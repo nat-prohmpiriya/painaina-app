@@ -1,10 +1,13 @@
 'use client'
 
 import React from 'react'
-import { Button, Spin, Empty } from 'antd'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Empty } from '@/components/ui/empty'
 import { useNotifications, useMarkAsRead, useMarkAllAsRead, useUnreadCount } from '@/hooks/useNotifications'
 import NotificationItem from './NotificationItem'
 import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 
 interface NotificationDropdownProps {
   onClose: () => void
@@ -43,12 +46,13 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
         <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
         {unreadCount > 0 && (
           <Button
-            type="link"
-            size="small"
+            variant="link"
+            size="sm"
             onClick={handleMarkAllAsRead}
-            className="text-blue-600 hover:text-blue-700"
-            loading={markAllAsRead.isPending}
+            className="text-blue-600 hover:text-blue-700 p-0 h-auto"
+            disabled={markAllAsRead.isPending}
           >
+            {markAllAsRead.isPending && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
             Mark all as read
           </Button>
         )}
@@ -58,14 +62,11 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Spin />
+            <Spinner />
           </div>
         ) : notifications.length === 0 ? (
           <div className="py-8">
-            <Empty
-              description="No notifications"
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-            />
+            <Empty description="No notifications" />
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -90,7 +91,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
       {notifications.length > 10 && (
         <div className="border-t border-gray-200 p-3 text-center">
           <Button
-            type="link"
+            variant="link"
             onClick={() => {
               onClose()
               router.push('/notifications')

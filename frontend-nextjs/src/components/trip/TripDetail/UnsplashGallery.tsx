@@ -1,8 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Input, Spin, Button } from 'antd'
-import { LuImage } from 'react-icons/lu'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { LuImage, LuSearch } from 'react-icons/lu'
 import { HiOutlinePhotograph } from "react-icons/hi"
 import { unsplashService } from '@/services/unsplash.service'
 
@@ -69,20 +71,34 @@ const UnsplashGallery = ({ onPhotoSelect, isUpdating }: UnsplashGalleryProps) =>
     return (
         <div className="space-y-4">
             {/* Search */}
-            <Input.Search
-                placeholder="Search for photos (e.g., 'Tokyo', 'beach sunset', 'mountain')"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onSearch={handleSearch}
-                prefix={<HiOutlinePhotograph className="text-gray-400" />}
-                size="large"
-                disabled={isUpdating}
-            />
+            <div className="relative">
+                <HiOutlinePhotograph className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Input
+                    placeholder="Search for photos (e.g., 'Tokyo', 'beach sunset', 'mountain')"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handleSearch(searchQuery)
+                        }
+                    }}
+                    className="pl-10 pr-20"
+                    disabled={isUpdating}
+                />
+                <Button
+                    onClick={() => handleSearch(searchQuery)}
+                    disabled={isUpdating}
+                    size="sm"
+                    className="absolute right-1 top-1/2 -translate-y-1/2"
+                >
+                    <LuSearch size={16} />
+                </Button>
+            </div>
 
             {/* Loading */}
             {loading && (
                 <div className="flex justify-center py-8">
-                    <Spin size="large" />
+                    <Spinner size="lg" />
                 </div>
             )}
 
@@ -136,14 +152,14 @@ const UnsplashGallery = ({ onPhotoSelect, isUpdating }: UnsplashGalleryProps) =>
             {selectedPhoto && (
                 <div className="flex justify-end space-x-2 pt-4 border-t">
                     <Button
+                        variant="outline"
                         onClick={() => setSelectedPhoto(null)}
                         disabled={isUpdating}
                     >
                         Cancel
                     </Button>
                     <Button
-                        type="primary"
-                        loading={isUpdating}
+                        disabled={isUpdating}
                         onClick={() => {
                             const photo = photos.find(p => p.id === selectedPhoto)
                             if (photo) {
@@ -151,7 +167,7 @@ const UnsplashGallery = ({ onPhotoSelect, isUpdating }: UnsplashGalleryProps) =>
                             }
                         }}
                     >
-                        Update Cover Photo
+                        {isUpdating ? 'Updating...' : 'Update Cover Photo'}
                     </Button>
                 </div>
             )}

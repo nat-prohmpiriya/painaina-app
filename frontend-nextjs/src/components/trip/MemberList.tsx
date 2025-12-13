@@ -7,7 +7,14 @@ import {
   useRemoveTripMember,
   useUpdateMemberRole,
 } from '@/hooks/useTripQueries'
-import { Button, Avatar, Dropdown, Modal, Select } from 'antd'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
 import { LuEllipsis, LuUserPlus, LuCrown, LuPencil, LuEye, LuTrash2 } from 'react-icons/lu'
 import { useToastMessage } from '@/contexts/ToastMessageContext'
 
@@ -100,60 +107,6 @@ const MemberList = ({ tripId, currentUserRole }: MemberListProps) => {
     }
   }
 
-  const getMenuItems = (member: any) => {
-    if (currentUserRole !== 'admin') return []
-
-    const items = [
-      {
-        key: 'admin',
-        label: (
-          <div className="flex items-center gap-2">
-            <LuCrown className="w-4 h-4" />
-            Make Admin
-          </div>
-        ),
-        disabled: member.role === 'admin',
-        onClick: () => handleUpdateRole(member.user_id, 'admin'),
-      },
-      {
-        key: 'editor',
-        label: (
-          <div className="flex items-center gap-2">
-            <LuPencil className="w-4 h-4" />
-            Make Editor
-          </div>
-        ),
-        disabled: member.role === 'editor',
-        onClick: () => handleUpdateRole(member.user_id, 'editor'),
-      },
-      {
-        key: 'viewer',
-        label: (
-          <div className="flex items-center gap-2">
-            <LuEye className="w-4 h-4" />
-            Make Viewer
-          </div>
-        ),
-        disabled: member.role === 'viewer',
-        onClick: () => handleUpdateRole(member.user_id, 'viewer'),
-      },
-      {
-        type: 'divider' as const,
-      },
-      {
-        key: 'remove',
-        label: (
-          <div className="flex items-center gap-2 text-red-600">
-            <LuTrash2 className="w-4 h-4" />
-            Remove Member
-          </div>
-        ),
-        onClick: () => handleRemoveMember(member.user_id, member.user?.name || 'Unknown'),
-      },
-    ]
-
-    return items
-  }
 
   if (loading) {
     return <div>Loading members...</div>
@@ -168,11 +121,8 @@ const MemberList = ({ tripId, currentUserRole }: MemberListProps) => {
         </div>
 
         {currentUserRole === 'admin' && (
-          <Button
-            type="primary"
-            icon={<LuUserPlus />}
-            onClick={() => setIsInviteModalOpen(true)}
-          >
+          <Button onClick={() => setIsInviteModalOpen(true)}>
+            <LuUserPlus className="mr-2" />
             Invite Member
           </Button>
         )}
@@ -182,82 +132,114 @@ const MemberList = ({ tripId, currentUserRole }: MemberListProps) => {
         {members.map((member: any) => (
           <div key={member.user_id} className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors">
             <div className="flex items-center gap-3">
-              <Avatar
-                size={40}
-                src={member.user?.image}
-                className="bg-blue-500"
-              >
-                {member.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={member.user?.image} />
+                <AvatarFallback className="bg-blue-500 text-white">
+                  {member.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </AvatarFallback>
               </Avatar>
 
               <div>
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-gray-900">{member.user?.name || 'Unknown User'}</p>
-                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(member.role)}`}>
+                  <Badge variant="secondary" className={`inline-flex items-center gap-1 ${getRoleColor(member.role)}`}>
                     {getRoleIcon(member.role)}
                     {member.role}
-                  </span>
+                  </Badge>
                 </div>
                 <p className="text-sm text-gray-500">{member.user?.email}</p>
               </div>
             </div>
 
             {currentUserRole === 'admin' && (
-              <Dropdown
-                menu={{ items: getMenuItems(member) }}
-                trigger={['click']}
-                placement="bottomRight"
-              >
-                <Button
-                  type="text"
-                  icon={<LuEllipsis />}
-                  className="text-gray-400 hover:text-gray-600"
-                />
-              </Dropdown>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <LuEllipsis />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    disabled={member.role === 'admin'}
+                    onClick={() => handleUpdateRole(member.user_id, 'admin')}
+                  >
+                    <LuCrown className="mr-2 w-4 h-4" />
+                    Make Admin
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={member.role === 'editor'}
+                    onClick={() => handleUpdateRole(member.user_id, 'editor')}
+                  >
+                    <LuPencil className="mr-2 w-4 h-4" />
+                    Make Editor
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={member.role === 'viewer'}
+                    onClick={() => handleUpdateRole(member.user_id, 'viewer')}
+                  >
+                    <LuEye className="mr-2 w-4 h-4" />
+                    Make Viewer
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600"
+                    onClick={() => handleRemoveMember(member.user_id, member.user?.name || 'Unknown')}
+                  >
+                    <LuTrash2 className="mr-2 w-4 h-4" />
+                    Remove Member
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         ))}
       </div>
 
       {/* Invite Member Modal */}
-      <Modal
-        title="Invite Member"
-        open={isInviteModalOpen}
-        onCancel={() => setIsInviteModalOpen(false)}
-        onOk={handleInviteMember}
-        okText="Send Invite"
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              User ID
-            </label>
-            <input
-              type="text"
-              value={selectedUserId}
-              onChange={(e) => setSelectedUserId(e.target.value)}
-              placeholder="Enter user ID"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+      <Dialog open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite Member</DialogTitle>
+            <DialogDescription>
+              Add a new member to this trip by entering their user ID and selecting their role.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="userId">User ID</Label>
+              <Input
+                id="userId"
+                type="text"
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
+                placeholder="Enter user ID"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Role
-            </label>
-            <Select
-              value={selectedRole}
-              onChange={setSelectedRole}
-              className="w-full"
-              options={[
-                { value: 'admin', label: 'Admin' },
-                { value: 'editor', label: 'Editor' },
-                { value: 'viewer', label: 'Viewer' },
-              ]}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as 'admin' | 'editor' | 'viewer')}>
+                <SelectTrigger id="role">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="editor">Editor</SelectItem>
+                  <SelectItem value="viewer">Viewer</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
-      </Modal>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsInviteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleInviteMember}>
+              Send Invite
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

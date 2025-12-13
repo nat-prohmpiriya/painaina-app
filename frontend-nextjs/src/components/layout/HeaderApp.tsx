@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from "antd"
+import { Button } from "@/components/ui/button"
 import SignInButton from "../auth/SignInButton"
 import NotificationBell from "../notification/NotificationBell"
 import LanguageSwitcher from "../i18n/LanguageSwitcher"
@@ -60,8 +60,8 @@ const HeaderApp = () => {
                     {/* Trips - Show only when authenticated */}
                     {isAuthenticated && (
                         <Button
-                            shape="round"
-                            type={currentBtn === 'trips' ? 'primary' : 'text'}
+                            variant={currentBtn === 'trips' ? 'default' : 'ghost'}
+                            className="rounded-full"
                             onClick={() => {
                                 router.push("/trips");
                                 setCurrentBtn('trips');
@@ -72,8 +72,8 @@ const HeaderApp = () => {
                     )}
                     {/* Travel Guides - Always visible */}
                     <Button
-                        shape="round"
-                        type={currentBtn === 'guides' ? 'primary' : 'text'}
+                        variant={currentBtn === 'guides' ? 'default' : 'ghost'}
+                        className="rounded-full"
                         onClick={() => {
                             router.push("/guides");
                             setCurrentBtn('guides');

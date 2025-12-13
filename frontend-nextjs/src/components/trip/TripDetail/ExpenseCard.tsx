@@ -1,6 +1,9 @@
 'use client'
 
-import { Avatar, Button, Dropdown } from "antd"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
 import ExpenseModal, { ExpenseModalRef } from "./ExpenseModal"
 import { imgUrl } from "@/lib/imgUrl"
 import {
@@ -16,7 +19,6 @@ import {
 } from "react-icons/lu"
 import React, { useRef } from "react"
 import type { TripExpense } from "@/interfaces/expense.interface"
-import type { MenuProps } from "antd"
 import { useToastMessage } from '@/contexts/ToastMessageContext'
 import { useDeleteExpense } from '@/hooks/useExpenseQueries'
 
@@ -101,27 +103,6 @@ const ExpenseCard = ({ expense, onSuccess }: ExpenseCardProps) => {
         return `${symbols[currency as keyof typeof symbols] || currency} ${amount.toLocaleString()}`
     }
 
-    const dropdownItems: MenuProps['items'] = [
-        {
-            key: 'edit',
-            label: 'Edit Expense',
-            icon: <LuPencil />,
-            onClick: (e) => {
-                e.domEvent.stopPropagation()
-                handleEdit()
-            },
-        },
-        {
-            key: 'delete',
-            label: 'Delete Expense',
-            icon: <LuTrash />,
-            onClick: (e) => {
-                e.domEvent.stopPropagation()
-                handleDelete()
-            },
-            danger: true,
-        },
-    ]
 
     return (
         <>
@@ -130,24 +111,21 @@ const ExpenseCard = ({ expense, onSuccess }: ExpenseCardProps) => {
                 onClick={handleEdit}
             >
                 <div className='flex gap-4'>
-                    <Button
-                        size="large"
-                        icon={categoryIcons[expense.category]}
-                        shape='circle'
-                        type='dashed'
-                        className={`${categoryColors[expense.category]} border-0`}
-                    />
+                    <div className={`h-12 w-12 rounded-full flex items-center justify-center border-2 border-dashed ${categoryColors[expense.category]}`}>
+                        {categoryIcons[expense.category]}
+                    </div>
                     <div className='flex flex-col gap-1'>
                         <h3 className='text-lg font-semibold'>{categoryLabels[expense.category]}</h3>
                         <p className='text-gray-500 line-clamp-1'>{expense.description}</p>
                         <p className='text-gray-500 text-sm'>{formatDate(expense.date)}</p>
                         <div className="flex items-center gap-2">
-                            <span className={`text-xs px-2 py-1 rounded-full ${expense.status === 'settled'
-                                    ? 'bg-green-100 text-green-600'
-                                    : 'bg-yellow-100 text-yellow-600'
-                                }`}>
+                            <Badge variant={expense.status === 'settled' ? 'default' : 'secondary'} className={
+                                expense.status === 'settled'
+                                    ? 'bg-green-100 text-green-700 hover:bg-green-100'
+                                    : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
+                            }>
                                 {expense.status === 'settled' ? 'Settled' : 'Pending'}
-                            </span>
+                            </Badge>
                             {expense.splitWith?.length && expense.splitWith.length > 1 && (
                                 <span className="text-xs text-gray-500">
                                     Split {expense.splitWith.length} ways
@@ -158,29 +136,46 @@ const ExpenseCard = ({ expense, onSuccess }: ExpenseCardProps) => {
                 </div>
                 <div className='flex flex-col justify-between items-end h-full'>
                     <div className="flex items-center gap-2">
-                        <Dropdown
-                            menu={{ items: dropdownItems }}
-                            trigger={['click']}
-                        >
-                            <Button
-                                size="small"
-                                icon={<LuEllipsis />}
-                                type="text"
-                                className="hover:bg-gray-100"
-                                onClick={(e) => e.stopPropagation()}
-                            />
-                        </Dropdown>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="hover:bg-gray-100"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <LuEllipsis />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleEdit()
+                                }}>
+                                    <LuPencil className="mr-2" />
+                                    Edit Expense
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    className="text-red-600 focus:text-red-600"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleDelete()
+                                    }}
+                                >
+                                    <LuTrash className="mr-2" />
+                                    Delete Expense
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                     <div className="flex flex-col items-end">
                         <span className='text-lg font-semibold mb-2'>
                             {formatCurrency(expense.amount, expense.currency)}
                         </span>
-                        <Avatar
-                            src={imgUrl}
-                            shape='circle'
-                            size={32}
-                        >
-                            U
+                        <Avatar className="h-8 w-8">
+                            <AvatarImage src={imgUrl} />
+                            <AvatarFallback>U</AvatarFallback>
                         </Avatar>
                     </div>
                 </div>

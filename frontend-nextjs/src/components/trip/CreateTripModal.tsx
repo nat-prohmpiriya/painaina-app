@@ -1,20 +1,27 @@
 'use client'
 
 import { useState, useCallback, useEffect } from "react"
-import { Button, Modal, Form, Input, AutoComplete, DatePicker } from "antd"
-import { LuPlus, LuMapPin, LuPencil } from "react-icons/lu"
+import { LuPlus, LuMapPin, LuPencil, LuSearch } from "react-icons/lu"
 import { usePainainaApi } from "@/services/api-client"
 import { placeService, unsplashService } from "@/services"
 import { DateRange } from "react-day-picker"
-import { addDays } from "date-fns"
+import { addDays, format } from "date-fns"
 import { useToastMessage } from '@/contexts/ToastMessageContext'
 import { useCreateTrip } from "@/hooks/useTripQueries"
-import dayjs from "dayjs"
 import type { CreateTripRequest, PlaceOption } from "@/interfaces"
-
-const { TextArea } = Input
-
-const { RangePicker } = DatePicker
+import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { DateRangePicker } from "@/components/ui/date-range-picker"
+import { Combobox } from "@/components/ui/combobox"
 
 // Convert Google types to human-readable label
 const getPlaceTypeLabel = (types: string[]): string => {
@@ -39,7 +46,15 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
     const api = usePainainaApi()
     const createTripMutation = useCreateTrip()
     const [isOpen, setIsOpen] = useState(false)
-    const [form] = Form.useForm()
+    const [formData, setFormData] = useState({
+        title: '',
+        description: ''
+    })
+    const [formErrors, setFormErrors] = useState({
+        title: '',
+        destination: '',
+        dateRange: ''
+    })
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
         from: new Date(),
         to: addDays(new Date(), 7)
@@ -144,7 +159,10 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
         setSearchTimeout(newTimeout)
     }, [searchPlaces, searchTimeout])
 
-    const handlePlaceSelect = async (value: string, option: PlaceOption) => {
+    const handlePlaceSelect = async (value: string) => {
+        const option = placeOptions.find(opt => opt.value === value)
+        if (!option) return
+
         try {
             let placeData = option.place
             debugger
@@ -196,14 +214,35 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
         }
     }
 
-    const handleSubmit = async (values: any) => {
+    const validateForm = () => {
+        const errors = {
+            title: '',
+            destination: '',
+            dateRange: ''
+        }
+
+        if (!formData.title || formData.title.length < 3) {
+            errors.title = 'Title must be at least 3 characters'
+        }
+
         if (!selectedPlace) {
-            showError('Please select a destination')
-            return
+            errors.destination = 'Please select a destination'
         }
 
         if (!dateRange?.from || !dateRange?.to) {
-            showError('Please select trip dates')
+            errors.dateRange = 'Please select trip dates'
+        }
+
+        setFormErrors(errors)
+        return !errors.title && !errors.destination && !errors.dateRange
+    }
+
+    const handleSubmit = async () => {
+        if (!validateForm()) {
+            return
+        }
+
+        if (!selectedPlace || !dateRange?.from || !dateRange?.to) {
             return
         }
 
@@ -216,8 +255,8 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
             const country = addressParts[addressParts.length - 1]?.trim() || destinationData.name
 
             const createData: CreateTripRequest = {
-                title: values.title,
-                description: values.description,
+                title: formData.title,
+                description: formData.description,
                 destination: {
                     name: destinationData.name,
                     country: country,
@@ -241,7 +280,8 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
             showSuccess('Trip created successfully!')
 
             // Reset form and close modal
-            form.resetFields()
+            setFormData({ title: '', description: '' })
+            setFormErrors({ title: '', destination: '', dateRange: '' })
             setSelectedPlace(null)
             setDateRange({
                 from: new Date(),
@@ -260,7 +300,8 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
 
     const openModal = () => {
         setIsOpen(true)
-        form.resetFields()
+        setFormData({ title: '', description: '' })
+        setFormErrors({ title: '', destination: '', dateRange: '' })
         setSelectedPlace(null)
         setSearchText("")
         setPlaceOptions([])
@@ -273,138 +314,131 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
     return (
         <>
             <Button
-                shape="round"
-                color="danger"
-                variant="solid"
+                className="rounded-full font-semibold"
+                variant="destructive"
                 onClick={openModal}
             >
-                <span className="text-lg font-semibold">+</span>
-                <span className="font-semibold">Create New Trip</span>
+                <LuPlus className="text-lg" />
+                Create New Trip
             </Button>
 
-            <Modal
-                title="Create New Trip"
-                open={isOpen}
-                onCancel={() => {
-                    setIsOpen(false)
-                    form.resetFields()
-                    setSelectedPlace(null)
-                    setSearchText("")
-                    setPlaceOptions([])
-                }}
-                footer={null}
-                width={600}
-            >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handleSubmit}
-                    className="mt-6"
-                >
-                    {/* Destination Search */}
-                    <Form.Item
-                        label={<span className="font-semibold">Where are you going?</span>}
-                        required
-                    >
-                        <AutoComplete
-                            value={searchText}
-                            options={placeOptions}
-                            onSearch={handlePlaceSearch}
-                            onSelect={handlePlaceSelect}
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Create New Trip</DialogTitle>
+                    </DialogHeader>
 
-                        >
-                            <Input.Search prefix={<LuMapPin className="text-xl text-gray-400" />} size="large" placeholder="Search for a destination..." enterButton allowClear />
-                        </AutoComplete>
+                    <div className="space-y-6 mt-6">
+                        {/* Destination Search */}
+                        <div className="space-y-2">
+                            <Label className="font-semibold">
+                                Where are you going? <span className="text-red-500">*</span>
+                            </Label>
+                            <div className="relative">
+                                <Input
+                                    value={searchText}
+                                    onChange={(e) => handlePlaceSearch(e.target.value)}
+                                    placeholder="Search for a destination..."
+                                    className="pl-10"
+                                />
+                                <LuMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
+                            </div>
+                            {placeOptions.length > 0 && (
+                                <div className="border rounded-lg max-h-60 overflow-y-auto">
+                                    {placeOptions.map((option) => (
+                                        <div
+                                            key={option.value}
+                                            className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                                            onClick={() => handlePlaceSelect(option.value)}
+                                        >
+                                            {option.label}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {formErrors.destination && (
+                                <p className="text-sm text-red-500">{formErrors.destination}</p>
+                            )}
 
-                        {selectedPlace && (
-                            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                <div className="flex items-center gap-3">
-                                    {selectedPlace.coverPhoto && selectedPlace.coverPhoto !== '/default-trip-cover.jpg' && (
-                                        <img
-                                            src={selectedPlace.coverPhoto}
-                                            alt={selectedPlace.name}
-                                            className="w-16 h-12 rounded-lg object-cover"
-                                        />
-                                    )}
-                                    <div className="flex items-center gap-2 flex-1">
-                                        <LuMapPin className="text-blue-600" />
-                                        <div>
-                                            <div className="font-medium text-blue-900">
-                                                {selectedPlace.name}
-                                            </div>
-                                            <div className="text-sm text-blue-600">
-                                                {selectedPlace.formattedAddress}
+                            {selectedPlace && (
+                                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                    <div className="flex items-center gap-3">
+                                        {selectedPlace.coverPhoto && selectedPlace.coverPhoto !== '/default-trip-cover.jpg' && (
+                                            <img
+                                                src={selectedPlace.coverPhoto}
+                                                alt={selectedPlace.name}
+                                                className="w-16 h-12 rounded-lg object-cover"
+                                            />
+                                        )}
+                                        <div className="flex items-center gap-2 flex-1">
+                                            <LuMapPin className="text-blue-600" />
+                                            <div>
+                                                <div className="font-medium text-blue-900">
+                                                    {selectedPlace.name}
+                                                </div>
+                                                <div className="text-sm text-blue-600">
+                                                    {selectedPlace.formattedAddress}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            )}
+                        </div>
+
+                        {/* Trip Title */}
+                        <div className="space-y-2">
+                            <Label className="font-semibold">
+                                Trip Title <span className="text-red-500">*</span>
+                            </Label>
+                            <div className="relative">
+                                <Input
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                    placeholder="Give your trip a name"
+                                    className="pl-10"
+                                />
+                                <LuPencil className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
                             </div>
-                        )}
-                    </Form.Item>
+                            {formErrors.title && (
+                                <p className="text-sm text-red-500">{formErrors.title}</p>
+                            )}
+                        </div>
 
-                    {/* Trip Title */}
-                    <Form.Item
-                        label={<span className="font-semibold">Trip Title</span>}
-                        name="title"
-                        rules={[
-                            { required: true, message: 'Please enter trip title' },
-                            { min: 3, message: 'Title must be at least 3 characters' }
-                        ]}
-                    >
-                        <Input
-                            allowClear
-                            prefix={<LuPencil className="text-xl text-gray-400" />}
-                            placeholder="Give your trip a name"
-                            size="large"
-                        />
-                    </Form.Item>
+                        {/* Description */}
+                        <div className="space-y-2">
+                            <Label className="font-semibold">Description (Optional)</Label>
+                            <Textarea
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                placeholder="Tell us about your trip..."
+                                rows={4}
+                            />
+                        </div>
 
-                    {/* Description */}
-                    <Form.Item
-                        label={<span className="font-semibold">Description (Optional)</span>}
-                        name="description"
-                    >
-                        <TextArea
-                            allowClear
-                            rows={4}
-                            placeholder="Tell us about your trip..."
-                        />
-                    </Form.Item>
+                        {/* Date Range */}
+                        <div className="space-y-2">
+                            <Label className="font-semibold">
+                                Trip Dates <span className="text-red-500">*</span>
+                            </Label>
+                            <DateRangePicker
+                                date={dateRange}
+                                onDateChange={(range) => setDateRange(range)}
+                                className="w-full"
+                            />
+                            {formErrors.dateRange && (
+                                <p className="text-sm text-red-500">{formErrors.dateRange}</p>
+                            )}
+                        </div>
+                    </div>
 
-                    {/* Date Range */}
-                    <Form.Item
-                        label={<span className="font-semibold">Trip Dates</span>}
-                        required
-                    >
-                        <RangePicker
-                            value={dateRange?.from && dateRange?.to
-                                ? [dayjs(dateRange.from), dayjs(dateRange.to)]
-                                : null
-                            }
-                            onChange={(dates) => {
-                                if (dates && dates[0] && dates[1]) {
-                                    setDateRange({
-                                        from: dates[0].toDate(),
-                                        to: dates[1].toDate()
-                                    })
-                                } else {
-                                    setDateRange(undefined)
-                                }
-                            }}
-                            placeholder={['Start date', 'End date']}
-                            size="large"
-                            className="w-full"
-                            disabledDate={(current) => {
-                                return current && current < dayjs().startOf('day')
-                            }}
-                        />
-                    </Form.Item>
-                    <div className="flex gap-3 justify-end mt-8">
+                    <DialogFooter className="mt-8">
                         <Button
-                            shape="round"
+                            variant="outline"
                             onClick={() => {
                                 setIsOpen(false)
-                                form.resetFields()
+                                setFormData({ title: '', description: '' })
+                                setFormErrors({ title: '', destination: '', dateRange: '' })
                                 setSelectedPlace(null)
                                 setSearchText("")
                                 setPlaceOptions([])
@@ -413,16 +447,14 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
                             Cancel
                         </Button>
                         <Button
-                            shape="round"
-                            type="primary"
-                            htmlType="submit"
-                            loading={createTripMutation.isPending}
+                            onClick={handleSubmit}
+                            disabled={createTripMutation.isPending}
                         >
-                            Create Trip
+                            {createTripMutation.isPending ? 'Creating...' : 'Create Trip'}
                         </Button>
-                    </div>
-                </Form>
-            </Modal>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }

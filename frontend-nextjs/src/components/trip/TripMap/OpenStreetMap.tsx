@@ -3,9 +3,12 @@
 import React, { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import 'leaflet/dist/leaflet.css'
-import { Popover, Radio, Space } from 'antd'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
 import MapBottomSheet from './MapBottomSheet'
-import { LuSearch, LuSquareStack, LuBed, LuMap } from 'react-icons/lu'
+import { Search, Layers, Bed, Map as MapIcon } from 'lucide-react'
 import { PlaceInfo } from '@/interfaces/itinerary.interface'
 import { ItineraryWithEntries } from '@/interfaces/trip.interface'
 
@@ -164,48 +167,41 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({ itineraries }) => {
             <div className='absolute top-0 right-0 w-[10%] z-400 h-36'>
                 <div className='flex flex-col items-end p-4 space-y-2'>
                     <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
-                        <LuSearch size={18} />
+                        <Search size={18} />
                     </div>
-                    <Popover
-                        content={
-                            <div className="w-64">
-                                <div className="font-semibold mb-3">Choose Map Style</div>
-                                <Radio.Group
-                                    value={selectedProvider}
-                                    onChange={(e) => handleProviderChange(e.target.value)}
-                                    className="w-full"
-                                >
-                                    <Space direction="vertical" className="w-full">
-                                        {Object.entries(MAP_PROVIDERS).map(([key, provider]) => (
-                                            <Radio key={key} value={key} className="w-full">
-                                                <div className="flex justify-between items-center w-full">
-                                                    <span>{provider.name}</span>
-                                                    <span className={`text-xs px-2 py-1 rounded ${provider.free
-                                                        ? 'bg-green-100 text-green-700'
-                                                        : 'bg-orange-100 text-orange-700'
-                                                        }`}>
-                                                        {provider.free ? 'Free' : 'API Key'}
-                                                    </span>
-                                                </div>
-                                            </Radio>
-                                        ))}
-                                    </Space>
-                                </Radio.Group>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
+                                <MapIcon size={18} />
                             </div>
-                        }
-                        title={null}
-                        trigger="click"
-                        placement="bottomRight"
-                    >
-                        <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
-                            <LuMap size={18} />
-                        </div>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" className="w-64">
+                            <div className="font-semibold mb-3">Choose Map Style</div>
+                            <RadioGroup
+                                value={selectedProvider}
+                                onValueChange={handleProviderChange}
+                            >
+                                <div className="flex flex-col space-y-2">
+                                    {Object.entries(MAP_PROVIDERS).map(([key, provider]) => (
+                                        <div key={key} className="flex items-center space-x-2">
+                                            <RadioGroupItem value={key} id={key} />
+                                            <Label htmlFor={key} className="cursor-pointer flex-1 flex justify-between items-center">
+                                                <span>{provider.name}</span>
+                                                <Badge variant={provider.free ? "default" : "secondary"} className="text-xs">
+                                                    {provider.free ? 'Free' : 'API Key'}
+                                                </Badge>
+                                            </Label>
+                                        </div>
+                                    ))}
+                                </div>
+                            </RadioGroup>
+                        </PopoverContent>
                     </Popover>
                     <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
-                        <LuSquareStack size={18} />
+                        <Layers size={18} />
                     </div>
                     <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
-                        <LuBed size={18} />
+                        <Bed size={18} />
                     </div>
                 </div>
 

@@ -1,15 +1,15 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Button, Input, Avatar } from 'antd'
-import { LuSend, LuUser } from 'react-icons/lu'
+import React, { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Send, User } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 import { useToastMessage } from '@/contexts/ToastMessageContext'
-import { userService, commentService } from '@/services'
+import { commentService } from '@/services'
 import { useAuth } from '@/hooks/useAuth'
 import { useTranslations } from 'next-intl'
-
-const { TextArea } = Input
 
 interface CommentInputProps {
     guideId: string;
@@ -75,11 +75,13 @@ const CommentInput: React.FC<CommentInputProps> = ({
     if (!isSignedIn) {
         return (
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border">
-                <Avatar icon={<LuUser />} />
+                <Avatar>
+                    <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                </Avatar>
                 <div className="flex-1 text-gray-500">
                     {t('auth.signInToLeave')}
                 </div>
-                <Button type="primary">
+                <Button>
                     {t('auth.signIn')}
                 </Button>
             </div>
@@ -88,20 +90,19 @@ const CommentInput: React.FC<CommentInputProps> = ({
 
     return (
         <div className={`flex items-start gap-3 ${isReply ? 'mt-3 pl-4 border-l-2 border-gray-200' : 'p-4 bg-white rounded-lg border'}`}>
-            <Avatar
-                src={user?.photoUrl}
-                icon={<LuUser />}
-                size={isReply ? 32 : 40}
-            />
+            <Avatar className={isReply ? 'h-8 w-8' : 'h-10 w-10'}>
+                <AvatarImage src={user?.photoUrl} />
+                <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+            </Avatar>
 
             <div className="flex-1 space-y-3">
-                <TextArea
+                <Textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder={defaultPlaceholder}
-                    autoSize={{ minRows: isReply ? 2 : 3, maxRows: 8 }}
+                    rows={isReply ? 2 : 3}
                     onKeyDown={handleKeyPress}
-                    className="border-gray-300 focus:border-blue-500"
+                    className="resize-none"
                 />
 
                 <div className="flex items-center justify-between mt-2">
@@ -112,6 +113,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
                     <div className="flex gap-2">
                         {isReply && onCancel && (
                             <Button
+                                variant="outline"
                                 onClick={onCancel}
                                 disabled={isSubmitting}
                             >
@@ -120,13 +122,17 @@ const CommentInput: React.FC<CommentInputProps> = ({
                         )}
 
                         <Button
-                            type="primary"
-                            icon={<LuSend className="w-4 h-4" />}
                             onClick={handleSubmit}
-                            loading={isSubmitting}
-                            disabled={!content.trim()}
+                            disabled={isSubmitting || !content.trim()}
                         >
-                            {isReply ? t('actions.reply') : t('actions.comment')}
+                            {isSubmitting ? (
+                                "Posting..."
+                            ) : (
+                                <>
+                                    <Send className="w-4 h-4 mr-2" />
+                                    {isReply ? t('actions.reply') : t('actions.comment')}
+                                </>
+                            )}
                         </Button>
                     </div>
                 </div>

@@ -1,6 +1,12 @@
 'use client'
 
-import { Button, Popover, TimePicker } from "antd";
+import { Button } from '@/components/ui/button'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
+import { TimePicker } from '@/components/ui/time-picker'
 import { LuClock9 } from "react-icons/lu";
 import dayjs from 'dayjs';
 import { useState } from "react";
@@ -37,33 +43,40 @@ const AddTimePlace = ({ startTime, endTime, onTimeUpdate }: AddTimePlaceProps) =
     const hasTime = startTime && endTime;
     const displayText = hasTime ? `${startTime}-${endTime}` : 'Add Time';
     return (
-        <Popover 
-            content={
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant={hasTime ? "outline" : "default"}
+                    size="sm"
+                    className={hasTime ? "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-700" : ""}
+                >
+                    <LuClock9 className="mr-1" />
+                    <span className="font-bold text-xs">{displayText}</span>
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-4">
                 <div>
                     <div className="flex items-center gap-2 mb-2">
                         <TimePicker
-                            value={localStartTime ? dayjs(localStartTime, format) : null}
-                            format={format}
-                            onChange={(time, timeString) => setLocalStartTime(Array.isArray(timeString) ? timeString[0] : timeString)}
+                            value={localStartTime}
+                            onChange={(value) => setLocalStartTime(value)}
                             placeholder="Start time"
                         />
                         <span>-</span>
                         <TimePicker
-                            value={localEndTime ? dayjs(localEndTime, format) : null}
-                            format={format}
-                            onChange={(time, timeString) => setLocalEndTime(Array.isArray(timeString) ? timeString[0] : timeString)}
+                            value={localEndTime}
+                            onChange={(value) => setLocalEndTime(value)}
                             placeholder="End time"
                         />
                     </div>
 
                     <div className="flex gap-2 p-2">
-                        <Button type="default" shape="round" className="w-full" onClick={handleClear}>
+                        <Button variant="outline" className="w-full" onClick={handleClear}>
                             Clear
                         </Button>
-                        <Button 
-                            type="primary" 
-                            shape="round" 
-                            className="w-full" 
+                        <Button
+                            variant="default"
+                            className="w-full"
                             onClick={handleSave}
                             disabled={!localStartTime || !localEndTime}
                         >
@@ -71,21 +84,7 @@ const AddTimePlace = ({ startTime, endTime, onTimeUpdate }: AddTimePlaceProps) =
                         </Button>
                     </div>
                 </div>
-            }
-            trigger="click"
-            placement="bottom"
-            open={isOpen}
-            onOpenChange={setIsOpen}
-        >
-            <Button 
-                icon={<LuClock9 />} 
-                shape="round" 
-                size="small" 
-                type={hasTime ? "default" : "primary"}
-                className={hasTime ? "bg-green-50 border-green-200 text-green-700" : ""}
-            >
-                <span className="font-bold text-xs">{displayText}</span>
-            </Button>
+            </PopoverContent>
         </Popover>
     )
 }

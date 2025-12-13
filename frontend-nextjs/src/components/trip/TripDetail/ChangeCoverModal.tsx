@@ -2,12 +2,19 @@
 
 import React from 'react'
 import { TbPhoto } from 'react-icons/tb'
-import { Modal, Tabs, Tooltip } from 'antd'
 import { useState } from 'react'
 import { useToastMessage } from '@/contexts/ToastMessageContext'
 import UnsplashGallery from './UnsplashGallery'
 import UploadCover from './UploadCover'
 import { useUpdateTrip } from '@/hooks/useTripQueries'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface ChangeCoverModalProps {
     tripId: string
@@ -41,53 +48,58 @@ const ChangeCoverModal = ({ tripId, currentPhotoUrl, onPhotoUpdated }: ChangeCov
         }
     }
 
-    const tabs = [
-        {
-            key: 'upload',
-            label: <span className='text-sm font-bold'>Upload</span>,
-            children: (
-                <UploadCover 
-                    currentPhotoUrl={currentPhotoUrl}
-                    onPhotoSelect={handlePhotoSelect}
-                    isUpdating={isUpdating}
-                />
-            )
-        },
-        {
-            key: 'gallery',
-            label: <span className='text-sm font-bold'>Unsplash Gallery</span>,
-            children: (
-                <UnsplashGallery 
-                    onPhotoSelect={handlePhotoSelect}
-                    isUpdating={isUpdating}
-                />
-            )
-        }
-    ]
     return (
         <>
-            <div className="bg-black/40 h-10 w-10 flex justify-center items-center rounded-full p-2 cursor-pointer hover:bg-black/70 transition">
-                <Tooltip title="Change Cover Photo">
-                    <TbPhoto className="text-white text-lg" onClick={() => setIsModalOpen(true)} />
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            className="bg-black/40 h-10 w-10 flex justify-center items-center rounded-full p-2 cursor-pointer hover:bg-black/70 transition"
+                            onClick={() => setIsModalOpen(true)}
+                        >
+                            <TbPhoto className="text-white text-lg" />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Change Cover Photo</p>
+                    </TooltipContent>
                 </Tooltip>
-            </div >
-            <Modal
-                style={{ top: 20, }}
-                title={
-                    <div className="flex items-center justify-center">
-                        <span className="font-bold text-2xl">Change Cover Photo</span>
-                    </div>
-                }
-                open={isModalOpen}
-                onCancel={() => setIsModalOpen(false)}
-                footer={null}
-                width={650}
-            >
-                <Tabs items={tabs} defaultActiveKey="upload" />
-            </Modal>
+            </TooltipProvider>
 
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent className="max-w-3xl max-h-[90vh]">
+                    <DialogHeader>
+                        <DialogTitle className="text-center text-2xl font-bold">
+                            Change Cover Photo
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    <Tabs defaultValue="upload" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="upload" className="text-sm font-bold">
+                                Upload
+                            </TabsTrigger>
+                            <TabsTrigger value="gallery" className="text-sm font-bold">
+                                Unsplash Gallery
+                            </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="upload">
+                            <UploadCover
+                                currentPhotoUrl={currentPhotoUrl}
+                                onPhotoSelect={handlePhotoSelect}
+                                isUpdating={isUpdating}
+                            />
+                        </TabsContent>
+                        <TabsContent value="gallery">
+                            <UnsplashGallery
+                                onPhotoSelect={handlePhotoSelect}
+                                isUpdating={isUpdating}
+                            />
+                        </TabsContent>
+                    </Tabs>
+                </DialogContent>
+            </Dialog>
         </>
-
     )
 }
 

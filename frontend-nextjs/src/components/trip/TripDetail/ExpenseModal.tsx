@@ -1,11 +1,10 @@
 'use client'
 
-import { Button, Input, Modal, Select, Checkbox, Avatar, InputNumber, DatePicker, Form } from "antd"
 import React, { useState, forwardRef, useImperativeHandle, useEffect } from "react"
 import { useTripContext } from '@/contexts/TripContext'
 import type { TripExpense, ExpenseCategory } from '@/interfaces/expense.interface'
 import { useToastMessage } from '@/contexts/ToastMessageContext'
-import dayjs from 'dayjs'
+import { format } from 'date-fns'
 import { useCreateExpense, useUpdateExpense } from '@/hooks/useExpenseQueries'
 import {
     LuUtensilsCrossed,
@@ -13,8 +12,32 @@ import {
     LuBed,
     LuShoppingBag,
     LuMapPin,
-    LuDollarSign
+    LuDollarSign,
+    LuCalendar
 } from "react-icons/lu"
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
 
 export interface ExpenseModalRef {
     open: (expense?: TripExpense | null) => void
@@ -29,7 +52,12 @@ interface ExpenseModalProps {
 
 const ExpenseModal = forwardRef<ExpenseModalRef, ExpenseModalProps>((props, ref) => {
     const [isOpen, setIsOpen] = useState(false)
-    const [form] = Form.useForm()
+    const [formData, setFormData] = useState({
+        amount: '',
+        currency: 'THB',
+        description: ''
+    })
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date())
     const [selectedCategory, setSelectedCategory] = useState<ExpenseCategory | null>(null)
     const [splitWith, setSplitWith] = useState<string[]>([])
     const [currentExpense, setCurrentExpense] = useState<TripExpense | null>(null)
@@ -51,46 +79,52 @@ const ExpenseModal = forwardRef<ExpenseModalRef, ExpenseModalProps>((props, ref)
     useEffect(() => {
         if (isOpen && currentExpense) {
             // Edit mode - populate form
-            form.setFieldsValue({
-                amount: currentExpense.amount,
+            setFormData({
+                amount: currentExpense.amount.toString(),
                 currency: currentExpense.currency,
-                description: currentExpense.description,
-                date: dayjs(currentExpense.date),
-                paidBy: currentExpense.paidBy
+                description: currentExpense.description
             })
+            setSelectedDate(new Date(currentExpense.date))
             setSelectedCategory(currentExpense.category)
             setSplitWith(currentExpense.splitWith || currentExpense.splitWith || [])
         } else if (isOpen) {
             // Add mode - reset form
-            form.resetFields()
-            form.setFieldsValue({
+            setFormData({
+                amount: '',
                 currency: 'THB',
-                date: dayjs(),
-                paidBy: tripData?.ownerId || ''
+                description: ''
             })
+            setSelectedDate(new Date())
             setSelectedCategory(null)
             setSplitWith([])
         }
-    }, [isOpen, currentExpense, form])
+    }, [isOpen, currentExpense])
 
     const handleClose = () => {
         setIsOpen(false)
         setCurrentExpense(null)
         setSelectedCategory(null)
         setSplitWith([])
-        form.resetFields()
+        setFormData({
+            amount: '',
+            currency: 'THB',
+            description: ''
+        })
+        setSelectedDate(new Date())
     }
 
     const categories = [
-        { value: 'food' as ExpenseCategory, icon: <LuUtensilsCrossed size={20} className="text-gray-500 mt-3" />, label: 'Food & Dining' },
-        { value: 'transportation' as ExpenseCategory, icon: <LuCar size={20} className="text-gray-500 mt-3" />, label: 'Transportation' },
-        { value: 'accommodation' as ExpenseCategory, icon: <LuBed size={20} className="text-gray-500 mt-3" />, label: 'Accommodation' },
-        { value: 'activities' as ExpenseCategory, icon: <LuMapPin size={20} className="text-gray-500 mt-3" />, label: 'Activities' },
-        { value: 'shopping' as ExpenseCategory, icon: <LuShoppingBag size={20} className="text-gray-500 mt-3" />, label: 'Shopping' },
-        { value: 'other' as ExpenseCategory, icon: <LuDollarSign size={20} className="text-gray-500 mt-3" />, label: 'Others' },
+        { value: 'food' as ExpenseCategory, icon: LuUtensilsCrossed, label: 'Food & Dining' },
+        { value: 'transportation' as ExpenseCategory, icon: LuCar, label: 'Transportation' },
+        { value: 'accommodation' as ExpenseCategory, icon: LuBed, label: 'Accommodation' },
+        { value: 'activities' as ExpenseCategory, icon: LuMapPin, label: 'Activities' },
+        { value: 'shopping' as ExpenseCategory, icon: LuShoppingBag, label: 'Shopping' },
+        { value: 'other' as ExpenseCategory, icon: LuDollarSign, label: 'Others' },
     ]
 
-    const handleSubmit = async (values: any) => {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+
         if (!tripData) {
             showError('Trip data not found')
             return
@@ -106,9 +140,15 @@ const ExpenseModal = forwardRef<ExpenseModalRef, ExpenseModalProps>((props, ref)
             return
         }
 
+        const amount = parseFloat(formData.amount)
+        if (isNaN(amount) || amount <= 0) {
+            showError('Please enter a valid amount')
+            return
+        }
+
         setIsSubmitting(true)
         try {
-            const splitAmount = values.amount / splitWith.length
+            const splitAmount = amount / splitWith.length
             const splitDetails = splitWith.map(userId => ({
                 userId: userId,
                 amount: splitAmount,
@@ -118,13 +158,13 @@ const ExpenseModal = forwardRef<ExpenseModalRef, ExpenseModalProps>((props, ref)
 
             const expenseData = {
                 tripId: tripData.id,
-                amount: values.amount,
-                currency: values.currency,
+                amount: amount,
+                currency: formData.currency,
                 category: selectedCategory,
-                description: values.description || '',
+                description: formData.description || '',
                 paidBy: tripMembers.find(m => m.role === 'owner')?.userId || tripData.ownerId,
                 splitWith: splitWith,
-                date: values.date.toISOString(),
+                date: selectedDate.toISOString(),
                 splitType: 'equal' as const,
                 splitDetails: splitDetails,
             }
@@ -168,143 +208,174 @@ const ExpenseModal = forwardRef<ExpenseModalRef, ExpenseModalProps>((props, ref)
             setSplitWith(prev => prev.filter(id => id !== userId))
         }
     }
+
     return (
-        <Modal
-            title={
-                <h2 className="text-xl font-semibold mb-4">
-                    {currentExpense ? 'Edit Expense' : 'Add Expense'}
-                </h2>
-            }
-            open={isOpen}
-            onCancel={handleClose}
-            style={{ top: 10 }}
-            footer={[
-                <Button key="cancel" onClick={handleClose} disabled={isSubmitting}>
-                    Cancel
-                </Button>,
-                <Button
-                    key="save"
-                    type="primary"
-                    onClick={() => form.submit()}
-                    loading={isSubmitting}
-                >
-                    {currentExpense ? 'Update' : 'Save'}
-                </Button>
-            ]}
-            destroyOnHidden
-        >
-            <Form
-                form={form}
-                onFinish={handleSubmit}
-                layout="vertical"
-                className="mt-4"
-            >
-                {/* Amount Input */}
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                    <div className="col-span-2">
-                        <Form.Item
-                            name="amount"
-                            rules={[
-                                { required: true, message: 'Please enter amount' },
-                                { type: 'number', min: 0.01, message: 'Amount must be greater than 0' }
-                            ]}
-                        >
-                            <InputNumber
-                                size="large"
-                                placeholder="Expense Amount"
-                                style={{ width: '100%' }}
-                                precision={2}
+        <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle className="text-xl">
+                        {currentExpense ? 'Edit Expense' : 'Add Expense'}
+                    </DialogTitle>
+                </DialogHeader>
+
+                <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+                    {/* Amount Input */}
+                    <div className="grid grid-cols-3 gap-4">
+                        <div className="col-span-2 space-y-2">
+                            <Label htmlFor="amount">
+                                Expense Amount <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                id="amount"
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                value={formData.amount}
+                                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                                placeholder="0.00"
+                                required
                             />
-                        </Form.Item>
-                    </div>
-                    <div className="col-span-1">
-                        <Form.Item
-                            name="currency"
-                            rules={[{ required: true, message: 'Please select currency' }]}
-                        >
-                            <Select size="large" placeholder="Currency">
-                                <Select.Option value="THB">THB (฿)</Select.Option>
-                                <Select.Option value="USD">USD ($)</Select.Option>
-                                <Select.Option value="EUR">EUR (€)</Select.Option>
-                                <Select.Option value="JPY">JPY (¥)</Select.Option>
+                        </div>
+                        <div className="col-span-1 space-y-2">
+                            <Label htmlFor="currency">Currency</Label>
+                            <Select
+                                value={formData.currency}
+                                onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                            >
+                                <SelectTrigger id="currency">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="THB">THB (฿)</SelectItem>
+                                    <SelectItem value="USD">USD ($)</SelectItem>
+                                    <SelectItem value="EUR">EUR (€)</SelectItem>
+                                    <SelectItem value="JPY">JPY (¥)</SelectItem>
+                                </SelectContent>
                             </Select>
-                        </Form.Item>
+                        </div>
                     </div>
-                </div>
 
-                {/* Category Selection */}
-                <div className="grid grid-cols-3 gap-2 my-6">
-                    {categories.map((category) => (
-                        <div
-                            key={category.value}
-                            className={`flex flex-col justify-center items-center p-3 rounded-lg cursor-pointer transition duration-300 ${selectedCategory === category.value
-                                ? 'bg-blue-100 border-2 border-blue-500'
-                                : 'bg-gray-100 hover:bg-gray-200'
-                                }`}
-                            onClick={() => setSelectedCategory(category.value)}
-                        >
-                            <div className="">{category.icon}</div>
-                            <span className="text-xs font-semibold text-gray-500 my-2 text-center">
-                                {category.label}
-                            </span>
+                    {/* Category Selection */}
+                    <div className="space-y-2">
+                        <Label>Category <span className="text-red-500">*</span></Label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {categories.map((category) => {
+                                const Icon = category.icon
+                                return (
+                                    <div
+                                        key={category.value}
+                                        className={cn(
+                                            "flex flex-col justify-center items-center p-3 rounded-lg cursor-pointer transition duration-300",
+                                            selectedCategory === category.value
+                                                ? 'bg-blue-100 border-2 border-blue-500'
+                                                : 'bg-gray-100 hover:bg-gray-200'
+                                        )}
+                                        onClick={() => setSelectedCategory(category.value)}
+                                    >
+                                        <Icon size={20} className="text-gray-500 mt-3" />
+                                        <span className="text-xs font-semibold text-gray-500 my-2 text-center">
+                                            {category.label}
+                                        </span>
+                                    </div>
+                                )
+                            })}
                         </div>
-                    ))}
-                </div>
+                    </div>
 
-                {/* Date Selection */}
-                <div className="mb-4">
-                    <Form.Item
-                        name="date"
-                        rules={[{ required: true, message: 'Please select date' }]}
-                    >
-                        <DatePicker
-                            size="large"
-                            className="w-full"
-                            format="DD/MM/YYYY"
-                            placeholder="Select date"
-                        />
-                    </Form.Item>
-                </div>
+                    {/* Date Selection */}
+                    <div className="space-y-2">
+                        <Label>Date <span className="text-red-500">*</span></Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className={cn(
+                                        "w-full justify-start text-left font-normal",
+                                        !selectedDate && "text-muted-foreground"
+                                    )}
+                                >
+                                    <LuCalendar className="mr-2 h-4 w-4" />
+                                    {selectedDate ? format(selectedDate, "dd/MM/yyyy") : <span>Pick a date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                    mode="single"
+                                    selected={selectedDate}
+                                    onSelect={(date) => date && setSelectedDate(date)}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
 
-                {/* Description */}
-                <div className="mb-4">
-                    <Form.Item
-                        name="description"
-                        rules={[{ required: true, message: 'Please enter description' }]}
-                    >
-                        <Input.TextArea
-                            size="large"
-                            placeholder="Expense Description"
+                    {/* Description */}
+                    <div className="space-y-2">
+                        <Label htmlFor="description">
+                            Expense Description <span className="text-red-500">*</span>
+                        </Label>
+                        <Textarea
+                            id="description"
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="What was this expense for?"
                             rows={2}
-                            className="w-full"
+                            required
                         />
-                    </Form.Item>
-                </div>
+                    </div>
 
-                {/* Split Section */}
-                <div className="p-3 border rounded-lg flex flex-col gap-2 overflow-y-auto max-h-48 [&::-webkit-scrollbar]:hidden scrollbar-width-none">
-                    <span className="font-semibold text-sm mb-2">Split with:</span>
-                    {tripMembers.map(member => (
-                        <Checkbox
-                            key={member.userId}
-                            className="mt-2 flex items-center"
-                            checked={splitWith.includes(member.userId)}
-                            onChange={(e) => handleMemberToggle(member.userId, e.target.checked)}
-                        >
-                            <Avatar src={member.user.photoUrl} shape='circle'>
-                                {member?.user?.name?.charAt(0).toUpperCase()}
-                            </Avatar>
-                            <span className="ml-2">{member?.user?.name} ({member?.role})</span>
-                        </Checkbox>
-                    ))}
-                    {splitWith.length > 0 && (
-                        <div className="text-sm text-gray-600 mt-2">
-                            Selected: {splitWith.length} member{splitWith.length > 1 ? 's' : ''}
+                    {/* Split Section */}
+                    <div className="space-y-2">
+                        <Label>Split with <span className="text-red-500">*</span></Label>
+                        <div className="p-3 border rounded-lg space-y-2 max-h-48 overflow-y-auto">
+                            {tripMembers.map(member => (
+                                <div key={member.userId} className="flex items-center space-x-3">
+                                    <Checkbox
+                                        id={`member-${member.userId}`}
+                                        checked={splitWith.includes(member.userId)}
+                                        onCheckedChange={(checked) => handleMemberToggle(member.userId, checked === true)}
+                                    />
+                                    <label
+                                        htmlFor={`member-${member.userId}`}
+                                        className="flex items-center gap-2 cursor-pointer flex-1"
+                                    >
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage src={member.user.photoUrl} />
+                                            <AvatarFallback>
+                                                {member?.user?.name?.charAt(0).toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <span>{member?.user?.name} ({member?.role})</span>
+                                    </label>
+                                </div>
+                            ))}
+                            {splitWith.length > 0 && (
+                                <div className="text-sm text-gray-600 mt-2 pt-2 border-t">
+                                    Selected: {splitWith.length} member{splitWith.length > 1 ? 's' : ''}
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-            </Form>
-        </Modal>
+                    </div>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleClose}
+                            disabled={isSubmitting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? 'Saving...' : (currentExpense ? 'Update' : 'Save')}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     )
 })
 

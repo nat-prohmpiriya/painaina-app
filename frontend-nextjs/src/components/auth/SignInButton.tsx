@@ -1,11 +1,16 @@
 'use client'
 
-import { Button, Avatar, Dropdown } from 'antd';
-import type { MenuProps } from 'antd';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { LuUser, LuLogOut } from 'react-icons/lu';
 import { SignInButton as ClerkSignInButton } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { LuBell } from "react-icons/lu";
 import { useAuth } from '@/hooks/useAuth';
 
 
@@ -17,43 +22,33 @@ const SignInButton = () => {
         await signOut();
     };
 
-    const items: MenuProps['items'] = [
-        {
-            key: '1',
-            label: 'Profile',
-            icon: <LuUser size={16} />,
-            onClick: () => router.push(`/profiles/${convexUser?.id}`)
-        },
-        {
-            key: '2',
-            label: 'Sign Out',
-            icon: <LuLogOut size={16} />,
-            onClick: handleSignOut
-        },
-    ];
-
     return (
         <>
             {isAuthenticated ? (
-                <>
-                    <Dropdown menu={{ items }} placement="bottomRight" arrow>
-                        <Avatar
-                            src={convexUser?.photoUrl}
-                            // icon={!convexUser?.image ? <LuUser /> : undefined}
-                            style={{ cursor: 'pointer' }}
-                            size="default"
-                        >
-                            {!convexUser?.photoUrl && convexUser?.name?.charAt(0).toUpperCase()}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Avatar className="h-8 w-8 cursor-pointer">
+                            <AvatarImage src={convexUser?.photoUrl} alt="" />
+                            <AvatarFallback>
+                                {convexUser?.name?.charAt(0).toUpperCase() || <LuUser />}
+                            </AvatarFallback>
                         </Avatar>
-                    </Dropdown>
-                </>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => router.push(`/profiles/${convexUser?.id}`)}>
+                            <LuUser className="mr-2 h-4 w-4" />
+                            Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleSignOut}>
+                            <LuLogOut className="mr-2 h-4 w-4" />
+                            Sign Out
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             ) : (
                 <ClerkSignInButton mode="modal">
-                    <Button
-                        shape='round'
-                        type="primary"
-                        icon={<LuUser />}
-                    >
+                    <Button className="rounded-full">
+                        <LuUser className="mr-2 h-4 w-4" />
                         <span className='font-semibold'>Sign In</span>
                     </Button>
                 </ClerkSignInButton>

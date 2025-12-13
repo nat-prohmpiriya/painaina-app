@@ -1,6 +1,7 @@
 'use client'
 
-import { Button, Checkbox } from "antd"
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { LuGripVertical } from "react-icons/lu";
 import { FiTrash2 } from "react-icons/fi";
 import { NoteEntry as NoteEntryType } from '@/interfaces/itinerary.interface'
@@ -150,19 +151,20 @@ const NoteEntry = ({ entry }: NoteEntryProps) => {
                         <Button
                             {...attributes}
                             {...listeners}
-                            size="small"
-                            shape="circle"
-                            icon={<LuGripVertical className="text-lg cursor-grab active:cursor-grabbing text-gray-400" />}
-                            type="text"
-                        />
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 rounded-full"
+                        >
+                            <LuGripVertical className="text-lg cursor-grab active:cursor-grabbing text-gray-400" />
+                        </Button>
                         <Button
-                            size="small"
-                            shape="circle"
-                            icon={<FiTrash2 className="text-base" />}
-                            type="text"
+                            size="sm"
+                            variant="ghost"
                             onClick={handleDelete}
-                            className="text-red-500 hover:bg-red-50"
-                        />
+                            className="h-8 w-8 p-0 rounded-full text-red-500 hover:bg-red-50 hover:text-red-500"
+                        >
+                            <FiTrash2 className="text-base" />
+                        </Button>
                     </div>
                     {/* Content */}
                     <div className="flex-1">
@@ -177,14 +179,18 @@ const NoteEntry = ({ entry }: NoteEntryProps) => {
                     <Button
                         {...attributes}
                         {...listeners}
-                        size="large"
-                        shape="circle"
-                        icon={<LuGripVertical className="text-lg cursor-grab active:cursor-grabbing" />}
-                        type="text"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    />
-                    <Button size="large" shape="circle" type="text" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Checkbox style={{ scale: 1.3 }} />
+                        size="lg"
+                        variant="ghost"
+                        className="h-10 w-10 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                        <LuGripVertical className="text-lg cursor-grab active:cursor-grabbing" />
+                    </Button>
+                    <Button
+                        size="lg"
+                        variant="ghost"
+                        className="h-10 w-10 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                        <Checkbox className="scale-130" />
                     </Button>
                 </div>
                 <div className="col-span-14">
@@ -192,13 +198,13 @@ const NoteEntry = ({ entry }: NoteEntryProps) => {
                 </div>
                 <div className="col-span-1">
                     <Button
-                        size="large"
-                        shape="circle"
-                        icon={<FiTrash2 className="text-lg" />}
-                        type="text"
+                        size="lg"
+                        variant="ghost"
                         onClick={handleDelete}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:bg-red-50"
-                    />
+                        className="h-10 w-10 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:bg-red-50 hover:text-red-500"
+                    >
+                        <FiTrash2 className="text-lg" />
+                    </Button>
                 </div>
             </div>
         </div>

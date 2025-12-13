@@ -1,10 +1,8 @@
 'use client'
 
 import { imgUrl } from "@/lib/imgUrl"
-import { Avatar } from "antd"
-import { LuHeart } from "react-icons/lu"
-import { FaRegEye } from "react-icons/fa6"
-import { LuCalendar, LuMapPin } from "react-icons/lu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Heart, Eye, Calendar, MapPin, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { TripDetailResponse } from "@/interfaces/trip.interface"
 
@@ -50,30 +48,30 @@ const GuideCard = ({ guide }: GuideCardProps) => {
 
                 <div className="space-y-2 mb-3">
                     <div className="flex items-center text-sm text-gray-500">
-                        <LuMapPin className="w-4 h-4 mr-1" />
+                        <MapPin className="w-4 h-4 mr-1" />
                         <span className="truncate">{guide?.destinations?.name}</span>
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
-                        <LuCalendar className="w-4 h-4 mr-1" />
+                        <Calendar className="w-4 h-4 mr-1" />
                         <span>Updated {new Date(guide.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                 </div>
 
                 <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                        <Avatar
-                            size="small"
-                            src={guide.owner.photoUrl || imgUrl}
-                        />
+                        <Avatar className="h-8 w-8">
+                            <AvatarImage src={guide.owner.photoUrl || imgUrl} alt={guide.owner.name} />
+                            <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                        </Avatar>
                         <span className="ml-2 text-sm text-gray-700">{guide.owner.name || 'Anonymous'}</span>
                     </div>
                     <div className="text-sm text-gray-600 flex items-center gap-3">
                         <div className="flex items-center gap-1">
-                            <LuHeart className="w-4 h-4 text-red-500" />
+                            <Heart className="w-4 h-4 text-red-500" />
                             <span>{guide.reactionsCount || 0}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                            <FaRegEye className="w-4 h-4 text-gray-500" />
+                            <Eye className="w-4 h-4 text-gray-500" />
                             <span>{guide.viewCount || 0}</span>
                         </div>
                     </div>

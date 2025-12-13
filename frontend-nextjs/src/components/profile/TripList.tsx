@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useTrips } from '@/hooks/useTripQueries'
 import CreateTripModal from '../trip/CreateTripModal'
 import TripCard from '../trip/TripCard'
-import { Spin } from 'antd'
+import { Spinner } from '@/components/ui/spinner'
 import { useTranslations } from 'next-intl'
 
 interface TripListProps {
@@ -65,7 +65,7 @@ const TripList = ({ userId, isOwnProfile }: TripListProps) => {
                     <CreateTripModal onSuccess={refetch} />
                 </div>
                 <div className='mt-4 flex justify-center py-8'>
-                    <Spin size="large" />
+                    <Spinner size="lg" />
                     <p className="ml-2 text-gray-500">{t('loading.auth')}</p>
                 </div>
             </div>
@@ -99,7 +99,7 @@ const TripList = ({ userId, isOwnProfile }: TripListProps) => {
                     <CreateTripModal onSuccess={refetch} />
                 </div>
                 <div className='mt-4 flex justify-center py-8'>
-                    <Spin size="large" />
+                    <Spinner size="lg" />
                 </div>
             </div>
         )

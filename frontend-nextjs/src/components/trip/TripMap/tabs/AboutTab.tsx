@@ -1,7 +1,11 @@
 'use client'
 
-import { LuStar, LuGlobe, LuPhone, LuClock, LuMapPin, LuInfo } from "react-icons/lu";
-import { Skeleton, Alert, Empty, Image } from 'antd'
+import { Star, Globe, Phone, Clock, MapPin, Info } from "lucide-react";
+import { Skeleton } from '@/components/ui/skeleton'
+import { Empty } from '@/components/ui/empty'
+import Image from 'next/image'
+import { useState } from 'react'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import AddToTripButton from "../AddToTripButton";
 import { PlaceInfo } from "@/interfaces/itinerary.interface";
 
@@ -10,26 +14,26 @@ interface AboutTabProps {
 }
 
 const AboutTab: React.FC<AboutTabProps> = ({ placeDetails }) => {
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
+
     // Get photo URL from API
     const getPhotoUrl = (photoReference: string, maxWidth: number = 300): string => {
         if (!photoReference) return `https://via.placeholder.com/${maxWidth}x${Math.floor(maxWidth * 0.75)}?text=No+Image`;
         return `${process.env.NEXT_PUBLIC_API_URL}/places/photo?photoReference=${photoReference}&maxWidth=${maxWidth}`;
     };
-    // Render star rating
 
-
-    if (!placeDetails) {
-        return (
-            <div className="p-4">
-                <Skeleton active paragraph={{ rows: 3 }} />
-            </div>
-        );
-    }
+    const handlePreview = (photoUrl: string) => {
+        setPreviewImage(photoUrl);
+        setPreviewOpen(true);
+    };
 
     if (!placeDetails) {
         return (
-            <div className="p-4">
-                <Empty description="Loading place details..." />
+            <div className="p-4 space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
             </div>
         );
     }
@@ -42,25 +46,25 @@ const AboutTab: React.FC<AboutTabProps> = ({ placeDetails }) => {
                     <div className="col-span-3 space-y-3">
                         <AddToTripButton placeDetails={placeDetails} />
                         <div className="flex gap-4">
-                            <LuStar size={22} className="text-yellow-300 fill-current" />
+                            <Star size={22} className="text-yellow-400 fill-yellow-400" />
                             <span className="text-sm font-bold">{placeDetails?.rating}</span>
                             <span className="text-sm text-gray-500">({placeDetails?.userRatingsTotal} reviews)</span>
                         </div>
                         <div className="flex gap-4">
-                            <LuInfo size={28} />
+                            <Info size={28} className="flex-shrink-0" />
                             <p className="text-gray-600 text-sm text-wrap">{placeDetails?.editorialSummary?.overview}</p>
                         </div>
                         <div className="flex gap-4">
-                            <LuMapPin size={22} />
+                            <MapPin size={22} className="flex-shrink-0" />
                             <p className="text-gray-600 text-sm">{placeDetails?.address}</p>
                         </div>
 
                         <div className="flex gap-4">
-                            <LuPhone size={18} />
+                            <Phone size={18} className="flex-shrink-0" />
                             <p className="text-sm text-gray-600">{placeDetails?.phone}</p>
                         </div>
                         <p className="flex gap-4">
-                            <LuGlobe size={20} className="text-gray-600" />
+                            <Globe size={20} className="text-gray-600 flex-shrink-0" />
                             {
                                 placeDetails?.website
                                     ? (
@@ -73,7 +77,7 @@ const AboutTab: React.FC<AboutTabProps> = ({ placeDetails }) => {
 
                         </p>
                         <p className="flex gap-4">
-                            <LuClock size={18} className="text-gray-500 mt-1" />
+                            <Clock size={18} className="text-gray-500 mt-1 flex-shrink-0" />
                             <span className={placeDetails?.openingHours?.openNow ? 'text-green-600' : 'text-red-600'}>
                                 {placeDetails?.openingHours?.openNow ? 'Open now' : 'Closed'}
                             </span>
@@ -83,15 +87,12 @@ const AboutTab: React.FC<AboutTabProps> = ({ placeDetails }) => {
 
                     <div className="col-span-2">
                         {placeDetails?.photos?.[0] && (
-                            <div className="ml-4">
+                            <div className="ml-4 relative h-[250px] cursor-pointer" onClick={() => handlePreview(getPhotoUrl(placeDetails.photos[0].photoReference, 600))}>
                                 <Image
                                     src={getPhotoUrl(placeDetails.photos[0].photoReference, 300)}
                                     alt={`${placeDetails.name} - Photo`}
-                                    className="rounded-lg object-cover w-full shadow-sm"
-                                    height={250}
-                                    width="100%"
-                                    style={{ objectFit: 'cover' }}
-                                    preview={false}
+                                    fill
+                                    className="rounded-lg object-cover shadow-sm hover:shadow-md transition-shadow"
                                 />
                             </div>
                         )}
@@ -127,6 +128,22 @@ const AboutTab: React.FC<AboutTabProps> = ({ placeDetails }) => {
                     </div>
                 )}
             </div>
+
+            {/* Image Preview Dialog */}
+            <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+                <DialogContent className="max-w-4xl">
+                    {previewImage && (
+                        <div className="relative w-full h-[80vh]">
+                            <Image
+                                src={previewImage}
+                                alt="Preview"
+                                fill
+                                className="object-contain"
+                            />
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

@@ -1,7 +1,9 @@
 'use client'
 
 import { imgUrl } from "@/lib/imgUrl"
-import { Button, Checkbox, Image } from "antd"
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import Image from 'next/image'
 import { LuGripVertical, LuCamera, LuSettings } from "react-icons/lu";
 import { FiTrash2 } from "react-icons/fi";
 import { useRef, useState, useEffect, useMemo } from "react";
@@ -12,7 +14,6 @@ import { PlaceEntry as PlaceEntryType } from '@/interfaces/itinerary.interface'
 import { useTripContext } from '@/contexts/TripContext'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { UploadProps } from 'antd'
 import PhotoManageModal from './PhotoManageModal'
 import { usePhotoUrls } from './PhotoUrlContext'
 import { useToastMessage } from '@/contexts/ToastMessageContext'
@@ -175,18 +176,7 @@ const PlaceEntry = ({ entry }: PlaceEntryProps) => {
         return photos.filter(Boolean)
     }, [photoUrl, imgUrl, entry.photos, photoUrls])
 
-    // Upload configuration
-    const uploadProps: UploadProps = {
-        name: 'photo',
-        multiple: true,
-        accept: 'image/*',
-        showUploadList: false,
-        beforeUpload: async (file) => {
-            // TODO: Implement file upload with fileService
-            showError('Photo upload feature is temporarily disabled')
-            return false
-        },
-    }
+    // Upload configuration - not needed for now as upload is handled in PhotoManageModal
 
     // Cleanup timeouts
     useEffect(() => {
@@ -256,13 +246,12 @@ const PlaceEntry = ({ entry }: PlaceEntryProps) => {
     const ImageSection = ({ className = "" }: { className?: string }) => (
         <div className={className}>
             {allImages.length > 0 ? (
-                <Image.PreviewGroup items={allImages}>
-                    <div className="h-48 w-full rounded-lg relative">
+                <div>
+                    <div className="h-48 w-full rounded-lg relative cursor-pointer" onClick={() => setShowManageModal(true)}>
                         <Image
                             src={allImages[0]}
                             alt={entry.place?.name || entry.title}
-                            height={192}
-                            width="100%"
+                            fill
                             className="rounded-lg object-cover"
                         />
                         {allImages.length > 1 && (
@@ -273,17 +262,16 @@ const PlaceEntry = ({ entry }: PlaceEntryProps) => {
                     </div>
                     <div className="flex justify-center mt-2">
                         <Button
-                            shape="round"
-                            type="text"
-                            icon={<LuSettings />}
-                            size="small"
+                            variant="ghost"
+                            size="sm"
                             onClick={() => setShowManageModal(true)}
                             className="text-gray-600 hover:text-blue-600"
                         >
+                            <LuSettings className="mr-2" />
                             Manage Photos
                         </Button>
                     </div>
-                </Image.PreviewGroup>
+                </div>
             ) : (
                 <div>
                     <div className="h-48 w-full rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
@@ -295,12 +283,12 @@ const PlaceEntry = ({ entry }: PlaceEntryProps) => {
                     </div>
                     <div className="flex justify-center mt-2">
                         <Button
-                            type="text"
-                            icon={<LuSettings />}
-                            size="small"
+                            variant="ghost"
+                            size="sm"
                             onClick={() => setShowManageModal(true)}
                             className="text-gray-600 hover:text-blue-600"
                         >
+                            <LuSettings className="mr-2" />
                             Manage Photos
                         </Button>
                     </div>
@@ -323,19 +311,20 @@ const PlaceEntry = ({ entry }: PlaceEntryProps) => {
                         <Button
                             {...attributes}
                             {...listeners}
-                            size="small"
-                            shape="circle"
-                            icon={<LuGripVertical className="text-lg cursor-grab active:cursor-grabbing text-gray-400" />}
-                            type="text"
-                        />
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 rounded-full"
+                        >
+                            <LuGripVertical className="text-lg cursor-grab active:cursor-grabbing text-gray-400" />
+                        </Button>
                         <Button
-                            size="small"
-                            shape="circle"
-                            icon={<FiTrash2 className="text-base" />}
-                            type="text"
+                            size="sm"
+                            variant="ghost"
                             onClick={handleDelete}
-                            className="text-red-500 hover:bg-red-50"
-                        />
+                            className="h-8 w-8 p-0 rounded-full text-red-500 hover:bg-red-50 hover:text-red-500"
+                        >
+                            <FiTrash2 className="text-base" />
+                        </Button>
                     </div>
                     {/* Content */}
                     <div className="flex-1 flex flex-col gap-3">
@@ -356,14 +345,18 @@ const PlaceEntry = ({ entry }: PlaceEntryProps) => {
                     <Button
                         {...attributes}
                         {...listeners}
-                        size="large"
-                        shape="circle"
-                        icon={<LuGripVertical className="text-lg cursor-grab active:cursor-grabbing" />}
-                        type="text"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    />
-                    <Button size="large" shape="circle" type="text" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Checkbox style={{ scale: 1.3 }} />
+                        size="lg"
+                        variant="ghost"
+                        className="h-10 w-10 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                        <LuGripVertical className="text-lg cursor-grab active:cursor-grabbing" />
+                    </Button>
+                    <Button
+                        size="lg"
+                        variant="ghost"
+                        className="h-10 w-10 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                        <Checkbox className="scale-130" />
                     </Button>
                 </div>
                 {/* Content */}
@@ -378,13 +371,13 @@ const PlaceEntry = ({ entry }: PlaceEntryProps) => {
                 {/* Delete button */}
                 <div className="col-span-1">
                     <Button
-                        size="large"
-                        shape="circle"
-                        icon={<FiTrash2 className="text-lg" />}
-                        type="text"
+                        size="lg"
+                        variant="ghost"
                         onClick={handleDelete}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:bg-red-50"
-                    />
+                        className="h-10 w-10 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:bg-red-50 hover:text-red-500"
+                    >
+                        <FiTrash2 className="text-lg" />
+                    </Button>
                 </div>
             </div>
 

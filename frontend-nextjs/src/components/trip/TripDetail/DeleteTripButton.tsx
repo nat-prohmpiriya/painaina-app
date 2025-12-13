@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react';
-import { Button, Tooltip } from 'antd';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { LuTrash2 } from 'react-icons/lu';
 import { canDeleteTrip } from '@/lib/permissions';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,14 +11,14 @@ import DeleteTripModal from './DeleteTripModal';
 
 interface DeleteTripButtonProps {
   className?: string;
-  size?: 'small' | 'middle' | 'large';
-  type?: 'default' | 'text' | 'link';
+  size?: 'sm' | 'default' | 'lg';
+  variant?: 'default' | 'ghost' | 'link';
 }
 
 const DeleteTripButton = ({
   className = '',
-  size = 'middle',
-  type = 'default'
+  size = 'default',
+  variant = 'default'
 }: DeleteTripButtonProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { user } = useAuth();
@@ -37,18 +38,24 @@ const DeleteTripButton = ({
 
   return (
     <>
-      <Tooltip title="Delete this trip permanently">
-        <Button
-          type={type}
-          danger
-          icon={<LuTrash2 />}
-          onClick={() => setIsDeleteModalOpen(true)}
-          className={className}
-          size={size}
-        >
-          Delete Trip
-        </Button>
-      </Tooltip>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={variant === 'default' ? 'destructive' : variant}
+              size={size}
+              onClick={() => setIsDeleteModalOpen(true)}
+              className={className}
+            >
+              <LuTrash2 className="mr-2" />
+              Delete Trip
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Delete this trip permanently</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       <DeleteTripModal
         isOpen={isDeleteModalOpen}

@@ -1,7 +1,7 @@
 'use client'
 
 import BookingForm from '@/components/book/BookingForm'
-import { AutoComplete, Input } from 'antd'
+import { Input } from '@/components/ui/input'
 import Footer from '@/components/home/FooterSection'
 import Image from 'next/image'
 import { r2Images } from '@/lib/r2Images'
@@ -98,22 +98,13 @@ const GuidesPage = () => {
 								{t('hero.subtitle')}
 							</p>
 							<div className='w-full md:w-3/4 lg:w-2/3'>
-								<AutoComplete
-									className='w-full'
+								<Input
+									placeholder={t('hero.searchPlaceholder')}
+									className='w-full h-12 rounded-2xl'
 									value={searchKeyword}
-									onChange={setSearchKeyword}
-									onSelect={handleSearch}
-								>
-									<Input
-										size='large'
-										placeholder={t('hero.searchPlaceholder')}
-										className='w-full'
-										style={{ borderRadius: '16px' }}
-										value={searchKeyword}
-										onChange={(e) => setSearchKeyword(e.target.value)}
-										onKeyDown={handleKeyPress}
-									/>
-								</AutoComplete>
+									onChange={(e) => setSearchKeyword(e.target.value)}
+									onKeyDown={handleKeyPress}
+								/>
 							</div>
 						</div>
 					</div>

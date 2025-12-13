@@ -2,7 +2,7 @@
 'use client'
 
 import GuideCard from '@/components/guide/GuideCard'
-import { Button } from 'antd'
+import { Button } from '@/components/ui/button'
 import React from 'react'
 import { useTrips } from '@/hooks/useTripQueries'
 
@@ -23,7 +23,7 @@ const ExploreGuide = () => {
         <div className='my-8 px-4'>
             <div className='flex justify-between items-center mb-6'>
                 <h2 className='text-2xl font-bold'>Explore Guide</h2>
-                <Button color='danger' shape='round' variant='solid' className='font-semibold'>See All</Button>
+                <Button variant='destructive' className='rounded-full font-semibold'>See All</Button>
             </div>
             <div className='flex gap-4 overflow-x-auto py-6 [&::-webkit-scrollbar]:hidden scrollbar-width-none'>
                 {guides.map((guide: any) => (

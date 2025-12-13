@@ -1,6 +1,7 @@
 'use client'
 
-import { Button, Progress } from 'antd'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
 import { LuDollarSign } from 'react-icons/lu'
 import ExpenseModal, { ExpenseModalRef } from './ExpenseModal'
 import { useRef, useMemo } from 'react'
@@ -49,13 +50,12 @@ const BudgetBanner = () => {
             <div className='flex items-center justify-between mb-4'>
                 <h2 className='text-2xl font-semibold'>Budget Overview</h2>
                 <Button
-                    color='danger'
-                    variant='solid'
-                    shape='round'
-                    icon={<LuDollarSign className='font-bold' />}
+                    variant='destructive'
+                    className="rounded-full font-bold"
                     onClick={() => expenseModalRef.current?.open()}
                 >
-                    <span className='font-bold'>Add Expense</span>
+                    <LuDollarSign className='mr-2' />
+                    Add Expense
                 </Button>
             </div>
             <div className='bg-gray-100 rounded-lg shadow-md p-4 grid grid-cols-6 gap-4'>
@@ -74,9 +74,8 @@ const BudgetBanner = () => {
                         </span>
                     </div>
                     <Progress
-                        size='small'
-                        percent={budgetMetrics.percentUsed}
-                        status={budgetMetrics.percentUsed >= 90 ? 'exception' : 'normal'}
+                        value={budgetMetrics.percentUsed}
+                        className={budgetMetrics.percentUsed >= 90 ? '[&>div]:bg-red-500' : ''}
                     />
                     <div className='gap-2 flex mt-2'>
                         <SetBudgetModal mode="update" />

@@ -1,7 +1,6 @@
-
-import { LuMapPin } from "react-icons/lu";
+import { MapPin } from "lucide-react";
 import AddToTripButton from "@/components/trip/TripMap/AddToTripButton";
-import { Badge } from "antd";
+import { Badge } from "@/components/ui/badge";
 import { ItineraryEntry } from "@/interfaces/trip.interface";
 
 interface GuidePlaceEntryProps {
@@ -29,20 +28,21 @@ const GuidePlaceEntry = ({ entry, placeName }: GuidePlaceEntryProps) => {
             <div className="flex justify-between items-center mb-2">
                 <div className="">
                     <div className="flex items-center gap-4">
-                        <LuMapPin size={24} className="font-semibold" />
+                        <MapPin size={24} className="font-semibold" />
                         {placeName && <span className="text-sm text-gray-500 bg-red-500 text-white font-bold p-1 rounded-full w-6 h-6 flex items-center justify-center">{placeName}</span>}
                         <h3 className="text-lg font-semibold">{entry?.place?.name}</h3>
                     </div>
                     <div className="flex flex-wrap">
                         {entry.place?.categories && (
-                            <div className="flex flex-wrap">
+                            <div className="flex flex-wrap gap-2 mt-2">
                                 {entry.place.categories.map((category, index) => (
-                                    <span
+                                    <Badge
                                         key={index}
-                                        className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2 mt-2"
+                                        variant="secondary"
+                                        className="bg-blue-100 text-blue-800"
                                     >
                                         {replaceWord(category)}
-                                    </span>
+                                    </Badge>
                                 ))}
                             </div>
                         )}

@@ -1,14 +1,30 @@
 'use client'
 
-import { Modal, Button, Form, InputNumber, Select } from "antd"
 import { useState, useEffect } from "react"
 import { LuWallet, LuPencil } from "react-icons/lu"
 import { useTripContext } from '@/contexts/TripContext'
 import { useToastMessage } from '@/contexts/ToastMessageContext'
 import { useUpdateTrip } from '@/hooks/useTripQueries'
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select'
 
 interface BudgetFormValues {
-	amount: number
+	amount: string
 	currency: string
 }
 
@@ -18,7 +34,10 @@ interface SetBudgetModalProps {
 
 const SetBudgetModal = ({ mode = 'create' }: SetBudgetModalProps) => {
 	const [isModalOpen, setIsModalOpen] = useState(false)
-	const [form] = Form.useForm()
+	const [formData, setFormData] = useState<BudgetFormValues>({
+		amount: '',
+		currency: 'THB'
+	})
 	const [loading, setLoading] = useState(false)
 	const { tripData } = useTripContext()
 	const updateTrip = useUpdateTrip()
@@ -27,28 +46,36 @@ const SetBudgetModal = ({ mode = 'create' }: SetBudgetModalProps) => {
 	// Auto-populate form when modal opens in update mode
 	useEffect(() => {
 		if (isModalOpen && mode === 'update' && tripData?.budget?.amount) {
-			form.setFieldsValue({
-				amount: tripData.budget.amount,
+			setFormData({
+				amount: tripData.budget.amount.toString(),
 				currency: tripData.budget.currency || 'THB'
 			})
 		}
-	}, [isModalOpen, mode, tripData, form])
+	}, [isModalOpen, mode, tripData])
 
-	const handleSubmit = async (values: BudgetFormValues) => {
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault()
+
 		if (!tripData) return
+
+		const amount = parseFloat(formData.amount)
+		if (isNaN(amount) || amount <= 0) {
+			showError('Please enter a valid amount greater than 0')
+			return
+		}
 
 		setLoading(true)
 		try {
 			await updateTrip.mutateAsync({
 				tripId: tripData.id,
 				data: {
-					budgetTotal: values.amount,
-					budgetCurrency: values.currency
+					budgetTotal: amount,
+					budgetCurrency: formData.currency
 				}
 			})
 			showSuccess(mode === 'create' ? 'Budget set successfully!' : 'Budget updated successfully!')
 			setIsModalOpen(false)
-			form.resetFields()
+			setFormData({ amount: '', currency: 'THB' })
 		} catch (error) {
 			console.error(`Failed to ${mode} budget:`, error)
 			showError(`Failed to ${mode} budget`)
@@ -70,78 +97,91 @@ const SetBudgetModal = ({ mode = 'create' }: SetBudgetModalProps) => {
 	const modalTitle = mode === 'create' ? 'Set Trip Budget' : 'Edit Trip Budget'
 	const buttonIcon = mode === 'create' ? <LuWallet /> : <LuPencil />
 
+	const formatNumber = (value: string) => {
+		const num = value.replace(/\D/g, '')
+		return num.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+	}
+
+	const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value.replace(/,/g, '')
+		if (value === '' || /^\d*\.?\d*$/.test(value)) {
+			setFormData({ ...formData, amount: value })
+		}
+	}
+
 	return (
 		<>
 			<Button
-				icon={buttonIcon}
-				shape='round'
-				type={mode === 'create' ? 'primary' : 'default'}
-				className='mt-2'
+				variant={mode === 'create' ? 'default' : 'outline'}
+				size={mode === 'update' ? 'sm' : 'default'}
+				className={mode === 'create' ? 'rounded-full mt-2' : 'rounded-full'}
 				onClick={() => setIsModalOpen(true)}
-				size={mode === 'update' ? 'small' : 'middle'}
 			>
+				{buttonIcon}
 				{buttonText}
 			</Button>
-			<Modal
-				title={modalTitle}
-				open={isModalOpen}
-				onCancel={() => setIsModalOpen(false)}
-				footer={null}
-				width={500}
-			>
-				<Form
-					form={form}
-					layout="vertical"
-					onFinish={handleSubmit}
-					initialValues={{ currency: 'THB' }}
-					className="mt-4"
-				>
-					<Form.Item
-						name="amount"
-						label="Budget Amount"
-						rules={[
-							{ required: true, message: 'Please enter budget amount' },
-							{ type: 'number', min: 1, message: 'Amount must be greater than 0' }
-						]}
-					>
-						<InputNumber
-							size="large"
-							className="w-full"
-							placeholder="Enter amount"
-							formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-							parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
-						/>
-					</Form.Item>
 
-					<Form.Item
-						name="currency"
-						label="Currency"
-						rules={[{ required: true, message: 'Please select currency' }]}
-					>
-						<Select
-							size="large"
-							placeholder="Select currency"
-							options={currencyOptions}
-						/>
-					</Form.Item>
+			<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+				<DialogContent className="max-w-md">
+					<DialogHeader>
+						<DialogTitle>{modalTitle}</DialogTitle>
+					</DialogHeader>
 
-					<div className="flex gap-2 justify-end mt-6">
-						<Button
-							onClick={() => setIsModalOpen(false)}
-							disabled={loading}
-						>
-							Cancel
-						</Button>
-						<Button
-							type="primary"
-							htmlType="submit"
-							loading={loading}
-						>
-							{mode === 'create' ? 'Set Budget' : 'Update Budget'}
-						</Button>
-					</div>
-				</Form>
-			</Modal>
+					<form onSubmit={handleSubmit} className="space-y-6 mt-4">
+						<div className="space-y-2">
+							<Label htmlFor="amount">
+								Budget Amount <span className="text-red-500">*</span>
+							</Label>
+							<Input
+								id="amount"
+								type="text"
+								value={formatNumber(formData.amount)}
+								onChange={handleAmountChange}
+								placeholder="Enter amount"
+								required
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="currency">
+								Currency <span className="text-red-500">*</span>
+							</Label>
+							<Select
+								value={formData.currency}
+								onValueChange={(value) => setFormData({ ...formData, currency: value })}
+							>
+								<SelectTrigger id="currency">
+									<SelectValue placeholder="Select currency" />
+								</SelectTrigger>
+								<SelectContent>
+									{currencyOptions.map((option) => (
+										<SelectItem key={option.value} value={option.value}>
+											{option.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+
+						<DialogFooter className="gap-2 sm:gap-0">
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => setIsModalOpen(false)}
+								disabled={loading}
+							>
+								Cancel
+							</Button>
+							<Button
+								type="submit"
+								disabled={loading}
+							>
+								{loading ? 'Saving...' : (mode === 'create' ? 'Set Budget' : 'Update Budget')}
+							</Button>
+						</DialogFooter>
+					</form>
+				</DialogContent>
+			</Dialog>
 		</>
 	)
 }

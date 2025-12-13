@@ -1,8 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Button, Spin, Empty } from 'antd'
-import { LuMessageSquare, LuRefreshCw } from 'react-icons/lu'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Empty } from '@/components/ui/empty'
+import { MessageSquare } from 'lucide-react'
 import { commentService } from '@/services'
 import CommentInput from './CommentInput'
 import CommentItem from './CommentItem'
@@ -48,14 +50,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ guideId }) => {
             <div className="space-y-6">
                 <div className="border-b border-gray-200 pb-4">
                     <div className="flex items-center gap-2">
-                        <LuMessageSquare className="w-5 h-5" />
+                        <MessageSquare className="w-5 h-5" />
                         <h3 className="text-lg font-semibold">{t('title')}</h3>
-                        <Spin size="small" />
+                        <Spinner size="sm" />
                     </div>
                 </div>
 
                 <div className="flex justify-center py-8">
-                    <Spin size="large" />
+                    <Spinner size="lg" />
                 </div>
             </div>
         )
@@ -67,7 +69,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ guideId }) => {
             <div className="border-b border-gray-200 pb-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <LuMessageSquare className="w-5 h-5" />
+                        <MessageSquare className="w-5 h-5" />
                         <h3 className="text-lg font-semibold">{t('title')}</h3>
                         <span className="text-sm text-gray-500">
                             ({comments.length})
@@ -96,20 +98,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ guideId }) => {
                 </div>
             ) : (
                 <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={
-                        <span className="text-gray-500">
-                            {t('empty')}
-                        </span>
-                    }
-                    className="py-8"
+                    description={t('empty')}
                 />
             )}
 
             {/* Load More Button (for future pagination) */}
             {comments && comments.length >= 20 && (
                 <div className="flex justify-center pt-4">
-                    <Button type="default">
+                    <Button variant="outline">
                         {t('loadMore')}
                     </Button>
                 </div>

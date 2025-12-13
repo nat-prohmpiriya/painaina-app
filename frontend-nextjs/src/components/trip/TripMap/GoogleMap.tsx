@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState, useCallback } from 'react'
 import { GoogleMap as GoogleMapReact, Marker, useJsApiLoader } from '@react-google-maps/api'
-import { Popover, Radio, Space } from 'antd'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
 import MapBottomSheet from './MapBottomSheet'
-import { LuSearch, LuSquareStack, LuBed, LuMap } from 'react-icons/lu'
+import { Search, Layers, Bed, Map as MapIcon } from 'lucide-react'
 import { PlaceInfo } from '@/interfaces/itinerary.interface'
 import { ItineraryWithEntries } from '@/interfaces/trip.interface'
 
@@ -184,40 +186,38 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ itineraries }) => {
             <div className='absolute top-0 right-0 w-[10%] z-400 h-36'>
                 <div className='flex flex-col items-end p-4 space-y-2'>
                     <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
-                        <LuSearch size={18} />
+                        <Search size={18} />
                     </div>
-                    <Popover
-                        content={
-                            <div className="w-64">
-                                <div className="font-semibold mb-3">Choose Google Map Style</div>
-                                <Radio.Group
-                                    value={selectedMapType}
-                                    onChange={(e) => handleMapTypeChange(e.target.value)}
-                                    className="w-full"
-                                >
-                                    <Space direction="vertical" className="w-full">
-                                        {Object.entries(MAP_STYLES).map(([key, style]) => (
-                                            <Radio key={key} value={key} className="w-full">
-                                                <span>{style.name}</span>
-                                            </Radio>
-                                        ))}
-                                    </Space>
-                                </Radio.Group>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
+                                <MapIcon size={18} />
                             </div>
-                        }
-                        title={null}
-                        trigger="click"
-                        placement="bottomRight"
-                    >
-                        <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
-                            <LuMap size={18} />
-                        </div>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" className="w-64">
+                            <div className="font-semibold mb-3">Choose Google Map Style</div>
+                            <RadioGroup
+                                value={selectedMapType}
+                                onValueChange={(value) => handleMapTypeChange(value as keyof typeof MAP_STYLES)}
+                            >
+                                <div className="flex flex-col space-y-2">
+                                    {Object.entries(MAP_STYLES).map(([key, style]) => (
+                                        <div key={key} className="flex items-center space-x-2">
+                                            <RadioGroupItem value={key} id={key} />
+                                            <Label htmlFor={key} className="cursor-pointer flex-1">
+                                                {style.name}
+                                            </Label>
+                                        </div>
+                                    ))}
+                                </div>
+                            </RadioGroup>
+                        </PopoverContent>
                     </Popover>
                     <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
-                        <LuSquareStack size={18} />
+                        <Layers size={18} />
                     </div>
                     <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
-                        <LuBed size={18} />
+                        <Bed size={18} />
                     </div>
                 </div>
 

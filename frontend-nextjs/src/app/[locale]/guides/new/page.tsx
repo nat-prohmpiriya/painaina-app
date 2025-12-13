@@ -1,7 +1,10 @@
 'use client'
 
 import { imgUrl } from '@/lib/imgUrl'
-import { Button, Input, Select, Tag } from 'antd'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tag } from '@/components/ui/tag'
 import { Search, Heart, Bookmark, Eye, User, MapPin, Clock, Star } from 'lucide-react'
 import { useState } from 'react'
 
@@ -140,14 +143,16 @@ const NewGuidesPage = () => {
           className="w-full h-48 object-cover"
         />
         <div className="absolute top-3 right-3">
-          <Button 
-            shape="circle" 
-            icon={<Bookmark size={16} />} 
-            className="bg-white/80 border-none shadow-sm"
-          />
+          <Button
+            size="icon"
+            variant="outline"
+            className="bg-white/80 border-none shadow-sm rounded-full h-8 w-8"
+          >
+            <Bookmark size={16} />
+          </Button>
         </div>
         <div className="absolute bottom-3 left-3">
-          <Tag color="blue">{guide.difficulty}</Tag>
+          <Tag variant="info">{guide.difficulty}</Tag>
         </div>
       </div>
       
@@ -230,10 +235,15 @@ const NewGuidesPage = () => {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">All Guides</h2>
-                <Select defaultValue="latest" className="w-32">
-                  <Select.Option value="latest">ล่าสุด</Select.Option>
-                  <Select.Option value="popular">ยอดนิยม</Select.Option>
-                  <Select.Option value="trending">กำลังฮิต</Select.Option>
+                <Select defaultValue="latest">
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="latest">ล่าสุด</SelectItem>
+                    <SelectItem value="popular">ยอดนิยม</SelectItem>
+                    <SelectItem value="trending">กำลังฮิต</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
               
@@ -252,7 +262,7 @@ const NewGuidesPage = () => {
             <User size={64} className="mx-auto text-gray-300 mb-4" />
             <h3 className="text-xl font-semibold mb-2">Follow Creators to See Their Guides</h3>
             <p className="text-gray-600 mb-6">เมื่อคุณติดตาม creators ที่ชอบ ก็จะเห็น guides ใหม่ๆ ของพวกเขาที่นี่</p>
-            <Button type="primary" onClick={() => setActiveTab('discover')}>
+            <Button onClick={() => setActiveTab('discover')}>
               Discover Creators
             </Button>
           </div>
@@ -297,12 +307,11 @@ const NewGuidesPage = () => {
           </p>
           
           {/* Search Bar */}
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto relative">
+            <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
-              size="large"
               placeholder="ค้นหาจุดหมาย, กิจกรรม, หรือ keyword ที่สนใจ..."
-              prefix={<Search size={20} />}
-              className="h-12 rounded-full"
+              className="h-12 rounded-full pl-12"
             />
           </div>
         </div>

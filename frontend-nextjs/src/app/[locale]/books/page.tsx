@@ -1,6 +1,6 @@
 'use client'
 
-import { Divider } from 'antd'
+import { Separator } from '@/components/ui/separator'
 import SearchGuidesForm from '@/components/book/SearchFlightsForm'
 import PopularDestinations from '@/components/book/PopularDestinations'
 import PriceTrends from '@/components/book/PriceTrends'
@@ -23,14 +23,14 @@ const BookingPage = () => {
           <PopularDestinations origin="BKK" currency="USD" limit={6} />
         </section>
 
-        <Divider />
+        <Separator className="my-12" />
 
         {/* Route Comparison */}
         <section data-testid="route-comparison-section">
           <RouteComparison />
         </section>
 
-        <Divider />
+        <Separator className="my-12" />
 
         {/* Price Trends */}
         <section data-testid="price-trends-section">

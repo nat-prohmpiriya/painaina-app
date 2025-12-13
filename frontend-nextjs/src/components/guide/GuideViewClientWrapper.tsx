@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Drawer, FloatButton } from 'antd'
-import { LuMap } from 'react-icons/lu'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { FloatButton } from '@/components/ui/float-button'
+import { Map } from 'lucide-react'
 import GuideDetail from '@/components/guide/GuideDetail'
 import GoogleMap from '@/components/trip/TripMap/GoogleMap'
 import { useTranslations } from 'next-intl'
@@ -34,32 +35,27 @@ const GuideViewClientWrapper = ({ guide }: GuideViewClientWrapperProps) => {
 
                 {/* Floating Map Button - Mobile only */}
                 <FloatButton
-                    icon={<LuMap size={24} />}
-                    type="primary"
-                    className="lg:hidden"
+                    icon={<Map size={24} />}
                     onClick={() => setDrawerOpen(true)}
                     tooltip={t('map.openMap')}
+                    className="lg:hidden"
                     style={{
                         right: 24,
                         bottom: 88  // Adjusted to avoid BottomNavigation
                     }}
                 />
 
-                {/* Map Drawer - 95% height */}
-                <Drawer
-                    title={t('map.tripMap')}
-                    placement="bottom"
-                    height="95%"
-                    onClose={() => setDrawerOpen(false)}
-                    open={drawerOpen}
-                    styles={{
-                        body: { padding: 0 }
-                    }}
-                >
-                    <div className="h-full">
-                        <GoogleMap itineraries={guide.itineraries} />
-                    </div>
-                </Drawer>
+                {/* Map Sheet - 95% height */}
+                <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+                    <SheetContent side="bottom" className="h-[95vh] p-0">
+                        <SheetHeader className="p-4 border-b">
+                            <SheetTitle>{t('map.tripMap')}</SheetTitle>
+                        </SheetHeader>
+                        <div className="h-[calc(100%-4rem)]">
+                            <GoogleMap itineraries={guide.itineraries} />
+                        </div>
+                    </SheetContent>
+                </Sheet>
             </div>
         </>
     )

@@ -1,7 +1,8 @@
 'use client'
 
-import { Avatar, Button } from "antd"
-import { LuCircleUserRound, LuShare, LuMail, LuMessageCircle, LuMessageSquare } from "react-icons/lu"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { CircleUserRound, Share, Mail, MessageSquare } from "lucide-react"
 import EditProfileModal from "./EditProfileModal"
 import { useTranslations } from 'next-intl'
 
@@ -17,7 +18,9 @@ const ProfileInfo = ({ user, isOwnProfile }: ProfileInfoProps) => {
         return (
             <div className="w-full border border-gray-100 rounded-lg p-4 gap-4">
                 <div className="flex flex-col items-center mt-10">
-                    <Avatar size={100} className="mb-4">{t('loading')}</Avatar>
+                    <Avatar className="h-24 w-24 mb-4">
+                        <AvatarFallback>{t('loading')}</AvatarFallback>
+                    </Avatar>
                 </div>
             </div>
         )
@@ -36,19 +39,19 @@ const ProfileInfo = ({ user, isOwnProfile }: ProfileInfoProps) => {
             </div>
             <div className="my-6 md:my-12 text-left">
                 <p className="mt-3 md:mt-4 flex items-center gap-3 md:gap-4">
-                    <LuCircleUserRound className="text-lg md:text-xl flex-shrink-0" />
+                    <CircleUserRound className="text-lg md:text-xl flex-shrink-0" />
                     <span className="font-semibold text-sm md:text-base break-all">
                         {user?.name || t('notProvided')}
                     </span>
                 </p>
                 <p className="mt-3 md:mt-4 flex items-center gap-3 md:gap-4">
-                    <LuMail className="text-lg md:text-xl flex-shrink-0" />
+                    <Mail className="text-lg md:text-xl flex-shrink-0" />
                     <span className="font-semibold text-sm md:text-base break-all">
                         {user?.email || t('notProvided')}
                     </span>
                 </p>
                 <p className="mt-3 md:mt-4 flex items-center gap-3 md:gap-4 cursor-pointer">
-                    <LuMessageSquare className="text-lg md:text-xl flex-shrink-0" />
+                    <MessageSquare className="text-lg md:text-xl flex-shrink-0" />
                     <span className="font-semibold text-sm md:text-base">{t('message')}</span>
                 </p>
             </div>
@@ -64,7 +67,10 @@ const ProfileInfo = ({ user, isOwnProfile }: ProfileInfoProps) => {
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-2">
                 {isOwnProfile && <EditProfileModal />}
-                <Button shape="round" icon={<LuShare />} type="default" block>{t('share')}</Button>
+                <Button variant="outline" className="w-full rounded-full">
+                    <Share className="mr-2 h-4 w-4" />
+                    {t('share')}
+                </Button>
             </div>
         </div>
     )

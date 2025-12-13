@@ -1,7 +1,8 @@
 'use client'
 
-import { LuStar } from "react-icons/lu";
-import { Skeleton, Empty } from 'antd'
+import { Star } from "lucide-react";
+import { Skeleton } from '@/components/ui/skeleton'
+import { Empty } from '@/components/ui/empty'
 import { PlaceInfo } from "@/interfaces/itinerary.interface";
 
 interface ReviewsTabProps {
@@ -11,10 +12,22 @@ interface ReviewsTabProps {
 const ReviewsTab: React.FC<ReviewsTabProps> = ({ placeDetails }) => {
     if (!placeDetails) {
         return (
-            <div className="p-4">
-                <Skeleton active avatar paragraph={{ rows: 2 }} className="mb-4" />
-                <Skeleton active avatar paragraph={{ rows: 2 }} className="mb-4" />
-                <Skeleton active avatar paragraph={{ rows: 2 }} />
+            <div className="p-4 space-y-4">
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-3/4" />
+                </div>
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-3/4" />
+                </div>
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-3/4" />
+                </div>
             </div>
         );
     }
@@ -22,10 +35,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ placeDetails }) => {
     if (!placeDetails?.reviews || placeDetails.reviews.length === 0) {
         return (
             <div className="p-4">
-                <Empty
-                    description="No reviews available for this place"
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                />
+                <Empty description="No reviews available for this place" />
             </div>
         );
     }
@@ -37,11 +47,11 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ placeDetails }) => {
                     <div key={index} className="border-b border-gray-100 pb-3 last:border-b-0">
                         <div className="flex items-center justify-between mb-2">
                             <span className="font-medium text-sm">{review.authorName}</span>
-                            <div className="flex items-center">
+                            <div className="flex items-center gap-0.5">
                                 {[...Array(5)].map((_, i) => (
-                                    <LuStar
+                                    <Star
                                         key={i}
-                                        className={`w-3 h-3 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                                        className={`w-3 h-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
                                     />
                                 ))}
                             </div>

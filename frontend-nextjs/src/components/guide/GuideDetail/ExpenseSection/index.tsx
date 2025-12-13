@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import { Empty } from 'antd'
-import { LuWallet } from 'react-icons/lu'
+import { Empty } from '@/components/ui/empty'
+import { Wallet } from 'lucide-react'
 import BudgetOverview from './BudgetOverview'
 import CategoryBreakdown from './CategoryBreakdown'
 import ExpenseList from './ExpenseList'
@@ -67,14 +67,11 @@ const ExpenseSection: React.FC<ExpenseSectionProps> = ({ expenses = [] }) => {
             <div className="bg-white rounded-xl shadow-sm p-8">
                 <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <LuWallet className="w-5 h-5 text-purple-600" />
+                        <Wallet className="w-5 h-5 text-purple-600" />
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
                 </div>
-                <Empty
-                    description={t('noExpenses')}
-                    className="py-8"
-                />
+                <Empty description={t('noExpenses')} />
             </div>
         )
     }
@@ -83,7 +80,7 @@ const ExpenseSection: React.FC<ExpenseSectionProps> = ({ expenses = [] }) => {
         <div className="bg-gray-100 p-6 md:p-8 mb-6">
             <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <LuWallet className="w-5 h-5 text-purple-600" />
+                    <Wallet className="w-5 h-5 text-purple-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
             </div>

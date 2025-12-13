@@ -2,7 +2,11 @@
 
 import { useState, useRef, useCallback, useEffect } from "react"
 import { imgUrl } from "@/lib/imgUrl"
-import { Avatar, DatePicker, Menu, Dropdown, Tooltip, Input } from "antd"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { useTripContext } from "@/contexts/TripContext"
 import InviteMemberModal from "./InviteMemberModal"
 import ChangeCoverModal from "./ChangeCoverModal"
@@ -15,9 +19,8 @@ import { usePathname } from 'next/navigation'
 import GuideViewButton from "./GuideViewButton"
 import LevelSelector from "./LevelSelector"
 import TagsSelector from "./TagsSelector"
-
-const { RangePicker } = DatePicker
-const { TextArea } = Input
+import { DateRangePicker } from "@/components/ui/date-range-picker"
+import { DateRange } from "react-day-picker"
 
 const TripBanner = () => {
     const { tripData, members, updateTrip } = useTripContext()
@@ -109,10 +112,10 @@ const TripBanner = () => {
         }
     }, [])
 
-    const dateRange: [dayjs.Dayjs, dayjs.Dayjs] | null = tripData.startDate && tripData.endDate ? [
-        dayjs(tripData.startDate),
-        dayjs(tripData.endDate)
-    ] : null
+    const dateRange: DateRange | undefined = tripData.startDate && tripData.endDate ? {
+        from: new Date(tripData.startDate),
+        to: new Date(tripData.endDate)
+    } : undefined
 
     return (
         <div>
@@ -131,23 +134,26 @@ const TripBanner = () => {
                         }}
                     />
                     <div className="bg-black/40 h-10 w-10 flex justify-center items-center rounded-full p-2 cursor-pointer hover:bg-black/70 transition">
-                        <Dropdown menu={{
-                            items: [
-                                ...(canDelete ? [{
-                                    key: '1',
-                                    label: 'Delete Trip',
-                                    onClick: () => setIsDeleteModalOpen(true),
-                                    danger: true,
-                                }] : []),
-                                {
-                                    key: '2',
-                                    label: 'Convert to Guides',
-                                    onClick: () => console.log('Create Guides clicked'),
-                                },
-                            ]
-                        }}>
-                            <LuEllipsisVertical className="text-white text-lg" />
-                        </Dropdown>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="outline-none">
+                                    <LuEllipsisVertical className="text-white text-lg" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {canDelete && (
+                                    <DropdownMenuItem
+                                        className="text-red-600 focus:text-red-600"
+                                        onClick={() => setIsDeleteModalOpen(true)}
+                                    >
+                                        Delete Trip
+                                    </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem onClick={() => console.log('Create Guides clicked')}>
+                                    Convert to Guides
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
             </div>
@@ -157,9 +163,8 @@ const TripBanner = () => {
                     <Input
                         value={title}
                         onChange={(e) => handleTitleChange(e.target.value)}
-                        className="w-full text-3xl font-bold border-0 outline-none focus:outline-none hover:bg-gray-50 focus:bg-white transition-colors"
+                        className="w-full text-3xl font-bold border-0 shadow-none hover:bg-gray-50 focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors px-0"
                         placeholder="Trip Title"
-                        variant="borderless"
                     />
                     {isSaving.title && (
                         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
@@ -169,13 +174,12 @@ const TripBanner = () => {
                 </div>
 
                 <div className="relative">
-                    <TextArea
+                    <Textarea
                         value={description}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
-                        className="w-full border-0 outline-none focus:outline-none hover:bg-gray-50 focus:bg-white transition-colors resize-none"
+                        className="w-full border-0 shadow-none hover:bg-gray-50 focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors resize-none px-0"
                         rows={5}
                         placeholder="Trip Description"
-                        variant="borderless"
                     />
                     {isSaving.description && (
                         <div className="absolute right-2 bottom-2 text-xs text-gray-500">
@@ -186,7 +190,7 @@ const TripBanner = () => {
 
                 <div className={`grid ${isGuidePage ? 'grid-cols-7' : 'grid-cols-5'} gap-4`}>
                     <div className={`col-span-${isGuidePage ? '4' : '2'}`}>
-                        {isTripPage && <RangePicker value={dateRange} style={{ width: '100%', borderRadius: '18px' }} />}
+                        {isTripPage && <DateRangePicker date={dateRange} onDateChange={() => {}} className="w-full" />}
                         {isGuidePage && <TagsSelector tags={tripData.tags || []} />}
                     </div>
 
@@ -195,22 +199,32 @@ const TripBanner = () => {
                     </div>
 
                     <div className={`col-span-${isGuidePage ? '1' : '2'} flex items-center justify-end`}>
-                        <Avatar.Group size="large" className="">
-                            {members && members.length > 0
-                                ? (members.map((member) => (
-                                    <Tooltip key={member.userId} title={`${member.user?.name || 'Unknown'} (${member.role})`}>
-                                        <Avatar
-                                            src={member.user?.photoUrl}
-                                            icon={<LuUser />}
-                                            alt={member.user?.name || 'Member'}
-                                        >
-                                            {!member.user?.photoUrl && (member.user?.name ? member.user.name.charAt(0).toUpperCase() : 'M')}
+                        <TooltipProvider>
+                            <div className="flex -space-x-2">
+                                {members && members.length > 0
+                                    ? (members.map((member) => (
+                                        <Tooltip key={member.userId}>
+                                            <TooltipTrigger asChild>
+                                                <Avatar className="border-2 border-white">
+                                                    <AvatarImage src={member.user?.photoUrl} alt={member.user?.name || 'Member'} />
+                                                    <AvatarFallback>
+                                                        {member.user?.name ? member.user.name.charAt(0).toUpperCase() : 'M'}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>{member.user?.name || 'Unknown'} ({member.role})</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    )))
+                                    : (
+                                        <Avatar>
+                                            <AvatarFallback><LuUser /></AvatarFallback>
                                         </Avatar>
-                                    </Tooltip>
-                                )))
-                                : (<Avatar icon={<LuUser />}>U</Avatar>)
-                            }
-                        </Avatar.Group>
+                                    )
+                                }
+                            </div>
+                        </TooltipProvider>
                         {isTripPage && <InviteMemberModal />}
                     </div>
                 </div>

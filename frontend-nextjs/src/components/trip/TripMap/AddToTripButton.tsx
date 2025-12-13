@@ -1,13 +1,16 @@
 'use client'
 
-import { Button, Popover, Spin, Empty, List, message } from 'antd'
+import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Spinner } from '@/components/ui/spinner'
+import { Empty } from '@/components/ui/empty'
 import { useState } from 'react';
-import { LuBookmarkPlus, LuChevronRight } from "react-icons/lu";
+import { BookmarkPlus, ChevronRight, ArrowLeft } from "lucide-react";
 import { PlaceInfo } from '@/interfaces/itinerary.interface';
 import { useAuth } from '@/hooks/useAuth';
-import { IoArrowBackOutline } from "react-icons/io5";
 import { useTrips, useTrip } from '@/hooks/useTripQueries';
 import { useCreateEntry } from '@/hooks/useItineraryQueries';
+import { useToastMessage } from '@/contexts/ToastMessageContext';
 
 interface AddToTripButtonProps {
     placeDetails: PlaceInfo | null
@@ -17,6 +20,7 @@ type Step = 'trips' | 'itineraries';
 
 const AddToTripButton: React.FC<AddToTripButtonProps> = ({ placeDetails }) => {
     const { user } = useAuth();
+    const { showSuccess, showError } = useToastMessage();
     const [open, setOpen] = useState(false);
     const [step, setStep] = useState<Step>('trips');
     const [selectedTripId, setSelectedTripId] = useState<string>();
@@ -61,13 +65,13 @@ const AddToTripButton: React.FC<AddToTripButtonProps> = ({ placeDetails }) => {
                 }
             });
 
-            message.success(`Added to ${selectedTrip?.title}`);
+            showSuccess(`Added to ${selectedTrip?.title}`);
             setOpen(false);
             setStep('trips');
             setSelectedTripId(undefined);
         } catch (error) {
             console.error('Error adding place to trip:', error);
-            message.error('Failed to add place to trip');
+            showError('Failed to add place to trip');
         }
     };
 
@@ -84,7 +88,7 @@ const AddToTripButton: React.FC<AddToTripButtonProps> = ({ placeDetails }) => {
         if (isLoadingTrips) {
             return (
                 <div className="flex justify-center items-center py-8">
-                    <Spin />
+                    <Spinner />
                 </div>
             );
         }
@@ -93,28 +97,24 @@ const AddToTripButton: React.FC<AddToTripButtonProps> = ({ placeDetails }) => {
             return (
                 <Empty
                     description="No trips yet"
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
                     className="py-4"
                 />
             );
         }
 
         return (
-            <List
-                size="small"
-                dataSource={tripsData.trips}
-                renderItem={(trip) => (
-                    <List.Item
+            <div className="space-y-1">
+                {tripsData.trips.map((trip) => (
+                    <div
+                        key={trip.id}
                         onClick={() => handleTripSelect(trip.id)}
-                        className="cursor-pointer hover:bg-gray-50 px-2 py-3 rounded transition-colors"
+                        className="cursor-pointer hover:bg-gray-50 px-2 py-3 rounded transition-colors flex justify-between items-center"
                     >
-                        <div className="flex justify-between items-center w-full">
-                            <span className="font-medium">{trip.title}</span>
-                            <LuChevronRight className="text-gray-400" />
-                        </div>
-                    </List.Item>
-                )}
-            />
+                        <span className="font-medium">{trip.title}</span>
+                        <ChevronRight className="text-gray-400 h-4 w-4" />
+                    </div>
+                ))}
+            </div>
         );
     };
 
@@ -127,7 +127,6 @@ const AddToTripButton: React.FC<AddToTripButtonProps> = ({ placeDetails }) => {
             return (
                 <Empty
                     description="No days in this trip"
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
                     className="py-4"
                 />
             );
@@ -136,23 +135,26 @@ const AddToTripButton: React.FC<AddToTripButtonProps> = ({ placeDetails }) => {
         return (
             <div>
                 <Button
-                    type="text"
-                    size="small"
+                    variant="ghost"
+                    size="sm"
                     onClick={handleBack}
                     className="mb-2"
-                    icon={<IoArrowBackOutline />}
                 >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
                     Back to trips
                 </Button>
-                <List
-                    size="small"
-                    dataSource={itineraries}
-                    renderItem={(itinerary) => (
-                        <List.Item
-                            onClick={() => handleItinerarySelect(itinerary.id)}
-                            className="cursor-pointer hover:bg-gray-50 px-2 py-3 rounded transition-colors"
-                        >
-                            <div className="flex justify-between items-center w-full">
+                {createEntryMutation.isPending ? (
+                    <div className="flex justify-center items-center py-8">
+                        <Spinner />
+                    </div>
+                ) : (
+                    <div className="space-y-1">
+                        {itineraries.map((itinerary) => (
+                            <div
+                                key={itinerary.id}
+                                onClick={() => handleItinerarySelect(itinerary.id)}
+                                className="cursor-pointer hover:bg-gray-50 px-2 py-3 rounded transition-colors flex justify-between items-center"
+                            >
                                 <div>
                                     <div className="font-medium">
                                         Day {itinerary.dayNumber}
@@ -163,39 +165,37 @@ const AddToTripButton: React.FC<AddToTripButtonProps> = ({ placeDetails }) => {
                                         </div>
                                     )}
                                 </div>
-                                <LuChevronRight className="text-gray-400" />
+                                <ChevronRight className="text-gray-400 h-4 w-4" />
                             </div>
-                        </List.Item>
-                    )}
-                    loading={createEntryMutation.isPending}
-                />
+                        ))}
+                    </div>
+                )}
             </div>
         );
     };
 
-    const content = (
-        <div className="w-72 max-h-96 overflow-y-auto">
-            {step === 'trips' ? renderTripsList() : renderItinerariesList()}
-        </div>
-    );
-
     return (
-        <Popover
-            content={content}
-            title={step === 'trips' ? 'Select Trip' : selectedTrip?.title}
-            trigger="click"
-            open={open}
-            onOpenChange={handleOpenChange}
-        >
-            <Button
-                icon={<LuBookmarkPlus size={18} className='mt-1' />}
-                color='danger'
-                variant='solid'
-                shape='round'
-                disabled={!placeDetails}
-            >
-                <span className='font-semibold'>Add To Trip</span>
-            </Button>
+        <Popover open={open} onOpenChange={handleOpenChange}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant="default"
+                    className="rounded-full"
+                    disabled={!placeDetails}
+                >
+                    <BookmarkPlus className="h-4 w-4 mr-2" />
+                    <span className='font-semibold'>Add To Trip</span>
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 max-h-96 overflow-y-auto p-0">
+                <div className="p-4 border-b">
+                    <h4 className="font-semibold">
+                        {step === 'trips' ? 'Select Trip' : selectedTrip?.title}
+                    </h4>
+                </div>
+                <div className="p-2">
+                    {step === 'trips' ? renderTripsList() : renderItinerariesList()}
+                </div>
+            </PopoverContent>
         </Popover>
     )
 }

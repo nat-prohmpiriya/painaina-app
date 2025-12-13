@@ -1,7 +1,6 @@
 'use client'
 
 import { LuUserPlus } from "react-icons/lu";
-import { Button, Tooltip, Modal, AutoComplete, Select, Avatar, Space, Typography, Spin } from "antd"
 import { useState } from "react";
 import { userService } from "@/services/user.service";
 import { tripService } from "@/services/trip.service";
@@ -9,8 +8,26 @@ import { useTripContext } from "@/contexts/TripContext";
 import type { User } from "@/interfaces";
 import { useUser } from "@clerk/nextjs";
 import { useToastMessage } from "@/contexts/ToastMessageContext";
-
-const { Text } = Typography;
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Spinner } from '@/components/ui/spinner'
 
 const InviteMemberModal = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,12 +62,10 @@ const InviteMemberModal = () => {
         }
     };
 
-    const handleSelect = (value: string) => {
-        const user = searchResults.find(u => u.id === value);
-        if (user) {
-            setSelectedUser(user);
-            setSearchValue(user.name);
-        }
+    const handleSelectUser = (user: User) => {
+        setSelectedUser(user);
+        setSearchValue(user.name);
+        setSearchResults([]);
     };
 
     const handleInvite = async () => {
@@ -106,119 +121,142 @@ const InviteMemberModal = () => {
         setSelectedRole("viewer");
     };
 
-    const options = searchResults.map(user => ({
-        value: user.id,
-        label: (
-            <Space>
-                <Avatar src={user.photoUrl} size="small">
-                    {user.name.charAt(0).toUpperCase()}
-                </Avatar>
-                <div>
-                    <Text strong>{user.name}</Text>
-                    <br />
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                        {user.email}
-                    </Text>
-                </div>
-            </Space>
-        ),
-    }));
-
     return (
         <>
-            <Tooltip title="Add Member">
-                <Button
-                    icon={<LuUserPlus className="ml-1 font-bold" />}
-                    type="default"
-                    shape="circle"
-                    size="large"
-                    className="ml-1"
-                    onClick={() => setIsModalOpen(true)}
-                />
-            </Tooltip>
-            <Modal
-                title={
-                    <div className="flex items-center justify-center">
-                        <span className="font-bold text-2xl">Invite Tripmates</span>
-                    </div>
-                }
-                open={isModalOpen}
-                onCancel={handleCancel}
-                footer={[
-                    <Button key="cancel" onClick={handleCancel}>
-                        Cancel
-                    </Button>,
-                    <Button
-                        key="invite"
-                        type="primary"
-                        onClick={handleInvite}
-                        loading={isInviting}
-                        disabled={!selectedUser}
-                    >
-                        Invite
-                    </Button>
-                ]}
-            >
-                <div className="space-y-4 py-4">
-                    {/* Search User */}
-                    <div>
-                        <Text strong>Search User</Text>
-                        <Spin spinning={isSearching}>
-                            <AutoComplete
-                                className="w-full mt-2"
-                                value={searchValue}
-                                options={options}
-                                onSearch={handleSearch}
-                                onSelect={handleSelect}
-                                placeholder="Search by name or email"
-                                notFoundContent={
-                                    searchValue.length >= 2 && !isSearching
-                                        ? "No users found"
-                                        : searchValue.length < 2
-                                        ? "Type at least 2 characters to search"
-                                        : null
-                                }
-                            />
-                        </Spin>
-                    </div>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="rounded-full ml-1"
+                            onClick={() => setIsModalOpen(true)}
+                        >
+                            <LuUserPlus className="font-bold" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Add Member</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
 
-                    {/* Selected User Display */}
-                    {selectedUser && (
-                        <div className="border rounded-lg p-3 bg-gray-50">
-                            <Text type="secondary" className="text-xs">
-                                Selected User
-                            </Text>
-                            <div className="flex items-center gap-3 mt-2">
-                                <Avatar src={selectedUser.photoUrl}>
-                                    {selectedUser.name.charAt(0).toUpperCase()}
-                                </Avatar>
-                                <div>
-                                    <Text strong>{selectedUser.name}</Text>
-                                    <br />
-                                    <Text type="secondary" style={{ fontSize: 12 }}>
-                                        {selectedUser.email}
-                                    </Text>
+            <Dialog open={isModalOpen} onOpenChange={(open) => !open && handleCancel()}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-center text-2xl font-bold">
+                            Invite Tripmates
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-4">
+                        {/* Search User */}
+                        <div className="space-y-2">
+                            <Label className="font-semibold">Search User</Label>
+                            <div className="relative">
+                                <Input
+                                    value={searchValue}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                    placeholder="Search by name or email (min 2 characters)"
+                                />
+                                {isSearching && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                        <Spinner size="sm" />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Search Results Dropdown */}
+                            {searchResults.length > 0 && (
+                                <div className="border rounded-lg max-h-60 overflow-y-auto">
+                                    {searchResults.map(user => (
+                                        <div
+                                            key={user.id}
+                                            className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0 flex items-center gap-3"
+                                            onClick={() => handleSelectUser(user)}
+                                        >
+                                            <Avatar className="h-10 w-10">
+                                                <AvatarImage src={user.photoUrl} />
+                                                <AvatarFallback>
+                                                    {user.name.charAt(0).toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1">
+                                                <div className="font-semibold">{user.name}</div>
+                                                <div className="text-sm text-gray-500">{user.email}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {searchValue.length >= 2 && !isSearching && searchResults.length === 0 && (
+                                <p className="text-sm text-gray-500 text-center py-2">
+                                    No users found
+                                </p>
+                            )}
+
+                            {searchValue.length > 0 && searchValue.length < 2 && (
+                                <p className="text-sm text-gray-500 text-center py-2">
+                                    Type at least 2 characters to search
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Selected User Display */}
+                        {selectedUser && (
+                            <div className="border rounded-lg p-3 bg-gray-50">
+                                <p className="text-xs text-gray-500 mb-2">Selected User</p>
+                                <div className="flex items-center gap-3">
+                                    <Avatar>
+                                        <AvatarImage src={selectedUser.photoUrl} />
+                                        <AvatarFallback>
+                                            {selectedUser.name.charAt(0).toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <div className="font-semibold">{selectedUser.name}</div>
+                                        <div className="text-sm text-gray-500">{selectedUser.email}</div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Role Selection */}
-                    <div>
-                        <Text strong>Role</Text>
-                        <Select
-                            className="w-full mt-2"
-                            value={selectedRole}
-                            onChange={setSelectedRole}
-                            options={[
-                                { value: "viewer", label: "Viewer - Can view trip details" },
-                                { value: "editor", label: "Editor - Can edit trip and itinerary" },
-                                { value: "admin", label: "Admin - Full access including member management" },
-                            ]}
-                        />
+                        {/* Role Selection */}
+                        <div className="space-y-2">
+                            <Label className="font-semibold">Role</Label>
+                            <Select
+                                value={selectedRole}
+                                onValueChange={(value: "admin" | "editor" | "viewer") => setSelectedRole(value)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="viewer">Viewer - Can view trip details</SelectItem>
+                                    <SelectItem value="editor">Editor - Can edit trip and itinerary</SelectItem>
+                                    <SelectItem value="admin">Admin - Full access including member management</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                </div>
-            </Modal>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button
+                            variant="outline"
+                            onClick={handleCancel}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleInvite}
+                            disabled={!selectedUser || isInviting}
+                        >
+                            {isInviting ? 'Inviting...' : 'Invite'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }

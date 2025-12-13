@@ -1,6 +1,6 @@
 'use client'
 
-import { Select } from "antd"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useTripContext } from "@/contexts/TripContext"
 import { useState } from "react"
 
@@ -38,13 +38,20 @@ const LevelSelector = ({ level, disabled = false }: LevelSelectorProps) => {
     return (
         <Select
             value={level}
-            onChange={handleLevelChange}
-            style={{ width: '100%' }}
+            onValueChange={handleLevelChange}
             disabled={disabled || isUpdating}
-            loading={isUpdating}
-            placeholder="Select Level"
-            options={levelOptions}
-        />
+        >
+            <SelectTrigger className="w-full">
+                <SelectValue placeholder={isUpdating ? "Updating..." : "Select Level"} />
+            </SelectTrigger>
+            <SelectContent>
+                {levelOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
     )
 }
 

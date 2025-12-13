@@ -2,7 +2,8 @@
 
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
-import { Drawer, FloatButton } from 'antd'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { FloatButton } from '@/components/ui/float-button'
 import { LuMap } from 'react-icons/lu'
 import TripDetail from '@/components/trip/TripDetail'
 import TripMap from '@/components/trip/TripMap'
@@ -38,7 +39,6 @@ const TripPage = () => {
                 {/* Floating Map Button - Mobile only */}
                 <FloatButton
                     icon={<LuMap size={24} />}
-                    type="primary"
                     className="lg:hidden"
                     onClick={() => setDrawerOpen(true)}
                     tooltip={t('map.openMap')}
@@ -48,21 +48,17 @@ const TripPage = () => {
                     }}
                 />
 
-                {/* Map Drawer - 85% height */}
-                <Drawer
-                    title={t('map.tripMap')}
-                    placement="bottom"
-                    height="95%"
-                    onClose={() => setDrawerOpen(false)}
-                    open={drawerOpen}
-                    styles={{
-                        body: { padding: 0 }
-                    }}
-                >
-                    <div className="h-full">
-                        <TripMap />
-                    </div>
-                </Drawer>
+                {/* Map Sheet - 95% height */}
+                <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+                    <SheetContent side="bottom" className="h-[95vh] p-0">
+                        <SheetHeader className="p-4 border-b">
+                            <SheetTitle>{t('map.tripMap')}</SheetTitle>
+                        </SheetHeader>
+                        <div className="h-[calc(100%-60px)]">
+                            <TripMap />
+                        </div>
+                    </SheetContent>
+                </Sheet>
             </div>
         </TripProvider>
     )

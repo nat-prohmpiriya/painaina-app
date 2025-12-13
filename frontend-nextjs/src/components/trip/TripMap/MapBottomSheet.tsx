@@ -1,13 +1,11 @@
 'use client'
 
-import { LuChevronLeft, LuChevronRight, LuX } from "react-icons/lu";
-import { FaRoute } from "react-icons/fa6";
+import { ChevronLeft, ChevronRight, X, Route, Info, Camera, Star } from "lucide-react";
 import { useState, forwardRef, useImperativeHandle } from "react";
-import { Tabs } from 'antd'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AboutTab from './tabs/AboutTab'
 import PhotosTab from './tabs/PhotosTab'
 import ReviewsTab from './tabs/ReviewsTab'
-import { LuInfo, LuCamera, LuStar } from "react-icons/lu";
 import { PlaceInfo } from '@/interfaces/itinerary.interface'
 
 export interface MapBottomSheetRef {
@@ -53,24 +51,6 @@ const MapBottomSheet = forwardRef<MapBottomSheetRef, MapBottomSheetProps>((props
         }
     }
 
-    const listTab = [
-        {
-            key: 'about',
-            label: <span className="text-xs font-bold flex items-center"><LuInfo size={16} className="inline-block mr-2" />About</span>,
-            children: <AboutTab placeDetails={selectedPlace} />
-        },
-        {
-            key: 'photos',
-            label: <span className="text-xs font-bold flex items-center"><LuCamera size={16} className="inline-block mr-2" />Photos</span>,
-            children: <PhotosTab placeDetails={selectedPlace} />
-        },
-        {
-            key: 'reviews',
-            label: <span className="text-xs font-bold flex items-center"><LuStar size={16} className="inline-block mr-2" />Reviews</span>,
-            children: <ReviewsTab placeDetails={selectedPlace} />
-        },
-    ];
-
     if (!isOpen) return null;
 
     return (
@@ -79,28 +59,30 @@ const MapBottomSheet = forwardRef<MapBottomSheetRef, MapBottomSheetProps>((props
             <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center space-x-3">
                     <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl py-2 px-3 flex items-center space-x-2 hover:bg-white transition-all duration-200">
-                        <LuChevronLeft
-                            className={`text-lg cursor-pointer transition-colors ${currentIndex > 0 ? 'text-gray-600 hover:text-gray-800' : 'text-gray-300 cursor-not-allowed'
+                        <ChevronLeft
+                            size={18}
+                            className={`cursor-pointer transition-colors ${currentIndex > 0 ? 'text-gray-600 hover:text-gray-800' : 'text-gray-300 cursor-not-allowed'
                                 }`}
                             onClick={goToPreviousPlace}
                         />
                         <span className="font-semibold text-sm text-gray-700">
                             {currentIndex + 1} of {totalPlaces}
                         </span>
-                        <LuChevronRight
-                            className={`text-lg cursor-pointer transition-colors ${currentIndex < totalPlaces - 1 ? 'text-gray-600 hover:text-gray-800' : 'text-gray-300 cursor-not-allowed'
+                        <ChevronRight
+                            size={18}
+                            className={`cursor-pointer transition-colors ${currentIndex < totalPlaces - 1 ? 'text-gray-600 hover:text-gray-800' : 'text-gray-300 cursor-not-allowed'
                                 }`}
                             onClick={goToNextPlace}
                         />
                     </div>
                     <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl py-2 px-3 flex items-center space-x-2 cursor-pointer hover:bg-white transition-all duration-200">
-                        <FaRoute className="text-blue-600 text-lg" />
+                        <Route className="text-blue-600 h-4 w-4" />
                         <span className="font-semibold text-sm text-gray-700">Optimize route</span>
                         <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 py-1 rounded-lg text-xs font-bold">PRO</span>
                     </div>
                 </div>
                 <div className="h-10 w-10 bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105">
-                    <LuX size={20} onClick={handleClose} className="text-gray-600" />
+                    <X size={20} onClick={handleClose} className="text-gray-600" />
                 </div>
             </div>
 
@@ -117,11 +99,31 @@ const MapBottomSheet = forwardRef<MapBottomSheetRef, MapBottomSheetProps>((props
 
                 {/* Tabs */}
                 <div className="px-3">
-                    <Tabs
-                        items={listTab}
-                        defaultActiveKey="about"
-                        className="h-full"
-                    />
+                    <Tabs defaultValue="about" className="h-full">
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="about" className="text-xs font-bold">
+                                <Info size={16} className="inline-block mr-2" />
+                                About
+                            </TabsTrigger>
+                            <TabsTrigger value="photos" className="text-xs font-bold">
+                                <Camera size={16} className="inline-block mr-2" />
+                                Photos
+                            </TabsTrigger>
+                            <TabsTrigger value="reviews" className="text-xs font-bold">
+                                <Star size={16} className="inline-block mr-2" />
+                                Reviews
+                            </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="about">
+                            <AboutTab placeDetails={selectedPlace} />
+                        </TabsContent>
+                        <TabsContent value="photos">
+                            <PhotosTab placeDetails={selectedPlace} />
+                        </TabsContent>
+                        <TabsContent value="reviews">
+                            <ReviewsTab placeDetails={selectedPlace} />
+                        </TabsContent>
+                    </Tabs>
                 </div>
             </div>
         </div>

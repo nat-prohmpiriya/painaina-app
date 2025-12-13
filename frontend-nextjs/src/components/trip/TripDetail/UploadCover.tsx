@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Upload, Button } from 'antd'
+import { FileUpload } from '@/components/ui/file-upload'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { LuUpload, LuImage, LuX } from 'react-icons/lu'
-import type { UploadFile, UploadProps } from 'antd/es/upload/interface'
 import { useToastMessage } from '@/contexts/ToastMessageContext'
 
 interface UploadCoverProps {
@@ -13,7 +14,7 @@ interface UploadCoverProps {
 }
 
 const UploadCover = ({ currentPhotoUrl, onPhotoSelect, isUpdating }: UploadCoverProps) => {
-    const [fileList, setFileList] = useState<UploadFile[]>([])
+    const [files, setFiles] = useState<File[]>([])
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const { showError } = useToastMessage()
 
@@ -27,42 +28,33 @@ const UploadCover = ({ currentPhotoUrl, onPhotoSelect, isUpdating }: UploadCover
         })
     }
 
-    const handleUpload: UploadProps['customRequest'] = async (options) => {
-        const { file, onSuccess, onError } = options
-        
-        try {
-            // Convert file to base64
-            const base64 = await getBase64(file as File)
-            setPreviewUrl(base64)
-            onSuccess?.('ok')
-        } catch (error) {
-            console.error('Upload error:', error)
-            onError?.(error as Error)
-        }
-    }
+    const handleFilesChange = async (newFiles: File[]) => {
+        if (newFiles.length === 0) return
 
-    const handleChange: UploadProps['onChange'] = (info) => {
-        setFileList(info.fileList.slice(-1)) // Keep only the latest file
-        
-        if (info.file.status === 'error') {
-            showError('Upload failed')
-        }
-    }
+        const file = newFiles[0]
 
-    const beforeUpload = (file: File) => {
+        // Validate file type
         const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp'
         if (!isJpgOrPng) {
-            showError('You can only upload JPG, PNG, or WebP files!')
-            return false
+            showError('Invalid file type', 'You can only upload JPG, PNG, or WebP files!')
+            return
         }
-        
+
+        // Validate file size
         const isLt10M = file.size / 1024 / 1024 < 10
         if (!isLt10M) {
-            showError('Image must be smaller than 10MB!')
-            return false
+            showError('File too large', 'Image must be smaller than 10MB!')
+            return
         }
-        
-        return true
+
+        try {
+            const base64 = await getBase64(file)
+            setPreviewUrl(base64)
+            setFiles([file])
+        } catch (error) {
+            console.error('Upload error:', error)
+            showError('Upload failed')
+        }
     }
 
     const handleUsePhoto = () => {
@@ -73,7 +65,7 @@ const UploadCover = ({ currentPhotoUrl, onPhotoSelect, isUpdating }: UploadCover
 
     const handleRemovePreview = () => {
         setPreviewUrl(null)
-        setFileList([])
+        setFiles([])
     }
 
     return (
@@ -98,11 +90,12 @@ const UploadCover = ({ currentPhotoUrl, onPhotoSelect, isUpdating }: UploadCover
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-sm font-medium">Preview:</p>
                         <Button
-                            type="text"
-                            icon={<LuX />}
+                            variant="ghost"
+                            size="sm"
                             onClick={handleRemovePreview}
-                            size="small"
-                        />
+                        >
+                            <LuX />
+                        </Button>
                     </div>
                     <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100">
                         <img
@@ -115,30 +108,28 @@ const UploadCover = ({ currentPhotoUrl, onPhotoSelect, isUpdating }: UploadCover
             )}
 
             {/* Upload Area */}
-            <Upload.Dragger
-                fileList={fileList}
-                customRequest={handleUpload}
-                onChange={handleChange}
-                beforeUpload={beforeUpload}
+            <FileUpload
+                value={files}
+                onChange={handleFilesChange}
                 accept="image/*"
-                showUploadList={false}
+                maxFiles={1}
                 disabled={isUpdating}
+                showPreview={false}
             >
                 <div className="py-8">
                     <LuUpload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                     <p className="text-base mb-2">Click or drag file to upload</p>
                     <p className="text-sm text-gray-500">Support JPG, PNG, WebP up to 10MB</p>
                 </div>
-            </Upload.Dragger>
+            </FileUpload>
 
             {/* URL Input Alternative */}
             <div className="text-center text-gray-500">
                 <p className="text-sm">or paste image URL:</p>
                 <div className="mt-2">
-                    <input
+                    <Input
                         type="url"
                         placeholder="https://example.com/image.jpg"
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         onBlur={(e) => {
                             const url = e.target.value.trim()
                             if (url) {
@@ -154,18 +145,18 @@ const UploadCover = ({ currentPhotoUrl, onPhotoSelect, isUpdating }: UploadCover
             {previewUrl && (
                 <div className="flex justify-end space-x-2 pt-4 border-t">
                     <Button
+                        variant="outline"
                         onClick={handleRemovePreview}
                         disabled={isUpdating}
                     >
                         Cancel
                     </Button>
                     <Button
-                        type="primary"
-                        icon={<LuImage />}
-                        loading={isUpdating}
+                        disabled={isUpdating}
                         onClick={handleUsePhoto}
                     >
-                        Update Cover Photo
+                        <LuImage className="mr-2" />
+                        {isUpdating ? 'Updating...' : 'Update Cover Photo'}
                     </Button>
                 </div>
             )}

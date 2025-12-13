@@ -4,12 +4,17 @@ import React from 'react'
 import CreateEntry from './CreateEntry'
 import PlaceEntry from './PlaceEntry'
 import NoteEntry from './NoteEntry'
-import { Button, Dropdown } from 'antd'
+import { Button } from '@/components/ui/button'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import TodoListEntry from './TodoListEntry'
 import { LuChevronRight, LuPencilLine, LuEllipsisVertical } from "react-icons/lu";
 import { isPlaceEntry, isNoteEntry, isTodoListEntry } from '@/interfaces/itinerary.interface'
 import { useTripContext } from '@/contexts/TripContext'
-import type { MenuProps } from 'antd';
 import type { ItineraryWithEntries } from '@/interfaces/trip.interface'
 
 import {
@@ -109,24 +114,13 @@ const ItineraryItem = ({ day, isGuidePage = false }: ItineraryItemProps) => {
         })
     }
 
-    const handleMenuClick: MenuProps['onClick'] = async ({ key }) => {
-        if (key === 'insert day after') {
-            await insertDayAfter(day.id)
-        } else if (key === 'delete') {
-            await deleteDay(day.id)
-        }
+    const handleInsertDayAfter = async () => {
+        await insertDayAfter(day.id)
     }
 
-    const menuItems: MenuProps['items'] = [
-        {
-            key: 'insert day after',
-            label: <span className='font-semibold'>Insert Day After</span>,
-        },
-        {
-            key: 'delete',
-            label: <span className='font-semibold'>Delete Itinerary</span>,
-        }
-    ]
+    const handleDeleteDay = async () => {
+        await deleteDay(day.id)
+    }
 
     return (
         <div className='space-y-4 p-4'>
@@ -154,9 +148,21 @@ const ItineraryItem = ({ day, isGuidePage = false }: ItineraryItemProps) => {
                     }
                 </div>
                 <div className='flex items-center gap-2 justify-end'>
-                    <Dropdown menu={{ items: menuItems, onClick: handleMenuClick }}>
-                        <Button shape='circle' type='text' icon={<LuEllipsisVertical />} />
-                    </Dropdown>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant='ghost' size='icon' className='rounded-full'>
+                                <LuEllipsisVertical />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={handleInsertDayAfter}>
+                                <span className='font-semibold'>Insert Day After</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleDeleteDay}>
+                                <span className='font-semibold'>Delete Itinerary</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </div>
 

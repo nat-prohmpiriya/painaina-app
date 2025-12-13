@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import { Avatar } from 'antd'
-import { UserOutlined } from '@ant-design/icons'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { User } from 'lucide-react'
 import { Notification } from '@/services/notification.service'
 import { formatDistanceToNow } from 'date-fns'
 import { enUS } from 'date-fns/locale'
@@ -41,11 +41,12 @@ export default function NotificationItem({ notification, onClick }: Notification
       }`}
     >
       <div className="relative">
-        <Avatar
-          size={40}
-          src={notification.sender?.profileImageUrl}
-          icon={<UserOutlined />}
-        />
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={notification.sender?.profileImageUrl} alt="" />
+          <AvatarFallback>
+            <User className="h-5 w-5" />
+          </AvatarFallback>
+        </Avatar>
         <span className="absolute -bottom-1 -right-1 text-sm">{getNotificationIcon()}</span>
       </div>
 

@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, Row, Col, Typography, Button, Spin, Tag } from 'antd'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Tag } from '@/components/ui/tag'
 import { Plane, MapPin, DollarSign } from 'lucide-react'
 import { useToastMessage } from '@/contexts/ToastMessageContext'
-
-const { Title, Text } = Typography
 
 interface PopularDestinationsProps {
   origin?: string
@@ -64,84 +64,80 @@ export default function PopularDestinations({
   return (
     <div className="w-full">
       <div className="mb-6">
-        <Title level={3} className="flex items-center gap-2 mb-2">
+        <h3 className="flex items-center gap-2 mb-2 text-xl font-semibold">
           <Plane className="text-blue-500" size={24} />
           Popular Destinations from {origin}
-        </Title>
-        <Text type="secondary">
+        </h3>
+        <p className="text-sm text-muted-foreground">
           Discover trending travel destinations with great prices
-        </Text>
+        </p>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-8">
-          <Spin size="large" />
+          <Spinner size="lg" />
         </div>
       ) : (
-        <Row gutter={[16, 16]}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {routes.map((route, index) => (
-            <Col xs={24} sm={12} lg={8} key={route.destination}>
-              <Card 
-                className="h-full hover:shadow-lg transition-shadow cursor-pointer"
-                hoverable
-                data-testid={`destination-card-${route.destination}`}
-              >
-                <div className="space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-gray-500" />
-                      <Text strong className="text-lg">{route.destination}</Text>
-                    </div>
-                    <Tag color={index < 3 ? 'gold' : 'blue'}>
-                      #{index + 1}
+            <div
+              key={route.destination}
+              className="bg-white rounded-xl border shadow-sm hover:shadow-lg transition-shadow cursor-pointer p-6"
+              data-testid={`destination-card-${route.destination}`}
+            >
+              <div className="space-y-3">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} className="text-gray-500" />
+                    <span className="text-lg font-semibold">{route.destination}</span>
+                  </div>
+                  <Tag variant={index < 3 ? 'warning' : 'info'}>
+                    #{index + 1}
+                  </Tag>
+                </div>
+
+                <div className="flex items-center gap-1 text-green-600">
+                  <DollarSign size={16} />
+                  <span className="text-xl font-semibold">{route.price}</span>
+                  <span className="text-sm text-muted-foreground">{currency}</span>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Airline:</span>
+                    <span>{route.airline}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Departure:</span>
+                    <span>{formatDate(route.departure_at)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Return:</span>
+                    <span>{formatDate(route.return_at)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Stops:</span>
+                    <Tag variant={route.transfers === 0 ? 'success' : 'warning'}>
+                      {getTransferText(route.transfers)}
                     </Tag>
                   </div>
-
-                  <div className="flex items-center gap-1 text-green-600">
-                    <DollarSign size={16} />
-                    <Text strong className="text-xl">{route.price}</Text>
-                    <Text type="secondary" className="text-sm">{currency}</Text>
-                  </div>
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <Text type="secondary">Airline:</Text>
-                      <Text>{route.airline}</Text>
-                    </div>
-                    <div className="flex justify-between">
-                      <Text type="secondary">Departure:</Text>
-                      <Text>{formatDate(route.departure_at)}</Text>
-                    </div>
-                    <div className="flex justify-between">
-                      <Text type="secondary">Return:</Text>
-                      <Text>{formatDate(route.return_at)}</Text>
-                    </div>
-                    <div className="flex justify-between">
-                      <Text type="secondary">Stops:</Text>
-                      <Tag color={route.transfers === 0 ? 'green' : 'orange'}>
-                        {getTransferText(route.transfers)}
-                      </Tag>
-                    </div>
-                  </div>
-
-                  <Button 
-                    type="primary" 
-                    block 
-                    className="mt-4"
-                    data-testid={`explore-btn-${route.destination}`}
-                  >
-                    Explore {route.destination}
-                  </Button>
                 </div>
-              </Card>
-            </Col>
+
+                <Button
+                  className="w-full mt-4"
+                  data-testid={`explore-btn-${route.destination}`}
+                >
+                  Explore {route.destination}
+                </Button>
+              </div>
+            </div>
           ))}
-        </Row>
+        </div>
       )}
 
       {!loading && routes.length === 0 && (
         <div className="text-center py-8">
-          <Text type="secondary">No popular destinations found for {origin}</Text>
+          <p className="text-sm text-muted-foreground">No popular destinations found for {origin}</p>
         </div>
       )}
     </div>

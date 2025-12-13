@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext } from 'react'
-import { App } from 'antd'
+import { toast } from 'sonner'
 
 interface ToastMessageContextType {
   showSuccess: (message: string, description?: string) => void
@@ -13,47 +13,29 @@ interface ToastMessageContextType {
 const ToastMessageContext = createContext<ToastMessageContextType | undefined>(undefined)
 
 export const ToastMessageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return (
-    <App>
-      <ToastMessageContent>{children}</ToastMessageContent>
-    </App>
-  )
-}
-
-const ToastMessageContent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { notification } = App.useApp()
-
   const contextValue: ToastMessageContextType = {
     showSuccess: (message: string, description?: string) => {
-      notification.success({
-        message,
+      toast.success(message, {
         description,
-        placement: 'topRight',
-        duration: 4.5,
+        duration: 4500,
       })
     },
     showError: (message: string, description?: string) => {
-      notification.error({
-        message,
+      toast.error(message, {
         description,
-        placement: 'topRight',
-        duration: 6,
+        duration: 6000,
       })
     },
     showWarning: (message: string, description?: string) => {
-      notification.warning({
-        message,
+      toast.warning(message, {
         description,
-        placement: 'topRight',
-        duration: 5,
+        duration: 5000,
       })
     },
     showInfo: (message: string, description?: string) => {
-      notification.info({
-        message,
+      toast.info(message, {
         description,
-        placement: 'topRight',
-        duration: 4.5,
+        duration: 4500,
       })
     },
   }

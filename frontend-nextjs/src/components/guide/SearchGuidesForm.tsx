@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Input, Button } from 'antd'
-import { IoSearch, IoClose } from 'react-icons/io5'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Search, X } from 'lucide-react'
 import type { SearchGuidesQuery } from '@/services/guide.service'
 
 interface SearchGuidesFormProps {
@@ -48,14 +49,16 @@ const SearchGuidesForm: React.FC<SearchGuidesFormProps> = ({
                     <label className='text-sm font-medium text-gray-700 mb-1'>
                         Search
                     </label>
-                    <Input
-                        placeholder='Keyword, destination, activity...'
-                        prefix={<IoSearch className='text-gray-400' />}
-                        value={keyword}
-                        onChange={(e) => setKeyword(e.target.value)}
-                        onKeyDown={handleKeyPress}
-                        size='large'
-                    />
+                    <div className='relative'>
+                        <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400' />
+                        <Input
+                            placeholder='Keyword, destination, activity...'
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value)}
+                            onKeyDown={handleKeyPress}
+                            className='pl-9 h-10'
+                        />
+                    </div>
                 </div>
 
                 {/* Tags */}
@@ -68,26 +71,25 @@ const SearchGuidesForm: React.FC<SearchGuidesFormProps> = ({
                         value={tags}
                         onChange={(e) => setTags(e.target.value)}
                         onKeyDown={handleKeyPress}
-                        size='large'
+                        className='h-10'
                     />
                 </div>
 
                 {/* Action Buttons */}
                 <div className='flex items-end gap-2'>
                     <Button
-                        type='primary'
-                        size='large'
-                        icon={<IoSearch />}
                         onClick={handleSearch}
-                        className='flex-1'
+                        className='flex-1 h-10'
                     >
+                        <Search className="h-4 w-4 mr-2" />
                         Search
                     </Button>
                     <Button
-                        size='large'
-                        icon={<IoClose />}
+                        variant="outline"
                         onClick={handleClear}
+                        className='h-10'
                     >
+                        <X className="h-4 w-4 mr-2" />
                         Clear
                     </Button>
                 </div>

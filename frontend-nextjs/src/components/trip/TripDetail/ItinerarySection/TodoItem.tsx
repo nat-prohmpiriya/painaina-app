@@ -1,6 +1,6 @@
 'use client'
 
-import { Checkbox, CheckboxChangeEvent } from "antd"
+import { Checkbox } from '@/components/ui/checkbox'
 import { LuGripVertical } from "react-icons/lu";
 import { FiTrash2 } from "react-icons/fi";
 import { Todo } from '@/interfaces/itinerary.interface'
@@ -62,11 +62,10 @@ const TodoItem = ({ todo, entryId, onStatusChange, onTitleChange, onDelete }: To
         }, 2000) // 2 seconds
     }
 
-    const handleStatusChange = async (e: CheckboxChangeEvent) => {
-        const checked = e.target.checked
+    const handleStatusChange = async (checked: boolean) => {
         // Optimistic update - immediate UI feedback
         setLocalTodo(prev => ({ ...prev, completed: checked }))
-        
+
         setIsSaving(prev => ({ ...prev, status: true }))
         try {
             await onStatusChange(entryId, todo.id)
@@ -108,13 +107,12 @@ const TodoItem = ({ todo, entryId, onStatusChange, onTitleChange, onDelete }: To
             >
                 <LuGripVertical size={16} />
             </div>
-            
+
             <div className="flex items-center gap-2 flex-1">
                 <Checkbox
                     className="text-lg"
                     checked={localTodo.completed}
-                    onChange={handleStatusChange}
-                    style={{ scale: 1 }}
+                    onCheckedChange={handleStatusChange}
                     disabled={isSaving.status}
                 />
                 <div className="relative flex-1">

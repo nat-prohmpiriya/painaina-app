@@ -1,15 +1,21 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Avatar, Button, Dropdown, Input } from 'antd'
-import { LuHeart, LuMessageSquare, LuMenu, LuPencil, LuTrash, LuUser } from 'react-icons/lu'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Heart, MessageSquare, MoreHorizontal, Pencil, Trash, User } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 import { useToastMessage } from '@/contexts/ToastMessageContext'
 import { commentService } from '@/services'
 import CommentInput from './CommentInput'
 import { CommentWithUser } from '@/interfaces/comment.interface'
-
-const { TextArea } = Input
 
 interface CommentItemProps {
     comment: CommentWithUser;
@@ -137,22 +143,6 @@ const CommentItem: React.FC<CommentItemProps> = ({
         }
     }
 
-    const menuItems = isOwner ? [
-        {
-            key: 'edit',
-            label: 'Edit',
-            icon: <LuPencil className="w-4 h-4" />,
-            onClick: handleEdit,
-        },
-        {
-            key: 'delete',
-            label: 'Delete',
-            icon: <LuTrash className="w-4 h-4" />,
-            onClick: handleDelete,
-            danger: true,
-        },
-    ] : []
-
     const visibleReplies = showAllReplies ? comment.replies : comment.replies?.slice(0, 3)
 
     console.log('CommentItem rendered:', comment)
@@ -160,11 +150,10 @@ const CommentItem: React.FC<CommentItemProps> = ({
     return (
         <div className={`${isReply ? 'ml-8 mt-4' : 'border-b border-gray-100 pb-4'}`}>
             <div className="flex items-start gap-3">
-                <Avatar
-                    src={comment.user?.photoUrl}
-                    icon={<LuUser />}
-                    size={isReply ? 32 : 40}
-                />
+                <Avatar className={isReply ? 'h-8 w-8' : 'h-10 w-10'}>
+                    <AvatarImage src={comment.user?.photoUrl} />
+                    <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                </Avatar>
 
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -181,28 +170,27 @@ const CommentItem: React.FC<CommentItemProps> = ({
 
                     {isEditing ? (
                         <div className="space-y-3">
-                            <TextArea
+                            <Textarea
                                 value={editContent}
                                 onChange={(e) => setEditContent(e.target.value)}
-                                autoSize={{ minRows: 2, maxRows: 6 }}
-                                className="border-gray-300 focus:border-blue-500"
+                                rows={2}
+                                className="resize-none"
                             />
                             <div className="flex gap-2">
                                 <Button
-                                    size="small"
+                                    variant="outline"
+                                    size="sm"
                                     onClick={handleCancelEdit}
                                     disabled={isUpdateLoading}
                                 >
                                     Cancel
                                 </Button>
                                 <Button
-                                    type="primary"
-                                    size="small"
+                                    size="sm"
                                     onClick={handleSaveEdit}
-                                    loading={isUpdateLoading}
-                                    disabled={!editContent.trim()}
+                                    disabled={isUpdateLoading || !editContent.trim()}
                                 >
-                                    Save
+                                    {isUpdateLoading ? "Saving..." : "Save"}
                                 </Button>
                             </div>
                         </div>
@@ -215,37 +203,50 @@ const CommentItem: React.FC<CommentItemProps> = ({
                     {!isEditing && (
                         <div className="flex items-center gap-4">
                             <Button
-                                type="text"
-                                size="small"
-                                icon={<LuHeart className="w-4 h-4" />}
+                                variant="ghost"
+                                size="sm"
                                 onClick={handleLike}
-                                loading={isLikeLoading}
-                                className="flex items-center gap-1 text-gray-500 hover:text-red-500"
+                                disabled={isLikeLoading}
+                                className="flex items-center gap-1 text-gray-500 hover:text-red-500 h-8 px-2"
                             >
+                                <Heart className="w-4 h-4" />
                                 {comment.reactionsCount || 0}
                             </Button>
 
                             {!isReply && (
                                 <Button
-                                    type="text"
-                                    size="small"
-                                    icon={<LuMessageSquare className="w-4 h-4" />}
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={handleReply}
-                                    className="flex items-center gap-1 text-gray-500"
+                                    className="flex items-center gap-1 text-gray-500 h-8 px-2"
                                 >
+                                    <MessageSquare className="w-4 h-4" />
                                     Reply
                                 </Button>
                             )}
 
-                            {menuItems.length > 0 && (
-                                <Dropdown menu={{ items: menuItems }} trigger={['click']}>
-                                    <Button
-                                        type="text"
-                                        size="small"
-                                        icon={<LuMenu className="w-4 h-4" />}
-                                        className="text-gray-500"
-                                    />
-                                </Dropdown>
+                            {isOwner && (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-gray-500 h-8 w-8 p-0"
+                                        >
+                                            <MoreHorizontal className="w-4 h-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={handleEdit}>
+                                            <Pencil className="w-4 h-4 mr-2" />
+                                            Edit
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+                                            <Trash className="w-4 h-4 mr-2" />
+                                            Delete
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             )}
                         </div>
                     )}
@@ -276,10 +277,10 @@ const CommentItem: React.FC<CommentItemProps> = ({
 
                             {comment.replies.length > 3 && !showAllReplies && (
                                 <Button
-                                    type="text"
-                                    size="small"
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => setShowAllReplies(true)}
-                                    className="mt-2 text-blue-600"
+                                    className="mt-2 text-blue-600 h-8"
                                 >
                                     Show {comment.replies.length - 3} more replies
                                 </Button>

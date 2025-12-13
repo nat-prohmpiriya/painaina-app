@@ -1,17 +1,14 @@
 'use client';
 
-import { Button } from 'antd'
+import { Button } from '@/components/ui/button'
 import { useState } from 'react';
-import { LuBed, LuPlane, LuCarFront, LuBusFront } from 'react-icons/lu';
-import { MdOutlineLocalActivity } from "react-icons/md";
-import { IoRestaurantOutline } from "react-icons/io5";
+import { Bed, Plane, Car, Bus, Ticket, UtensilsCrossed, Train } from 'lucide-react';
 import FlightSearch from './FlightSearch';
 import StaySearch from './StaySearch';
 import CarRentalSearch from './CarRentalSearch';
 import BusRentalSearch from './BusRentalSearch';
 import EventSearch from './EventSearch';
 import RestaurantsSearch from './RestaurantsSearch';
-import { FaTrain } from "react-icons/fa6";
 import TrainsSearch from './TrainsSearch';
 
 
@@ -20,13 +17,13 @@ const BookingForm = () => {
     const [currentTab, setCurrentTab] = useState('Stays');
 
     const listButton = [
-        { label: 'Stays', icon: <LuBed size={20} /> },
-        { label: 'Flights', icon: <LuPlane size={20} /> },
-        // { label: 'Car', icon: <LuCarFront size={20} /> },
-        // { label: 'Buses', icon: <LuBusFront size={20} /> },
-        // { label: 'Trains', icon: <FaTrain size={20} /> },
-        { label: 'Event', icon: <MdOutlineLocalActivity size={20} /> },
-        // { label: 'Restaurants', icon: <IoRestaurantOutline size={20} /> },
+        { label: 'Stays', icon: <Bed size={20} /> },
+        { label: 'Flights', icon: <Plane size={20} /> },
+        // { label: 'Car', icon: <Car size={20} /> },
+        // { label: 'Buses', icon: <Bus size={20} /> },
+        // { label: 'Trains', icon: <Train size={20} /> },
+        { label: 'Event', icon: <Ticket size={20} /> },
+        // { label: 'Restaurants', icon: <UtensilsCrossed size={20} /> },
     ]
     return (
         <div className='w-full'>
@@ -37,18 +34,17 @@ const BookingForm = () => {
                 {
                     listButton.map((item, index) => (
                         <Button
-                            size='large'
-                            variant={item.label === currentTab ? 'solid' : 'outlined'}
-                            color={item.label === currentTab ? 'danger' : 'default'}
-
+                            size='lg'
+                            variant={item.label === currentTab ? 'default' : 'outline'}
                             key={index}
-                            icon={item.icon}
                             className={`rounded-full ${currentTab === item.label
-                                ? 'bg-red-500 text-white'
+                                ? 'bg-red-500 text-white hover:bg-red-600'
                                 : 'bg-gray-200 text-gray-700 hover:bg-red-500 hover:text-white'
                                 }`}
                             onClick={() => setCurrentTab(item.label)}
-                        />
+                        >
+                            {item.icon}
+                        </Button>
                     ))
                 }
             </div>

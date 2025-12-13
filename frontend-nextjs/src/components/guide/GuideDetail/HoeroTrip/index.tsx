@@ -1,5 +1,7 @@
-import { Avatar, Button, Tag } from "antd";
-import { LuHeart, LuMessageSquare, LuSend, LuEye } from "react-icons/lu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Heart, MessageSquare, Send, Eye, User } from "lucide-react";
 import Link from "next/link";
 import type { TripDetailResponse } from "@/interfaces/trip.interface";
 
@@ -12,7 +14,7 @@ const HoeroTrip: React.FC<HoeroTripProps> = ({ guide }) => {
     const editGuideBtn = (
         <div className="absolute top-4 right-4">
             <Link href={`/guides/${guide.id}`}>
-                <Button shape="round" type="default" >
+                <Button variant="secondary" className="rounded-full">
                     <span className="font-bold">Edit</span>
                 </Button>
             </Link>
@@ -39,7 +41,11 @@ const HoeroTrip: React.FC<HoeroTripProps> = ({ guide }) => {
                             <h1 className="font-semibold text-3xl">{guide.title}</h1>
                             <div className="flex flex-wrap gap-2">
                                 {
-                                    guide?.tags?.map((tag: string) => <Tag style={{ borderRadius: '12px' }} color="blue" key={tag}>{tag}</Tag>)
+                                    guide?.tags?.map((tag: string) => (
+                                        <Badge key={tag} variant="secondary" className="rounded-xl bg-blue-500 text-white">
+                                            {tag}
+                                        </Badge>
+                                    ))
                                 }
                             </div>
                         </div>
@@ -50,7 +56,10 @@ const HoeroTrip: React.FC<HoeroTripProps> = ({ guide }) => {
             <div className="p-6">
                 <div className="flex justify-between">
                     <div className="flex gap-4">
-                        <Avatar src={guide.owner.photoUrl} size={48} />
+                        <Avatar className="h-12 w-12">
+                            <AvatarImage src={guide.owner.photoUrl} alt={guide.owner.name} />
+                            <AvatarFallback><User className="h-6 w-6" /></AvatarFallback>
+                        </Avatar>
                         <div className="flex flex-col">
                             <span className="font-semibold text-xl">{guide.owner.name}</span>
                             <div>{formatDate(guide.createdAt)}</div>
@@ -58,17 +67,25 @@ const HoeroTrip: React.FC<HoeroTripProps> = ({ guide }) => {
                     </div>
                     <div className="flex items-center justify-end gap-2">
 
-                        <Button shape="round" size="large" danger type="primary" style={{ width: 120 }}>
+                        <Button variant="destructive" size="lg" className="rounded-full w-[120px]">
                             <span className="font-bold">Follow</span>
                         </Button>
 
-                        <Button icon={<LuHeart size={24} />} shape="circle" size="large" type="text" />
+                        <Button variant="ghost" size="icon" className="rounded-full h-12 w-12">
+                            <Heart size={24} />
+                        </Button>
                         <span>{guide.reactionsCount || 0}</span>
-                        <Button icon={<LuEye size={24} />} shape="circle" size="large" type="text" />
+                        <Button variant="ghost" size="icon" className="rounded-full h-12 w-12">
+                            <Eye size={24} />
+                        </Button>
                         <span>{guide.viewCount || 0}</span>
-                        <Button icon={<LuMessageSquare size={24} />} shape="circle" size="large" type="text" />
+                        <Button variant="ghost" size="icon" className="rounded-full h-12 w-12">
+                            <MessageSquare size={24} />
+                        </Button>
                         <span>{0}</span>
-                        <Button icon={<LuSend size={24} />} shape="circle" size="large" type="text" />
+                        <Button variant="ghost" size="icon" className="rounded-full h-12 w-12">
+                            <Send size={24} />
+                        </Button>
 
                     </div>
                 </div>

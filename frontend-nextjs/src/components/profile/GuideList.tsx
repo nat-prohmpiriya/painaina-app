@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useTrips } from '@/hooks/useTripQueries'
 import CreateGuideModal from '../guide/CreateGuideModal'
 import GuideCard from '../guide/GuideCard'
-import { Spin } from 'antd'
+import { Spinner } from '@/components/ui/spinner'
 import { useTranslations } from 'next-intl'
 
 interface GuideListProps {
@@ -43,7 +43,7 @@ const GuideList = ({ userId, isOwnProfile }: GuideListProps) => {
                     <CreateGuideModal />
                 </div>
                 <div className='mt-4 flex justify-center py-8'>
-                    <Spin size="large" />
+                    <Spinner size="lg" />
                     <p className="ml-2 text-gray-500">{t('loading.auth')}</p>
                 </div>
             </div>
@@ -77,7 +77,7 @@ const GuideList = ({ userId, isOwnProfile }: GuideListProps) => {
                     <CreateGuideModal />
                 </div>
                 <div className='mt-4 flex justify-center py-8'>
-                    <Spin size="large" />
+                    <Spinner size="lg" />
                 </div>
             </div>
         )

@@ -1,6 +1,33 @@
 'use client'
 
-import { AutoComplete, Button, Checkbox, Input, Tooltip, Select } from "antd"
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/ui/command'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
 import { LuListTodo, LuMapPin, LuStickyNote, LuChefHat, LuBed, LuCamera, LuShoppingBag, LuPartyPopper, LuCar, LuBuilding2, LuFuel } from "react-icons/lu";
 import SmallPlaceCard from "./SmallPlaceCard";
 import { useTripContext } from '@/contexts/TripContext'
@@ -31,6 +58,7 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
     const [placeOptions, setPlaceOptions] = useState<PlaceOption[]>([])
     const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
     const [selectedPlaceTypes, setSelectedPlaceTypes] = useState<string[]>([])
+    const [openAutocomplete, setOpenAutocomplete] = useState(false)
 
     // Use placeService instead of Convex
     const { placeService } = require('@/services')
@@ -243,68 +271,87 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
         <div className="w-full p-2">
             {/* Mobile Layout */}
             <div className="flex flex-col gap-3 md:hidden">
-                <Select
-                    mode="multiple"
-                    placeholder="Select place types (all types...)"
-                    options={placeTypes.map(type => ({
-                        value: type.value,
-                        label: (
-                            <div className="flex items-center">
-                                {type.icon}
-                                {type.label}
-                            </div>
-                        )
-                    }))}
-                    value={selectedPlaceTypes}
-                    onChange={handlePlaceTypeChange}
-                    style={{ width: '100%' }}
-                    maxTagCount="responsive"
-                    size="large"
-                    allowClear
-                />
+                {/* Note: For simplicity, using simple text instead of multiselect on mobile */}
+                <div className="text-sm text-gray-600">
+                    {selectedPlaceTypes.length > 0
+                        ? `Filtering: ${placeTypes.filter(t => selectedPlaceTypes.includes(t.value)).map(t => t.label).join(', ')}`
+                        : 'All place types'}
+                </div>
                 <div className="flex gap-2">
-                    <AutoComplete
-                        className="flex-1"
-                        options={placeOptions}
-                        value={searchText}
-                        onChange={handlePlaceSearch}
-                        onSelect={handlePlaceSelect}
-                        onKeyDown={handleKeyDown}
-                        allowClear
-                        filterOption={false}
-                        notFoundContent={isLoading ? "Searching..." : "No places found"}
-                    >
-                        <Input
-                            prefix={<LuMapPin className="text-xl text-gray-400" />}
-                            placeholder="Search for places (e.g., restaur..."
-                            size="large"
-                            disabled={isCreating}
-                        />
-                    </AutoComplete>
-                    <Tooltip title="Create Todo List">
-                        <Button
-                            size="large"
-                            icon={<LuListTodo className="text-xl font-bold" />}
-                            shape="circle"
-                            color="default"
-                            variant="outlined"
-                            onClick={handleCreateTodoList}
-                            loading={isCreating}
-                            disabled={isCreating}
-                        />
-                    </Tooltip>
-                    <Tooltip title="Create Note">
-                        <Button
-                            size="large"
-                            icon={<LuStickyNote className="text-xl font-bold" />}
-                            shape="circle"
-                            color="default"
-                            variant="outlined"
-                            onClick={handleCreateNote}
-                            loading={isCreating}
-                            disabled={isCreating}
-                        />
-                    </Tooltip>
+                    <Popover open={openAutocomplete} onOpenChange={setOpenAutocomplete}>
+                        <PopoverTrigger asChild>
+                            <div className="flex-1 relative">
+                                <Input
+                                    value={searchText}
+                                    onChange={(e) => {
+                                        setSearchText(e.target.value)
+                                        handlePlaceSearch(e.target.value)
+                                        setOpenAutocomplete(true)
+                                    }}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Search for places (e.g., restaur..."
+                                    className="pl-10"
+                                    disabled={isCreating}
+                                />
+                                <LuMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-xl text-gray-400" />
+                            </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                            <Command>
+                                <CommandList>
+                                    <CommandEmpty>
+                                        {isLoading ? "Searching..." : "No places found"}
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                        {placeOptions.map((option) => (
+                                            <CommandItem
+                                                key={option.place.placeId}
+                                                value={option.value}
+                                                onSelect={() => {
+                                                    handlePlaceSelect(option.value, option)
+                                                    setOpenAutocomplete(false)
+                                                }}
+                                            >
+                                                {option.label}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="lg"
+                                    variant="outline"
+                                    onClick={handleCreateTodoList}
+                                    disabled={isCreating}
+                                    className="h-10 w-10 p-0 rounded-full"
+                                >
+                                    <LuListTodo className="text-xl font-bold" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Create Todo List</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="lg"
+                                    variant="outline"
+                                    onClick={handleCreateNote}
+                                    disabled={isCreating}
+                                    className="h-10 w-10 p-0 rounded-full"
+                                >
+                                    <LuStickyNote className="text-xl font-bold" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Create Note</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </div>
 
@@ -313,77 +360,91 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
                 <div className="col-span-2"></div>
                 <div className="col-span-12">
                     <div className="mb-2">
-                        <Select
-                            mode="multiple"
-                            placeholder="Select place types (all types if none selected)"
-                            options={placeTypes.map(type => ({
-                                value: type.value,
-                                label: (
-                                    <div className="flex items-center">
-                                        {type.icon}
-                                        {type.label}
-                                    </div>
-                                )
-                            }))}
-                            value={selectedPlaceTypes}
-                            onChange={handlePlaceTypeChange}
-                            style={{ width: '100%', }}
-                            maxTagCount="responsive"
-                            size="large"
-                            allowClear
-                        />
+                        <div className="text-sm text-gray-600">
+                            {selectedPlaceTypes.length > 0
+                                ? `Filtering: ${placeTypes.filter(t => selectedPlaceTypes.includes(t.value)).map(t => t.label).join(', ')}`
+                                : 'All place types'}
+                        </div>
                     </div>
-                    <AutoComplete
-                        className="w-full"
-                        options={placeOptions}
-                        value={searchText}
-                        onChange={handlePlaceSearch}
-                        onSelect={handlePlaceSelect}
-                        onKeyDown={handleKeyDown}
-                        allowClear
-                        filterOption={false}
-                        notFoundContent={isLoading ? "Searching..." : "No places found"}
-                    >
-                        <Input
-                            prefix={<LuMapPin className="text-xl text-gray-400" />}
-                            placeholder={selectedPlaceTypes.length > 0
-                                ? `Search ${placeTypes.filter(t => selectedPlaceTypes.includes(t.value)).map(t => t.label).join(', ')}`
-                                : "Search for places (e.g., restaurants, hotels, attractions)"
-                            }
-                            size="large"
-                            disabled={isCreating}
-                        />
-                    </AutoComplete>
+                    <Popover open={openAutocomplete} onOpenChange={setOpenAutocomplete}>
+                        <PopoverTrigger asChild>
+                            <div className="w-full relative">
+                                <Input
+                                    value={searchText}
+                                    onChange={(e) => {
+                                        setSearchText(e.target.value)
+                                        handlePlaceSearch(e.target.value)
+                                        setOpenAutocomplete(true)
+                                    }}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder={selectedPlaceTypes.length > 0
+                                        ? `Search ${placeTypes.filter(t => selectedPlaceTypes.includes(t.value)).map(t => t.label).join(', ')}`
+                                        : "Search for places (e.g., restaurants, hotels, attractions)"
+                                    }
+                                    className="pl-10"
+                                    disabled={isCreating}
+                                />
+                                <LuMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-xl text-gray-400" />
+                            </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                            <Command>
+                                <CommandList>
+                                    <CommandEmpty>
+                                        {isLoading ? "Searching..." : "No places found"}
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                        {placeOptions.map((option) => (
+                                            <CommandItem
+                                                key={option.place.placeId}
+                                                value={option.value}
+                                                onSelect={() => {
+                                                    handlePlaceSelect(option.value, option)
+                                                    setOpenAutocomplete(false)
+                                                }}
+                                            >
+                                                {option.label}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
                 </div>
                 <div className="col-span-3 flex gap-2 pt-12">
-                    <Tooltip title="Create Todo List">
-                        <Button
-                            size="large"
-                            icon={<LuListTodo className="text-xl font-bold" />}
-                            shape="circle"
-                            color="default"
-                            variant="outlined"
-                            className="col-span-1"
-                            onClick={handleCreateTodoList}
-                            loading={isCreating}
-                            disabled={isCreating}
-                            title="Create Todo List"
-                        />
-                    </Tooltip>
-                    <Tooltip title="Create Note">
-                        <Button
-                            size="large"
-                            icon={<LuStickyNote className="text-xl font-bold" />}
-                            shape="circle"
-                            color="default"
-                            variant="outlined"
-                            className="col-span-1"
-                            onClick={handleCreateNote}
-                            loading={isCreating}
-                            disabled={isCreating}
-                            title="Create Note"
-                        />
-                    </Tooltip>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="lg"
+                                    variant="outline"
+                                    onClick={handleCreateTodoList}
+                                    disabled={isCreating}
+                                    className="h-10 w-10 p-0 rounded-full"
+                                >
+                                    <LuListTodo className="text-xl font-bold" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Create Todo List</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="lg"
+                                    variant="outline"
+                                    onClick={handleCreateNote}
+                                    disabled={isCreating}
+                                    className="h-10 w-10 p-0 rounded-full"
+                                >
+                                    <LuStickyNote className="text-xl font-bold" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Create Note</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </div>
             <div className="hidden md:grid grid-cols-17">

@@ -1,14 +1,24 @@
 'use client'
 
 import { useState, useCallback, useEffect } from "react"
-import { Button, Modal, Form, Input, AutoComplete } from "antd"
-import { LuMapPin, LuPencil } from "react-icons/lu"
+import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { MapPin, Pencil, Search } from "lucide-react"
 import { useToastMessage } from '@/contexts/ToastMessageContext'
 import { placeService, unsplashService } from '@/services'
 import { useCreateTrip } from '@/hooks/useTripQueries'
 import type { PlaceOption } from '@/interfaces'
-
-const { TextArea } = Input
+import { useForm } from "react-hook-form"
 
 // Convert Google types to human-readable label
 const getPlaceTypeLabel = (types: string[]): string => {
@@ -32,12 +42,16 @@ interface CreateGuideModalProps {
 const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
     const createTripMutation = useCreateTrip()
     const [isOpen, setIsOpen] = useState(false)
-    const [form] = Form.useForm()
     const [selectedPlace, setSelectedPlace] = useState<PlaceOption['place'] | null>(null)
     const [placeOptions, setPlaceOptions] = useState<PlaceOption[]>([])
     const [searchText, setSearchText] = useState("")
     const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
+    const [showPlacePopover, setShowPlacePopover] = useState(false)
     const { showSuccess, showError } = useToastMessage()
+    const { register, handleSubmit: handleFormSubmit, formState: { errors }, reset } = useForm<{
+        title: string
+        description?: string
+    }>()
 
     // Cleanup timeout on component unmount
     useEffect(() => {
@@ -125,7 +139,7 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
         setSearchTimeout(newTimeout)
     }, [searchPlaces, searchTimeout])
 
-    const handlePlaceSelect = async (value: string, option: PlaceOption) => {
+    const handlePlaceSelect = async (option: PlaceOption) => {
         try {
             let placeData = option.place
 
@@ -165,6 +179,7 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
 
             setSelectedPlace(place)
             setSearchText(place.name)
+            setShowPlacePopover(false)
         } catch (error) {
             console.error('Error getting place photo:', error)
             // Fallback to original place data without cover photo
@@ -173,6 +188,7 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
                 coverPhoto: '/default-trip-cover.jpg'
             })
             setSearchText(option.place.name)
+            setShowPlacePopover(false)
         }
     }
 
@@ -214,7 +230,7 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
             showSuccess('Guide created successfully!')
 
             // Reset form and close modal
-            form.resetFields()
+            reset()
             setSelectedPlace(null)
             setSearchText("")
             setPlaceOptions([])
@@ -227,59 +243,65 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
         }
     }
 
-    const openModal = () => {
-        setIsOpen(true)
-        form.resetFields()
+    const handleClose = () => {
+        setIsOpen(false)
+        reset()
         setSelectedPlace(null)
         setSearchText("")
         setPlaceOptions([])
     }
 
     return (
-        <>
-            <Button
-                shape="round"
-                color="blue"
-                variant="solid"
-                onClick={openModal}
-            >
-                <span className="text-lg font-semibold">+</span>
-                <span className="font-semibold">Create New Guide</span>
-            </Button>
-
-            <Modal
-                title="Create New Guide"
-                open={isOpen}
-                onCancel={() => {
-                    setIsOpen(false)
-                    form.resetFields()
-                    setSelectedPlace(null)
-                    setSearchText("")
-                    setPlaceOptions([])
-                }}
-                footer={null}
-                width={600}
-            >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handleSubmit}
-                    className="mt-6"
-                >
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button className="rounded-full">
+                    <span className="text-lg font-semibold mr-1">+</span>
+                    <span className="font-semibold">Create New Guide</span>
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>Create New Guide</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleFormSubmit(handleSubmit)} className="space-y-6 mt-4">
                     {/* Destination Search */}
-                    <Form.Item
-                        label={<span className="font-semibold">Where are you going?</span>}
-                        required
-                    >
-                        <AutoComplete
-                            value={searchText}
-                            options={placeOptions}
-                            onSearch={handlePlaceSearch}
-                            onSelect={handlePlaceSelect}
-
-                        >
-                            <Input.Search prefix={<LuMapPin className="text-xl text-gray-400" />} size="large" placeholder="Search for a destination..." enterButton allowClear />
-                        </AutoComplete>
+                    <div className="space-y-2">
+                        <label className="font-semibold">
+                            Where are you going? <span className="text-red-500">*</span>
+                        </label>
+                        <Popover open={showPlacePopover} onOpenChange={setShowPlacePopover}>
+                            <PopoverTrigger asChild>
+                                <div className="relative">
+                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <Input
+                                        placeholder="Search for a destination..."
+                                        value={searchText}
+                                        onChange={(e) => {
+                                            setSearchText(e.target.value)
+                                            handlePlaceSearch(e.target.value)
+                                            setShowPlacePopover(true)
+                                        }}
+                                        className="pl-10 h-12"
+                                    />
+                                </div>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[500px] p-0" align="start">
+                                <Command>
+                                    <CommandEmpty>No places found.</CommandEmpty>
+                                    <CommandGroup>
+                                        {placeOptions.map((option) => (
+                                            <CommandItem
+                                                key={option.value}
+                                                onSelect={() => handlePlaceSelect(option)}
+                                                className="cursor-pointer"
+                                            >
+                                                {option.label}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
 
                         {selectedPlace && (
                             <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
@@ -292,7 +314,7 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
                                         />
                                     )}
                                     <div className="flex items-center gap-2 flex-1">
-                                        <LuMapPin className="text-blue-600" />
+                                        <MapPin className="text-blue-600" />
                                         <div>
                                             <div className="font-medium text-blue-900">
                                                 {selectedPlace.name}
@@ -305,62 +327,62 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
                                 </div>
                             </div>
                         )}
-                    </Form.Item>
+                    </div>
 
                     {/* Guide Title */}
-                    <Form.Item
-                        label={<span className="font-semibold">Guide Title</span>}
-                        name="title"
-                        rules={[
-                            { required: true, message: 'Please enter guide title' },
-                            { min: 3, message: 'Title must be at least 3 characters' }
-                        ]}
-                    >
-                        <Input
-                            allowClear
-                            prefix={<LuPencil className="text-xl text-gray-400" />}
-                            placeholder="Give your guide a name"
-                            size="large"
-                        />
-                    </Form.Item>
+                    <div className="space-y-2">
+                        <label className="font-semibold">
+                            Guide Title <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                            <Pencil className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            <Input
+                                {...register("title", {
+                                    required: "Please enter guide title",
+                                    minLength: {
+                                        value: 3,
+                                        message: "Title must be at least 3 characters"
+                                    }
+                                })}
+                                placeholder="Give your guide a name"
+                                className="pl-10 h-12"
+                            />
+                        </div>
+                        {errors.title && (
+                            <p className="text-sm text-red-500">{errors.title.message}</p>
+                        )}
+                    </div>
 
                     {/* Description - Optional */}
-                    <Form.Item
-                        label={<span className="font-semibold">Description (Optional)</span>}
-                        name="description"
-                    >
-                        <TextArea
-                            allowClear
+                    <div className="space-y-2">
+                        <label className="font-semibold">Description (Optional)</label>
+                        <Textarea
+                            {...register("description")}
                             rows={4}
                             placeholder="Tell us about your guide..."
                         />
-                    </Form.Item>
+                    </div>
 
                     <div className="flex gap-3 justify-end mt-8">
                         <Button
-                            shape="round"
-                            onClick={() => {
-                                setIsOpen(false)
-                                form.resetFields()
-                                setSelectedPlace(null)
-                                setSearchText("")
-                                setPlaceOptions([])
-                            }}
+                            type="button"
+                            variant="outline"
+                            onClick={handleClose}
+                            className="rounded-full"
                         >
                             Cancel
                         </Button>
                         <Button
-                            shape="round"
-                            type="primary"
-                            htmlType="submit"
-                            loading={createTripMutation.isPending}
+                            type="submit"
+                            disabled={createTripMutation.isPending}
+                            className="rounded-full"
                         >
-                            Create Guide
+                            {createTripMutation.isPending ? "Creating..." : "Create Guide"}
                         </Button>
                     </div>
-                </Form>
-            </Modal>
-        </>
+                </form>
+            </DialogContent>
+        </Dialog>
     )
 }
 

@@ -1,7 +1,7 @@
 'use client'
 
 import FooterSection from '@/components/home/FooterSection'
-import { Button } from 'antd'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { LuMapPin, LuUsers, LuSparkles, LuCalendarDays, LuBookOpen, LuDownload } from 'react-icons/lu'
 
@@ -81,11 +81,9 @@ const HowItWorksPage = () => {
                         </p>
                         <Link href='/guides'>
                             <Button
-                                type='primary'
-                                danger
-                                size='large'
-                                className='font-semibold'
-                                style={{ height: '50px', paddingInline: '32px' }}
+                                variant="destructive"
+                                size='lg'
+                                className='font-semibold h-[50px] px-8'
                             >
                                 Start Planning
                             </Button>
@@ -154,20 +152,18 @@ const HowItWorksPage = () => {
                     <div className='flex flex-col sm:flex-row gap-4 justify-center'>
                         <Link href='/guides'>
                             <Button
-                                type='primary'
-                                danger
-                                size='large'
-                                className='font-semibold w-full sm:w-auto'
-                                style={{ height: '50px', paddingInline: '32px' }}
+                                variant="destructive"
+                                size='lg'
+                                className='font-semibold w-full sm:w-auto h-[50px] px-8'
                             >
                                 Explore Guides
                             </Button>
                         </Link>
                         <Link href='/trips'>
                             <Button
-                                size='large'
-                                className='font-semibold w-full sm:w-auto'
-                                style={{ height: '50px', paddingInline: '32px' }}
+                                variant="outline"
+                                size='lg'
+                                className='font-semibold w-full sm:w-auto h-[50px] px-8'
                             >
                                 Create a Trip
                             </Button>

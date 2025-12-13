@@ -1,7 +1,7 @@
 'use client'
 
-import { Spin, Card } from 'antd';
-import { LuLoader } from 'react-icons/lu';
+import { Loader2 } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 
 interface AuthLoadingScreenProps {
   message?: string;
@@ -9,27 +9,20 @@ interface AuthLoadingScreenProps {
 
 const AuthLoadingScreen = ({ message = "Loading..." }: AuthLoadingScreenProps) => {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <Card className="text-center p-8">
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="rounded-lg border bg-card p-8 shadow-sm text-center">
         <div className="flex flex-col items-center space-y-4">
-          <Spin
-            indicator={
-              <LuLoader 
-                className="animate-spin text-blue-500" 
-                size={48} 
-              />
-            }
-          />
+          <Spinner size="xl" className="text-primary" />
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               {message}
             </h3>
-            <p className="text-gray-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               Please wait while we load your account...
             </p>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

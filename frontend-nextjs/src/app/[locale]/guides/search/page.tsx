@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Pagination, Spin, Empty } from 'antd'
+import { Pagination } from '@/components/ui/pagination'
+import { Spinner } from '@/components/ui/spinner'
+import { Empty } from '@/components/ui/empty'
 import Image from 'next/image'
 import { useQuery } from '@tanstack/react-query'
 import { guideService, type SearchGuidesQuery } from '@/services/guide.service'
@@ -97,7 +99,7 @@ const GuidesSearch = () => {
                 {/* Loading State */}
                 {isLoading && (
                     <div className='flex justify-center items-center py-20'>
-                        <Spin size='large' />
+                        <Spinner size='lg' />
                     </div>
                 )}
 
@@ -115,11 +117,8 @@ const GuidesSearch = () => {
                 {!isLoading && !error && guides.length === 0 && (
                     <div className='flex justify-center items-center py-20'>
                         <Empty
-                            description={
-                                <span className='text-gray-600'>
-                                    No guides found. Try adjusting your search filters.
-                                </span>
-                            }
+                            type="no-results"
+                            description="No guides found. Try adjusting your search filters."
                         />
                     </div>
                 )}
@@ -203,8 +202,7 @@ const GuidesSearch = () => {
                                 total={total}
                                 pageSize={ITEMS_PER_PAGE}
                                 onChange={handlePageChange}
-                                showSizeChanger={false}
-                                showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} guides`}
+                                showTotal={true}
                             />
                         </div>
                     </>

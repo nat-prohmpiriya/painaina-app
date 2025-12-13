@@ -1,6 +1,7 @@
 'use client'
 
-import { Button, Checkbox, Input } from "antd"
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { LuGripVertical } from "react-icons/lu";
 import { FiTrash2 } from "react-icons/fi";
 import { TodoListEntry as TodoListEntryType } from '@/interfaces/itinerary.interface'
@@ -243,7 +244,7 @@ const TodoListEntry = ({ entry }: TodoListEntryProps) => {
             {/* Add new todo */}
             <div className="flex items-center gap-2 w-full">
                 <div className="flex items-center gap-2 flex-1">
-                    <Checkbox className="text-lg" disabled style={{ scale: 1 }} />
+                    <Checkbox disabled className="text-lg" />
                     <input
                         className="!border-0 !outline-none focus:!outline-none p-1 w-full bg-transparent"
                         placeholder="Add new todo item..."
@@ -256,9 +257,8 @@ const TodoListEntry = ({ entry }: TodoListEntryProps) => {
             <div className="border-t">
                 <Button
                     className="mt-1"
-                    shape="round"
-                    type="text"
-                    size="small"
+                    variant="ghost"
+                    size="sm"
                     onClick={handleAddTodo}
                 >
                     <span className="text-xs font-semibold">{t('addTodo')}</span>
@@ -281,19 +281,20 @@ const TodoListEntry = ({ entry }: TodoListEntryProps) => {
                         <Button
                             {...attributes}
                             {...listeners}
-                            size="small"
-                            shape="circle"
-                            icon={<LuGripVertical className="text-lg cursor-grab active:cursor-grabbing text-gray-400" />}
-                            type="text"
-                        />
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 rounded-full"
+                        >
+                            <LuGripVertical className="text-lg cursor-grab active:cursor-grabbing text-gray-400" />
+                        </Button>
                         <Button
-                            size="small"
-                            shape="circle"
-                            icon={<FiTrash2 className="text-base" />}
-                            type="text"
+                            size="sm"
+                            variant="ghost"
                             onClick={handleDelete}
-                            className="text-red-500 hover:bg-red-50"
-                        />
+                            className="h-8 w-8 p-0 rounded-full text-red-500 hover:bg-red-50 hover:text-red-500"
+                        >
+                            <FiTrash2 className="text-base" />
+                        </Button>
                     </div>
                     {/* Content */}
                     <div className="flex-1">
@@ -308,14 +309,18 @@ const TodoListEntry = ({ entry }: TodoListEntryProps) => {
                     <Button
                         {...attributes}
                         {...listeners}
-                        size="large"
-                        shape="circle"
-                        icon={<LuGripVertical className="text-lg cursor-grab active:cursor-grabbing" />}
-                        type="text"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    />
-                    <Button size="large" shape="circle" type="text" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Checkbox style={{ scale: 1.2 }} />
+                        size="lg"
+                        variant="ghost"
+                        className="h-10 w-10 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                        <LuGripVertical className="text-lg cursor-grab active:cursor-grabbing" />
+                    </Button>
+                    <Button
+                        size="lg"
+                        variant="ghost"
+                        className="h-10 w-10 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                        <Checkbox className="scale-120" />
                     </Button>
                 </div>
                 <div className="col-span-14">
@@ -323,13 +328,13 @@ const TodoListEntry = ({ entry }: TodoListEntryProps) => {
                 </div>
                 <div className="col-span-1">
                     <Button
-                        size="large"
-                        shape="circle"
-                        icon={<FiTrash2 className="text-lg" />}
-                        type="text"
+                        size="lg"
+                        variant="ghost"
                         onClick={handleDelete}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:bg-red-50"
-                    />
+                        className="h-10 w-10 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:bg-red-50 hover:text-red-500"
+                    >
+                        <FiTrash2 className="text-lg" />
+                    </Button>
                 </div>
             </div>
         </div>

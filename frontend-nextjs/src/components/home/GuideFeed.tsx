@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef, useCallback } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { Spin, Empty } from 'antd'
+import { Spinner } from '@/components/ui/spinner'
+import { Empty } from '@/components/ui/empty'
 import { guideService } from '@/services/guide.service'
 import GuideCard from '@/components/guide/GuideCard'
 import { useTranslations } from 'next-intl'
@@ -71,7 +72,7 @@ const GuideFeed = () => {
     if (isLoading) {
         return (
             <div className="min-h-screen flex justify-center items-center py-20">
-                <Spin size="large" />
+                <Spinner size="lg" />
             </div>
         )
     }
@@ -90,7 +91,7 @@ const GuideFeed = () => {
     if (allGuides.length === 0) {
         return (
             <div className="min-h-screen flex justify-center items-center py-20">
-                <Empty description={t('empty.description')} />
+                <Empty description={t('empty.description')} type="no-data" />
             </div>
         )
     }
@@ -115,7 +116,7 @@ const GuideFeed = () => {
 
                 {/* Load More Trigger */}
                 <div ref={loadMoreRef} className="flex justify-center py-8">
-                    {isFetchingNextPage && <Spin size="default" />}
+                    {isFetchingNextPage && <Spinner />}
                     {!hasNextPage && allGuides.length > 0 && (
                         <p className="text-gray-500">{t('endOfList')}</p>
                     )}

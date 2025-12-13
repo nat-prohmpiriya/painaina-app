@@ -1,10 +1,27 @@
 'use client'
 
-import { Modal, Button, Upload, Image, Popconfirm, Row, Col } from 'antd'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { LuCamera, LuTrash2, LuStar, LuUpload } from 'react-icons/lu'
 import { useState, useMemo, useEffect } from 'react'
 import { imgUrl } from '@/lib/imgUrl'
-import type { UploadProps } from 'antd'
+import Image from 'next/image'
 // EntryPhoto type
 type EntryPhoto = {
     storage_id: string;
@@ -86,17 +103,13 @@ const PhotoManageModal = ({
         return photoList // Photos are already filtered by checking url existence
     }, [googlePlacePhoto, photos, photoUrls, imgUrl])
 
-    // Upload configuration
-    const uploadProps: UploadProps = {
-        name: 'photo',
-        multiple: true,
-        accept: 'image/*',
-        showUploadList: false,
-        beforeUpload: async (file) => {
-            // TODO: Implement file upload with fileService
-            showError('Photo upload feature is temporarily disabled')
-            return false // Prevent auto upload
-        },
+    // Upload handler
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files
+        if (!files) return
+
+        // TODO: Implement file upload with fileService
+        showError('Photo upload feature is temporarily disabled')
     }
 
     const handleDeletePhoto = async (photoId: string, storageId?: string) => {
@@ -110,49 +123,49 @@ const PhotoManageModal = ({
     }
 
     return (
-        <Modal
-            title={`Manage Photos - ${entryTitle}`}
-            open={open}
-            onCancel={onClose}
-            width={800}
-            footer={[
-                <Button key="close" onClick={onClose}>
-                    Close
-                </Button>
-            ]}
-        >
-            <div className="space-y-6">
-                {/* Upload Area */}
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors text-center cursor-pointer">
-                    <Upload {...uploadProps}>
-                        <div className="text-center">
-                            <LuUpload className="text-4xl text-gray-400 mb-3 mx-auto" />
-                            <p className="text-lg font-medium text-gray-600 mb-2">Upload New Photos</p>
-                            <p className="text-gray-500">Click or drag photos here to upload</p>
-                            {uploading && (
-                                <div className="mt-3">
-                                    <Button loading>Uploading...</Button>
-                                </div>
-                            )}
-                        </div>
-                    </Upload>
-                </div>
+        <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>{`Manage Photos - ${entryTitle}`}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6">
+                    {/* Upload Area */}
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors text-center cursor-pointer">
+                        <label htmlFor="photo-upload" className="cursor-pointer">
+                            <div className="text-center">
+                                <LuUpload className="text-4xl text-gray-400 mb-3 mx-auto" />
+                                <p className="text-lg font-medium text-gray-600 mb-2">Upload New Photos</p>
+                                <p className="text-gray-500">Click or drag photos here to upload</p>
+                                {uploading && (
+                                    <div className="mt-3">
+                                        <Button disabled>Uploading...</Button>
+                                    </div>
+                                )}
+                            </div>
+                        </label>
+                        <input
+                            id="photo-upload"
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={handleFileUpload}
+                        />
+                    </div>
 
                 {/* Photos Grid */}
                 {allPhotos.length > 0 ? (
                     <div>
                         <h3 className="text-lg font-semibold mb-4">All Photos ({allPhotos.length})</h3>
-                        <Row gutter={[16, 16]}>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             {allPhotos.map((photo, index) => (
-                                <Col key={photo.id} xs={12} sm={8} md={6}>
+                                <div key={photo.id}>
                                     <div className="relative group h-48 rounded-lg overflow-hidden">
                                         <Image
-                                            src={photo.url}
+                                            src={photo.url || imgUrl}
                                             alt={photo.name || `Photo ${index + 1}`}
-                                            width={'100%'}
-                                            height={192}
-                                            style={{ aspectRatio: '1/1', objectFit: 'cover', borderRadius: '0.5rem' }}
-                                            fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+                                            fill
+                                            className="object-cover rounded-lg"
                                             onError={(e) => {
                                                 console.error('Image load error:', photo.url, e);
                                             }}
@@ -164,34 +177,41 @@ const PhotoManageModal = ({
                                                 {/* Set as cover button */}
                                                 {index !== 0 && (
                                                     <Button
-                                                        type="primary"
-                                                        size="small"
-                                                        icon={<LuStar />}
-                                                        className="bg-blue-600 border-blue-600"
+                                                        size="sm"
                                                         onClick={() => handleSetCoverPhoto(photo.id, photo.storage_id)}
                                                     >
+                                                        <LuStar className="mr-1" />
                                                         Cover
                                                     </Button>
                                                 )}
 
                                                 {/* Delete button - only for uploaded photos */}
                                                 {photo.type === 'uploaded' && (
-                                                    <Popconfirm
-                                                        title="Delete Photo"
-                                                        description="Are you sure you want to delete this photo?"
-                                                        onConfirm={() => handleDeletePhoto(photo.id, photo.storage_id)}
-                                                        okText="Delete"
-                                                        cancelText="Cancel"
-                                                        okButtonProps={{ danger: true }}
-                                                    >
-                                                        <Button
-                                                            danger
-                                                            size="small"
-                                                            icon={<LuTrash2 />}
-                                                        >
-                                                            Delete
-                                                        </Button>
-                                                    </Popconfirm>
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button
+                                                                variant="destructive"
+                                                                size="sm"
+                                                            >
+                                                                <LuTrash2 className="mr-1" />
+                                                                Delete
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>Delete Photo</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    Are you sure you want to delete this photo?
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction onClick={() => handleDeletePhoto(photo.id, photo.storage_id)}>
+                                                                    Delete
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
                                                 )}
                                             </div>
                                         </div>
@@ -219,9 +239,9 @@ const PhotoManageModal = ({
                                             </div>
                                         )}
                                     </div>
-                                </Col>
+                                </div>
                             ))}
-                        </Row>
+                        </div>
                     </div>
                 ) : (
                     <div className="text-center py-8">
@@ -230,8 +250,9 @@ const PhotoManageModal = ({
                         <p className="text-gray-400">Upload some photos to get started</p>
                     </div>
                 )}
-            </div>
-        </Modal>
+                </div>
+            </DialogContent>
+        </Dialog>
     )
 }
 

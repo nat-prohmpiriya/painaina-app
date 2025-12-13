@@ -1,6 +1,8 @@
 'use client'
 
-import { Skeleton, Result, Button, Tabs, Card } from 'antd';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
 import { useMemo } from 'react';
@@ -10,7 +12,7 @@ import ProfileInfo from '@/components/profile/ProfileInfo';
 import CheckInSection from '@/components/profile/CheckInSection';
 import TripList from '@/components/profile/TripList';
 import GuideList from '@/components/profile/GuideList';
-import { LuNotebookText, LuCompass } from "react-icons/lu";
+import { NotebookText, Compass, AlertCircle } from "lucide-react";
 import { useTranslations } from 'next-intl';
 
 export default function ProfilePage() {
@@ -22,12 +24,12 @@ export default function ProfilePage() {
     if (!isAuthenticated) {
         return (
             <div className="container mx-auto px-4 py-8">
-                <Result
-                    status="403"
-                    title={t('errors.needSignIn.title')}
-                    subTitle={t('errors.needSignIn.subtitle')}
-                    extra={<Button type="primary" onClick={() => router.push('/')}>{t('errors.needSignIn.button')}</Button>}
-                />
+                <div className="flex flex-col items-center justify-center py-20">
+                    <AlertCircle className="h-16 w-16 text-yellow-500 mb-4" />
+                    <h3 className="text-2xl font-semibold mb-2">{t('errors.needSignIn.title')}</h3>
+                    <p className="text-muted-foreground mb-6 text-center max-w-md">{t('errors.needSignIn.subtitle')}</p>
+                    <Button onClick={() => router.push('/')}>{t('errors.needSignIn.button')}</Button>
+                </div>
             </div>
         );
     }
@@ -64,12 +66,15 @@ const ProfileContent = ({ profileId, currentUser }: ProfileContentProps) => {
     if (currentUser === undefined) {
         return (
             <div className="container mx-auto px-4 py-8">
-                <Card>
-                    <div className="text-center mb-6">
-                        <Skeleton.Avatar active size={120} />
-                        <Skeleton active paragraph={{ rows: 4 }} />
+                <div className="bg-card rounded-lg border p-6">
+                    <div className="text-center mb-6 space-y-4">
+                        <Skeleton className="h-32 w-32 rounded-full mx-auto" />
+                        <Skeleton className="h-4 w-3/4 mx-auto" />
+                        <Skeleton className="h-4 w-1/2 mx-auto" />
+                        <Skeleton className="h-4 w-2/3 mx-auto" />
+                        <Skeleton className="h-4 w-1/2 mx-auto" />
                     </div>
-                </Card>
+                </div>
             </div>
         );
     }
@@ -77,12 +82,12 @@ const ProfileContent = ({ profileId, currentUser }: ProfileContentProps) => {
     if (!currentUser) {
         return (
             <div className="container mx-auto px-4 py-8">
-                <Result
-                    status="404"
-                    title={t('errors.notFound.title')}
-                    subTitle={t('errors.notFound.subtitle')}
-                    extra={<Button type="primary" onClick={() => router.push('/')}>{t('errors.notFound.button')}</Button>}
-                />
+                <div className="flex flex-col items-center justify-center py-20">
+                    <AlertCircle className="h-16 w-16 text-destructive mb-4" />
+                    <h3 className="text-2xl font-semibold mb-2">{t('errors.notFound.title')}</h3>
+                    <p className="text-muted-foreground mb-6 text-center max-w-md">{t('errors.notFound.subtitle')}</p>
+                    <Button onClick={() => router.push('/')}>{t('errors.notFound.button')}</Button>
+                </div>
             </div>
         );
     }
@@ -94,12 +99,15 @@ const ProfileContent = ({ profileId, currentUser }: ProfileContentProps) => {
     if (!isOwnProfile && isLoadingProfile) {
         return (
             <div className="container mx-auto px-4 py-8">
-                <Card>
-                    <div className="text-center mb-6">
-                        <Skeleton.Avatar active size={120} />
-                        <Skeleton active paragraph={{ rows: 4 }} />
+                <div className="bg-card rounded-lg border p-6">
+                    <div className="text-center mb-6 space-y-4">
+                        <Skeleton className="h-32 w-32 rounded-full mx-auto" />
+                        <Skeleton className="h-4 w-3/4 mx-auto" />
+                        <Skeleton className="h-4 w-1/2 mx-auto" />
+                        <Skeleton className="h-4 w-2/3 mx-auto" />
+                        <Skeleton className="h-4 w-1/2 mx-auto" />
                     </div>
-                </Card>
+                </div>
             </div>
         );
     }
@@ -108,33 +116,16 @@ const ProfileContent = ({ profileId, currentUser }: ProfileContentProps) => {
     if (!isOwnProfile && !profileUser) {
         return (
             <div className="container mx-auto px-4 py-8">
-                <Result
-                    status="404"
-                    title={t('errors.profileNotFound.title')}
-                    subTitle={t('errors.profileNotFound.subtitle')}
-                    extra={<Button type="primary" onClick={() => router.push('/')}>{t('errors.profileNotFound.button')}</Button>}
-                />
+                <div className="flex flex-col items-center justify-center py-20">
+                    <AlertCircle className="h-16 w-16 text-destructive mb-4" />
+                    <h3 className="text-2xl font-semibold mb-2">{t('errors.profileNotFound.title')}</h3>
+                    <p className="text-muted-foreground mb-6 text-center max-w-md">{t('errors.profileNotFound.subtitle')}</p>
+                    <Button onClick={() => router.push('/')}>{t('errors.profileNotFound.button')}</Button>
+                </div>
             </div>
         );
     }
 
-    const tabList = [
-        {
-            key: 'Trips',
-            label: <div>
-                <LuNotebookText className='inline mr-1' size={18} />
-                <span className='mr-2 text-sm font-semibold'>{t('tabs.trips')}</span>
-            </div>,
-            children: <TripList userId={profileIdStr} isOwnProfile={isOwnProfile} />,
-        },
-        {
-            key: 'Guides',
-            label: <div>
-                <LuCompass className='inline mr-1' size={18} /><span className='mr-2 text-sm font-semibold'>{t('tabs.guides')}</span>
-            </div>,
-            children: <GuideList userId={profileIdStr} isOwnProfile={isOwnProfile} />,
-        },
-    ];
     return (
         <div className='container mx-auto p-4'>
             {/* Responsive Grid: 1 col mobile, 7 cols desktop (2+5) */}
@@ -146,7 +137,24 @@ const ProfileContent = ({ profileId, currentUser }: ProfileContentProps) => {
                 {/* Content - Full width mobile, 5 cols desktop */}
                 <div className='lg:col-span-5'>
                     <CheckInSection />
-                    <Tabs defaultActiveKey="Trips" items={tabList} />
+                    <Tabs defaultValue="trips">
+                        <TabsList>
+                            <TabsTrigger value="trips">
+                                <LuNotebookText className='inline mr-1' size={18} />
+                                <span className='mr-2 text-sm font-semibold'>{t('tabs.trips')}</span>
+                            </TabsTrigger>
+                            <TabsTrigger value="guides">
+                                <LuCompass className='inline mr-1' size={18} />
+                                <span className='mr-2 text-sm font-semibold'>{t('tabs.guides')}</span>
+                            </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="trips">
+                            <TripList userId={profileIdStr} isOwnProfile={isOwnProfile} />
+                        </TabsContent>
+                        <TabsContent value="guides">
+                            <GuideList userId={profileIdStr} isOwnProfile={isOwnProfile} />
+                        </TabsContent>
+                    </Tabs>
                 </div>
             </div>
         </div>
