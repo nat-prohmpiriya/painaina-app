@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
+
+	"backend-go/pkg/otel"
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -20,81 +23,112 @@ func ToJSONString(v interface{}) string {
 }
 
 // TraceLogger provides structured logging with OpenTelemetry integration
+// REFACTORED: Now uses slog instead of span events for proper log/trace separation
 type TraceLogger struct {
-	span trace.Span
-	ctx  context.Context
+	span   trace.Span
+	ctx    context.Context
+	logger *slog.Logger
 }
 
 // NewTraceLogger creates a new TraceLogger instance
 func NewTraceLogger(ctx context.Context, span trace.Span) *TraceLogger {
-	return &TraceLogger{
-		span: span,
-		ctx:  ctx,
-	}
-}
+	// Get context-aware logger with trace correlation
+	logger := otel.L(ctx)
 
-// addContextAttributes automatically injects context attributes (traceID, userID, userRole) into the span
-func (t *TraceLogger) addContextAttributes() {
-	traceID, userID, userRole, err := GetContextValue(t.ctx)
-	if err != nil {
-		// If traceID is missing, we still try to get userID and userRole directly
-		if userIDVal := t.ctx.Value("userID"); userIDVal != nil {
-			if userIDStr, ok := userIDVal.(string); ok {
-				userID = userIDStr
-			} else {
-				userID = "anonymous"
-			}
-		} else {
-			userID = "anonymous"
+	// Add user context if available
+	userID := "anonymous"
+	userRole := "guest"
+
+	if userIDVal := ctx.Value("userID"); userIDVal != nil {
+		if userIDStr, ok := userIDVal.(string); ok && userIDStr != "" {
+			userID = userIDStr
 		}
-
-		if userRoleVal := t.ctx.Value("userRole"); userRoleVal != nil {
-			if userRoleStr, ok := userRoleVal.(string); ok {
-				userRole = userRoleStr
-			} else {
-				userRole = "guest"
-			}
-		} else {
-			userRole = "guest"
-		}
-
-		traceID = "" // Empty string for missing traceID
 	}
 
-	t.span.SetAttributes(
-		attribute.String("traceID", traceID),
-		attribute.String("userID", userID),
-		attribute.String("userRole", userRole),
+	if userRoleVal := ctx.Value("userRole"); userRoleVal != nil {
+		if userRoleStr, ok := userRoleVal.(string); ok && userRoleStr != "" {
+			userRole = userRoleStr
+		}
+	}
+
+	logger = logger.With(
+		slog.String("user_id", userID),
+		slog.String("user_role", userRole),
 	)
+
+	// Set span attributes for trace context
+	span.SetAttributes(
+		attribute.String("user.id", userID),
+		attribute.String("user.role", userRole),
+	)
+
+	return &TraceLogger{
+		span:   span,
+		ctx:    ctx,
+		logger: logger,
+	}
 }
 
-// Input logs input data with context attributes
+// Input logs input data
 func (t *TraceLogger) Input(data interface{}) {
-	t.addContextAttributes()
-	t.span.AddEvent(fmt.Sprintf("input # %s", ToJSONString(data)))
+	t.logger.Info("input", slog.Any("data", data))
+	// Add minimal span attribute for trace debugging
+	t.span.SetAttributes(attribute.String("input.type", fmt.Sprintf("%T", data)))
 }
 
-// Output logs output data with context attributes
+// Output logs output data
 func (t *TraceLogger) Output(data interface{}) {
-	t.addContextAttributes()
-	t.span.AddEvent(fmt.Sprintf("output # %s", ToJSONString(data)))
+	t.logger.Info("output", slog.Any("data", data))
+	// Add minimal span attribute for trace debugging
+	t.span.SetAttributes(attribute.String("output.type", fmt.Sprintf("%T", data)))
 }
 
-// Warn logs warning messages with context attributes
+// Warn logs warning messages
 func (t *TraceLogger) Warn(message string) {
-	t.addContextAttributes()
-	t.span.AddEvent(fmt.Sprintf("warn # %s", message))
+	t.logger.Warn(message)
 }
 
-// Info logs informational messages with context attributes
+// Info logs informational messages
 func (t *TraceLogger) Info(message string) {
-	t.addContextAttributes()
-	t.span.AddEvent(fmt.Sprintf("info # %s", message))
+	t.logger.Info(message)
 }
 
 // Error logs error messages and records the error in the span
 func (t *TraceLogger) Error(err error) {
-	t.addContextAttributes()
+	t.logger.Error("error occurred", slog.String("error", err.Error()))
+	// Still record error in span for trace visibility
 	t.span.RecordError(err)
-	t.span.AddEvent(fmt.Sprintf("error # %s", err.Error()))
+}
+
+// Debug logs debug messages (new method)
+func (t *TraceLogger) Debug(message string, args ...any) {
+	t.logger.Debug(message, args...)
+}
+
+// With returns a logger with additional attributes
+func (t *TraceLogger) With(args ...any) *TraceLogger {
+	return &TraceLogger{
+		span:   t.span,
+		ctx:    t.ctx,
+		logger: t.logger.With(args...),
+	}
+}
+
+// InfoWithData logs info message with structured data
+func (t *TraceLogger) InfoWithData(message string, data interface{}) {
+	t.logger.Info(message, slog.Any("data", data))
+}
+
+// WarnWithData logs warning message with structured data
+func (t *TraceLogger) WarnWithData(message string, data interface{}) {
+	t.logger.Warn(message, slog.Any("data", data))
+}
+
+// ErrorWithData logs error with additional context data
+func (t *TraceLogger) ErrorWithData(err error, data interface{}) {
+	t.logger.Error("error occurred",
+		slog.String("error", err.Error()),
+		slog.Any("context", data),
+	)
+	t.span.RecordError(err)
 }

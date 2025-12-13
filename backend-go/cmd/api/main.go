@@ -31,15 +31,20 @@ func main() {
 	// Set Gin mode
 	gin.SetMode(cfg.Server.GinMode)
 
-	// Initialize OpenTelemetry
-	shutdownTracer, err := otel.InitTracer(cfg)
+	// Initialize OpenTelemetry (traces, metrics, logs)
+	log.Println("Initializing OpenTelemetry...")
+	otelManager, err := otel.NewOtelManager(cfg)
 	if err != nil {
-		log.Printf("⚠️  Failed to initialize tracer: %v", err)
+		log.Printf("⚠️  Failed to initialize OTEL: %v", err)
+	} else {
+		if err := otelManager.Initialize(); err != nil {
+			log.Printf("⚠️  Failed to initialize OTEL providers: %v", err)
+		}
 	}
 	defer func() {
-		if shutdownTracer != nil {
-			if err := shutdownTracer(context.Background()); err != nil {
-				log.Printf("Failed to shutdown tracer: %v", err)
+		if otelManager != nil {
+			if err := otelManager.Shutdown(context.Background()); err != nil {
+				log.Printf("Failed to shutdown OTEL: %v", err)
 			}
 		}
 	}()
@@ -86,6 +91,11 @@ func main() {
 	// Apply middleware
 	router.Use(middleware.CORS(&cfg.CORS))
 	router.Use(middleware.OTelMiddleware(cfg.Server.ServiceName))
+
+	// Add metrics middleware if enabled
+	if otelManager != nil && otelManager.IsMetricsEnabled() {
+		router.Use(middleware.MetricsMiddleware(otelManager.GetMetricsManager()))
+	}
 
 	// Initialize handlers
 	healthHandler := handlers.NewHealthHandler()
@@ -205,9 +215,11 @@ func main() {
 
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.Server.Port)
-	log.Printf("🚀 Server starting on %s", addr)
-	log.Printf("📝 Environment: %s", cfg.Server.Environment)
-	log.Printf("🔍 Tracing: %v (%s)", cfg.OTEL.Enabled, cfg.OTEL.ExporterType)
+	log.Printf("Server starting on %s", addr)
+	log.Printf("Environment: %s", cfg.Server.Environment)
+	log.Printf("Tracing: %v (%s)", cfg.OTEL.Enabled, cfg.OTEL.ExporterType)
+	log.Printf("Metrics: %v", cfg.OTEL.MetricsEnabled)
+	log.Printf("Logging: level=%s, format=%s", cfg.OTEL.LogLevel, cfg.OTEL.LogFormat)
 
 	// Start server in goroutine
 	go func() {

@@ -81,6 +81,14 @@ type OTELConfig struct {
 	// OTLP
 	OTLPEndpoint string
 	OTLPHeaders  string // comma-separated key=value pairs
+
+	// Logging
+	LogLevel       string // "debug", "info", "warn", "error"
+	LogFormat      string // "json", "text"
+	LogOTLPEnabled bool   // Enable OTLP log export
+
+	// Metrics
+	MetricsEnabled bool // Enable metrics collection and export via OTLP
 }
 
 type CORSConfig struct {
@@ -145,6 +153,12 @@ func Load() (*Config, error) {
 			GCPProjectID:   getEnv("OTEL_GCP_PROJECT_ID", ""),
 			OTLPEndpoint:   getEnv("OTEL_OTLP_ENDPOINT", "http://localhost:4318"),
 			OTLPHeaders:    getEnv("OTEL_OTLP_HEADERS", ""),
+			// Logging
+			LogLevel:       getEnv("OTEL_LOG_LEVEL", "info"),
+			LogFormat:      getEnv("OTEL_LOG_FORMAT", "json"),
+			LogOTLPEnabled: getEnvAsBool("OTEL_LOG_OTLP_ENABLED", false),
+			// Metrics
+			MetricsEnabled: getEnvAsBool("OTEL_METRICS_ENABLED", false),
 		},
 		CORS: CORSConfig{
 			AllowedOrigins: getEnvAsSlice("CORS_ALLOWED_ORIGINS", []string{"*"}),
