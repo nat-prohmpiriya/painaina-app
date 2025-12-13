@@ -1,4 +1,148 @@
 {
+  "landing": {
+    "hero": {
+      "title": "ไปไหนดี?",
+      "subtitle": "ดู Guides จากคนที่ไปมาแล้ว",
+      "subtitleHighlight": "Copy มาวางแผนกับเพื่อนได้เลย",
+      "cta": "ดู Guides ทั้งหมด",
+      "ctaSecondary": "สร้างทริปใหม่",
+      "popularDestinations": "จุดหมายยอดนิยม",
+      "guides": "guides"
+    },
+    "destinations": {
+      "chiangMai": "เชียงใหม่",
+      "phuket": "ภูเก็ต",
+      "krabi": "กระบี่",
+      "khaoYai": "เขาใหญ่",
+      "koSamui": "เกาะสมุย",
+      "pattaya": "พัทยา"
+    },
+    "popularGuides": {
+      "tagline": "แรงบันดาลใจสำหรับทริปถัดไป",
+      "title": "Guides ยอดนิยม",
+      "subtitle": "แผนเที่ยวจากคนที่ไปมาแล้ว พร้อมให้คุณ Copy ไปปรับใช้ได้เลย",
+      "viewAll": "ดู Guides ทั้งหมด",
+      "by": "by"
+    },
+    "valueProps": {
+      "title": "PaiNaiNa ช่วยคุณได้",
+      "subtitle": "ครบจบในแอพเดียว ตั้งแต่หาไอเดีย จนถึงแบ่งค่าใช้จ่าย",
+      "usp": "USP",
+      "discover": {
+        "title": "ค้นพบ",
+        "subtitle": "หาแรงบันดาลใจ",
+        "description": "Browse Guides จากคนที่ไปมาแล้ว ดูว่าเค้าไปไหน กินอะไร พักที่ไหน ไม่ต้องเริ่มจากศูนย์"
+      },
+      "plan": {
+        "title": "วางแผน",
+        "subtitle": "Copy แล้วแก้ไข",
+        "description": "เจอ Guide ที่ชอบ? กดปุ่มเดียว Copy มาเป็นทริปของคุณ แก้ไขได้ตามใจ ชวนเพื่อนมาวางแผนด้วยกัน"
+      },
+      "split": {
+        "title": "แบ่งจ่าย",
+        "subtitle": "หารอัตโนมัติ",
+        "description": "บันทึกค่าใช้จ่ายระหว่างทริป ระบบคำนวณให้เลยว่าใครต้องโอนใครเท่าไหร่ ไม่ต้องนั่งเปิด Excel คิดเงินกันอีก"
+      }
+    },
+    "howItWorks": {
+      "title": "ใช้งานง่ายใน 4 ขั้นตอน",
+      "subtitle": "จากแรงบันดาลใจ สู่ทริปจริง ภายในไม่กี่นาที",
+      "step": "ขั้นตอนที่",
+      "prev": "ก่อนหน้า",
+      "next": "ถัดไป",
+      "steps": {
+        "search": {
+          "title": "ค้นหา Guide ที่ใช่",
+          "description": "Browse guides ตาม destination ที่อยากไป หรือ search ตาม keyword ที่สนใจ เช่น \"เขาใหญ่ คาเฟ่\" หรือ \"ภูเก็ต 3 วัน\"",
+          "previewTitle": "Guide Discovery",
+          "previewSubtitle": "ค้นหาจาก 50+ Guides"
+        },
+        "copy": {
+          "title": "Copy มาเป็นของคุณ",
+          "description": "เจอ Guide ที่ชอบ? กดปุ่ม \"ใช้แผนนี้\" ระบบจะ Copy ทั้ง itinerary มาเป็น Trip ของคุณ พร้อมแก้ไขได้ตามใจ",
+          "previewTitle": "Copy to Trip",
+          "previewSubtitle": "กดปุ่มเดียว พร้อมใช้",
+          "items": ["✓ Copy ทุก Day", "✓ Copy ทุกสถานที่", "✓ แก้ไขได้เลย"]
+        },
+        "collaborate": {
+          "title": "ชวนเพื่อนมาวางแผน",
+          "description": "Share link ให้เพื่อนเข้ามาดู/แก้ไขด้วยกัน เห็นการเปลี่ยนแปลงแบบ Realtime ไม่ต้องส่งไฟล์ไปมาให้วุ่นวาย",
+          "previewTitle": "Collaboration",
+          "previewSubtitle": "วางแผนด้วยกัน Realtime",
+          "invite": "+ เชิญเพิ่ม"
+        },
+        "travel": {
+          "title": "ไปเที่ยว + หารค่าใช้จ่าย",
+          "description": "ใช้แอพดูแผนระหว่างทริป บันทึกค่าใช้จ่าย กดปุ่มเดียวรู้เลยใครต้องโอนใคร จบทริปไม่ต้องนั่งคิดเงิน",
+          "previewTitle": "Expense Summary",
+          "previewSubtitle": "รู้เลยใครต้องโอนใคร"
+        }
+      }
+    },
+    "features": {
+      "title": "ฟีเจอร์ที่จะทำให้ชีวิตง่ายขึ้น",
+      "subtitle": "ทุกอย่างที่คุณต้องการสำหรับวางแผนทริปกับเพื่อน",
+      "preview": "Feature Preview",
+      "list": {
+        "itinerary": {
+          "title": "วางแผน Itinerary รายวัน",
+          "description": "จัดแผนทริปเป็นวันๆ ใส่สถานที่ เวลา หมายเหตุ Drag & drop จัดลำดับได้ตามใจ ดูบน Map ว่าไปไหนบ้าง"
+        },
+        "places": {
+          "title": "ค้นหาสถานที่จาก Google",
+          "description": "Search ชื่อร้าน ชื่อที่เที่ยว เห็น rating, review, รูปภาพ, เวลาเปิด-ปิด เพิ่มลง itinerary ได้เลย"
+        },
+        "realtime": {
+          "title": "วางแผนกับเพื่อนแบบ Realtime",
+          "description": "Share link เชิญเพื่อนเข้ามาดู/แก้ไข เห็นการเปลี่ยนแปลงทันที ไม่ต้อง refresh ได้รับ notification เมื่อมีคนแก้ไข"
+        },
+        "expense": {
+          "title": "หารค่าใช้จ่ายอัตโนมัติ",
+          "description": "บันทึกว่าใครจ่ายอะไรไป เท่าไหร่ เลือกแบ่งแบบเท่าๆ กัน หรือกำหนดเอง ระบบคำนวณให้เลยว่าใครต้องโอนใครเท่าไหร่"
+        },
+        "guides": {
+          "title": "หาแรงบันดาลใจจาก Guides",
+          "description": "ดู Guides ที่คนอื่นแชร์ Filter ตาม destination, ความยากง่าย Bookmark เก็บไว้ดูทีหลัง"
+        },
+        "copy": {
+          "title": "Copy Guide มาใช้ได้เลย",
+          "description": "เจอ Guide ที่ชอบ? กดปุ่มเดียว Copy ทั้ง itinerary มาเป็น Trip ของคุณ แก้ไข ปรับเปลี่ยน เพิ่มเติมได้ตามใจ"
+        }
+      }
+    },
+    "cta": {
+      "title": "พร้อมวางแผนทริปถัดไป",
+      "titleHighlight": "แล้วหรือยัง?",
+      "subtitle": "เริ่มต้นใช้งานได้เลยวันนี้ ไม่มีข้อผูกมัด",
+      "button": "เริ่มต้นใช้งานฟรี",
+      "note": "ใช้เวลาไม่ถึง 1 นาที ในการสมัคร",
+      "benefits": {
+        "free": "ฟรีตลอดกาล",
+        "noCard": "ไม่ต้องใช้บัตรเครดิต",
+        "noAds": "ไม่มีโฆษณา",
+        "noHidden": "ไม่มีค่าใช้จ่ายแอบแฝง"
+      }
+    },
+    "footer": {
+      "brand": "ไปไหนนะ",
+      "tagline": "Your trip companion from inspiration to adventure.",
+      "taglineTh": "วางแผนเที่ยวง่ายๆ ตั้งแต่หาไอเดีย จนถึงแบ่งค่าใช้จ่าย",
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal",
+      "links": {
+        "guides": "Guides",
+        "features": "Features",
+        "howItWorks": "How It Works",
+        "about": "About Us",
+        "contact": "Contact",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy"
+      },
+      "location": "Bangkok, Thailand",
+      "copyright": "PaiNaiNa. Made with ❤️ in Bangkok"
+    }
+  },
   "home": {
     "hero": {
       "title": "แอปเดียวสำหรับทุกความต้องการในการวางแผนการท่องเที่ยว",

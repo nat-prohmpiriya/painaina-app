@@ -1,4 +1,148 @@
 {
+  "landing": {
+    "hero": {
+      "title": "Where to go?",
+      "subtitle": "Browse guides from travelers who've been there",
+      "subtitleHighlight": "Copy and plan with friends instantly",
+      "cta": "Browse All Guides",
+      "ctaSecondary": "Create New Trip",
+      "popularDestinations": "Popular Destinations",
+      "guides": "guides"
+    },
+    "destinations": {
+      "chiangMai": "Chiang Mai",
+      "phuket": "Phuket",
+      "krabi": "Krabi",
+      "khaoYai": "Khao Yai",
+      "koSamui": "Koh Samui",
+      "pattaya": "Pattaya"
+    },
+    "popularGuides": {
+      "tagline": "Inspiration for your next trip",
+      "title": "Popular Guides",
+      "subtitle": "Travel plans from people who've been there, ready for you to copy and customize",
+      "viewAll": "View All Guides",
+      "by": "by"
+    },
+    "valueProps": {
+      "title": "PaiNaiNa helps you",
+      "subtitle": "All-in-one app from finding ideas to splitting expenses",
+      "usp": "USP",
+      "discover": {
+        "title": "Discover",
+        "subtitle": "Find inspiration",
+        "description": "Browse guides from travelers who've been there. See where they went, what they ate, where they stayed. No need to start from scratch"
+      },
+      "plan": {
+        "title": "Plan",
+        "subtitle": "Copy & customize",
+        "description": "Found a guide you like? One click to copy it as your trip. Edit as you wish, invite friends to plan together"
+      },
+      "split": {
+        "title": "Split",
+        "subtitle": "Auto calculate",
+        "description": "Record expenses during the trip. System calculates who owes whom automatically. No more Excel spreadsheets"
+      }
+    },
+    "howItWorks": {
+      "title": "Easy to use in 4 steps",
+      "subtitle": "From inspiration to real trip in minutes",
+      "step": "Step",
+      "prev": "Previous",
+      "next": "Next",
+      "steps": {
+        "search": {
+          "title": "Find the right Guide",
+          "description": "Browse guides by destination or search by keywords like \"Khao Yai cafe\" or \"Phuket 3 days\"",
+          "previewTitle": "Guide Discovery",
+          "previewSubtitle": "Search from 50+ Guides"
+        },
+        "copy": {
+          "title": "Copy to your Trip",
+          "description": "Found a guide you like? Click \"Use this plan\" and the entire itinerary becomes your Trip, ready to edit",
+          "previewTitle": "Copy to Trip",
+          "previewSubtitle": "One click, ready to use",
+          "items": ["✓ Copy all days", "✓ Copy all places", "✓ Edit instantly"]
+        },
+        "collaborate": {
+          "title": "Invite friends to plan",
+          "description": "Share link with friends to view/edit together. See changes in realtime. No more sending files back and forth",
+          "previewTitle": "Collaboration",
+          "previewSubtitle": "Plan together in realtime",
+          "invite": "+ Invite more"
+        },
+        "travel": {
+          "title": "Travel + Split expenses",
+          "description": "Use the app to view plans during the trip. Record expenses, one click to see who owes whom. No more calculating after the trip",
+          "previewTitle": "Expense Summary",
+          "previewSubtitle": "See who owes whom"
+        }
+      }
+    },
+    "features": {
+      "title": "Features that make life easier",
+      "subtitle": "Everything you need to plan trips with friends",
+      "preview": "Feature Preview",
+      "list": {
+        "itinerary": {
+          "title": "Daily Itinerary Planning",
+          "description": "Organize your trip day by day. Add places, times, notes. Drag & drop to reorder. View on map"
+        },
+        "places": {
+          "title": "Search places from Google",
+          "description": "Search restaurants, attractions. See ratings, reviews, photos, opening hours. Add to itinerary instantly"
+        },
+        "realtime": {
+          "title": "Plan with friends in Realtime",
+          "description": "Share link to invite friends to view/edit. See changes instantly, no refresh needed. Get notified when someone edits"
+        },
+        "expense": {
+          "title": "Auto expense splitting",
+          "description": "Record who paid what, how much. Split equally or customize. System calculates who owes whom automatically"
+        },
+        "guides": {
+          "title": "Find inspiration from Guides",
+          "description": "Browse guides shared by others. Filter by destination, difficulty. Bookmark for later"
+        },
+        "copy": {
+          "title": "Copy Guide instantly",
+          "description": "Found a guide you like? One click to copy the entire itinerary as your Trip. Edit, adjust, add as you wish"
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to plan your next trip",
+      "titleHighlight": "yet?",
+      "subtitle": "Start using today, no strings attached",
+      "button": "Start for Free",
+      "note": "Takes less than 1 minute to sign up",
+      "benefits": {
+        "free": "Free forever",
+        "noCard": "No credit card required",
+        "noAds": "No ads",
+        "noHidden": "No hidden fees"
+      }
+    },
+    "footer": {
+      "brand": "PaiNaiNa",
+      "tagline": "Your trip companion from inspiration to adventure.",
+      "taglineTh": "Plan trips easily from finding ideas to splitting expenses",
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal",
+      "links": {
+        "guides": "Guides",
+        "features": "Features",
+        "howItWorks": "How It Works",
+        "about": "About Us",
+        "contact": "Contact",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy"
+      },
+      "location": "Bangkok, Thailand",
+      "copyright": "PaiNaiNa. Made with ❤️ in Bangkok"
+    }
+  },
   "home": {
     "hero": {
       "title": "One app for all your travel planning needs",

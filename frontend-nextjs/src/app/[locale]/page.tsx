@@ -1,11 +1,16 @@
 'use client'
 
 import { useAuth } from "@/hooks/useAuth"
-import HeroSection from "@/components/home/HeroSection"
-import FeaturesSection from "@/components/home/FeaturesSection"
-import PopularDestinationSection from "@/components/home/PopularDestinationSection"
-import FooterSection from "@/components/home/FooterSection"
 import GuideFeed from "@/components/home/GuideFeed"
+import {
+  HeroSection,
+  ValuePropsSection,
+  HowItWorksSection,
+  FeaturesSection,
+  PopularGuidesSection,
+  CTASection,
+  FooterSection
+} from "@/components/landing"
 
 const HomePage = () => {
   const { isAuthenticated, isLoading } = useAuth()
@@ -16,11 +21,15 @@ const HomePage = () => {
   }
 
   // Show landing page when not logged in
+  // Destination-first approach: Guides นำ, Features รอง
   return (
     <>
       <HeroSection />
+      <PopularGuidesSection />
+      <ValuePropsSection />
+      <HowItWorksSection />
       <FeaturesSection />
-      <PopularDestinationSection />
+      <CTASection />
       <FooterSection />
     </>
   )

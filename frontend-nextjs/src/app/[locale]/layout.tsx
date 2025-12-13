@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { Bai_Jamjuree } from 'next/font/google';
+import { Sarabun } from 'next/font/google';
 import "../globals.css";
 import AppProvider from "@/providers/AppProvider";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { GoogleAnalytics } from '@next/third-parties/google'
 
-const baiJamjuree = Bai_Jamjuree({
+const sarabun = Sarabun({
   subsets: ['thai', 'latin'],
   weight: ['200', '300', '400', '500', '600', '700'],
-  variable: '--font-bai-jamjuree',
+  variable: '--font-sarabun',
   display: 'swap',
 });
 
@@ -40,7 +40,7 @@ export default async function RootLayout({
   }
   return (
     <html lang={locale}>
-      <body className={`${baiJamjuree.variable} font-sans`}>
+      <body className={`${sarabun.variable} font-sans`}>
         <GoogleAnalytics gaId={GA_ID} />
         <NextIntlClientProvider messages={messages}>
           <AppProvider>
