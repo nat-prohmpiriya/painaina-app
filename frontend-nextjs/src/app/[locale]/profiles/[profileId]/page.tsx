@@ -140,11 +140,11 @@ const ProfileContent = ({ profileId, currentUser }: ProfileContentProps) => {
                     <Tabs defaultValue="trips">
                         <TabsList>
                             <TabsTrigger value="trips">
-                                <LuNotebookText className='inline mr-1' size={18} />
+                                <NotebookText className='inline mr-1' size={18} />
                                 <span className='mr-2 text-sm font-semibold'>{t('tabs.trips')}</span>
                             </TabsTrigger>
                             <TabsTrigger value="guides">
-                                <LuCompass className='inline mr-1' size={18} />
+                                <Compass className='inline mr-1' size={18} />
                                 <span className='mr-2 text-sm font-semibold'>{t('tabs.guides')}</span>
                             </TabsTrigger>
                         </TabsList>

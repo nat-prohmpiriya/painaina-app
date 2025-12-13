@@ -395,7 +395,8 @@
       "notFound": "Guide not found"
     },
     "map": {
-      "loading": "Loading map..."
+      "loading": "Loading map...",
+      "openMap": "Open Map"
     },
     "budget": {
       "title": "Budget & Expenses",
