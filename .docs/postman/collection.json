@@ -1,0 +1,1319 @@
+{
+  "info": {
+    "name": "Trip Planner API",
+    "description": "Complete API collection for Trip Planner backend-go application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{clerk_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": ["{{base_url}}"],
+              "path": [""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get Current User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('user_id', response.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update Current User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"bio\": \"Travel enthusiast and photographer\",\n  \"photoUrl\": \"https://example.com/photo.jpg\",\n  \"settings\": {\n    \"currency\": \"USD\",\n    \"language\": \"en\",\n    \"notifications\": {\n      \"email\": true,\n      \"push\": true\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Delete Current User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "users", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "List Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/users?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "users"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"bio\": \"Updated bio\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "users", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete User (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "users", "{{user_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Trips",
+      "item": [
+        {
+          "name": "Create Trip",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('trip_id', response.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Thailand Adventure 2025\",\n  \"description\": \"Amazing trip to explore Thailand\",\n  \"destination\": \"Bangkok, Thailand\",\n  \"startDate\": \"2025-03-01T00:00:00Z\",\n  \"endDate\": \"2025-03-10T00:00:00Z\",\n  \"budget\": 50000,\n  \"currency\": \"THB\",\n  \"coverPhoto\": \"https://example.com/thailand.jpg\",\n  \"visibility\": \"public\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips"]
+            }
+          }
+        },
+        {
+          "name": "Get Trip",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Trip with Expenses and Itineraries",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}?include=expenses,itineraries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}"],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "expenses,itineraries"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Trips",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips?limit=20&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Trip",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Thailand Adventure 2025 - Updated\",\n  \"description\": \"Updated description\",\n  \"budget\": 60000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Trip",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Expenses",
+      "item": [
+        {
+          "name": "Create Expense",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('expense_id', response._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entryId\": \"{{entry_id}}\",\n  \"amount\": 1500.50,\n  \"currency\": \"THB\",\n  \"category\": \"food\",\n  \"description\": \"Lunch at local restaurant\",\n  \"paidBy\": \"{{user_id}}\",\n  \"splitWith\": [\"{{user_id}}\"],\n  \"date\": \"2025-03-05T12:30:00Z\",\n  \"splitType\": \"equal\",\n  \"splitDetails\": []\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/expenses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "expenses"]
+            }
+          }
+        },
+        {
+          "name": "Get Expenses by Trip",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/expenses?limit=50&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "expenses"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Expense by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/expenses/{{expense_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "expenses", "{{expense_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Total Expenses",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/expenses/total",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "expenses", "total"]
+            }
+          }
+        },
+        {
+          "name": "Get Expenses by Category",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/expenses/category?category=food",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "expenses", "category"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "food"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Expense",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1800.00,\n  \"description\": \"Lunch at local restaurant - Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/expenses/{{expense_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "expenses", "{{expense_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Mark Expense as Settled",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/expenses/{{expense_id}}/settle",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "expenses", "{{expense_id}}", "settle"]
+            }
+          }
+        },
+        {
+          "name": "Delete Expense",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/expenses/{{expense_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "expenses", "{{expense_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Itineraries",
+      "item": [
+        {
+          "name": "Create Itinerary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('itinerary_id', response._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dayNumber\": 1,\n  \"date\": \"2025-03-01T00:00:00Z\",\n  \"title\": \"Day 1: Arrival in Bangkok\",\n  \"order\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries"]
+            }
+          }
+        },
+        {
+          "name": "Get Itineraries by Trip",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries"]
+            }
+          }
+        },
+        {
+          "name": "Get Itinerary by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries/{{itinerary_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries", "{{itinerary_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Itinerary",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Day 1: Arrival in Bangkok - Updated\",\n  \"order\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries/{{itinerary_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries", "{{itinerary_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Itinerary",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries/{{itinerary_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries", "{{itinerary_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Itinerary Entries",
+      "item": [
+        {
+          "name": "Create Entry",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('entry_id', response._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"place\",\n  \"title\": \"Visit Grand Palace\",\n  \"description\": \"Explore the iconic Grand Palace complex\",\n  \"placeId\": \"{{place_id}}\",\n  \"startTime\": \"2025-03-01T09:00:00Z\",\n  \"endTime\": \"2025-03-01T12:00:00Z\",\n  \"order\": 1,\n  \"todos\": [\n    {\n      \"text\": \"Buy entrance tickets\",\n      \"completed\": false\n    },\n    {\n      \"text\": \"Dress appropriately\",\n      \"completed\": false\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries/{{itinerary_id}}/entries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries", "{{itinerary_id}}", "entries"]
+            }
+          }
+        },
+        {
+          "name": "Get Entries by Itinerary",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries/{{itinerary_id}}/entries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries", "{{itinerary_id}}", "entries"]
+            }
+          }
+        },
+        {
+          "name": "Get Entry by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries/{{itinerary_id}}/entries/{{entry_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries", "{{itinerary_id}}", "entries", "{{entry_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Entry",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Visit Grand Palace - Updated\",\n  \"startTime\": \"2025-03-01T10:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries/{{itinerary_id}}/entries/{{entry_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries", "{{itinerary_id}}", "entries", "{{entry_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Todos",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"todos\": [\n    {\n      \"text\": \"Buy entrance tickets\",\n      \"completed\": true\n    },\n    {\n      \"text\": \"Dress appropriately\",\n      \"completed\": true\n    },\n    {\n      \"text\": \"Take photos\",\n      \"completed\": false\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries/{{itinerary_id}}/entries/{{entry_id}}/todos",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries", "{{itinerary_id}}", "entries", "{{entry_id}}", "todos"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Todo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries/{{itinerary_id}}/entries/{{entry_id}}/todos/0/toggle",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries", "{{itinerary_id}}", "entries", "{{entry_id}}", "todos", "0", "toggle"]
+            }
+          }
+        },
+        {
+          "name": "Delete Entry",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/itineraries/{{itinerary_id}}/entries/{{entry_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "itineraries", "{{itinerary_id}}", "entries", "{{entry_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Places",
+      "item": [
+        {
+          "name": "Autocomplete",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places/autocomplete?input=grand palace bangkok",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places", "autocomplete"],
+              "query": [
+                {
+                  "key": "input",
+                  "value": "grand palace bangkok"
+                },
+                {
+                  "key": "types",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Autocomplete City",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places/autocomplete-city?input=bang",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places", "autocomplete-city"],
+              "query": [
+                {
+                  "key": "input",
+                  "value": "bang"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Places",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places/search?query=restaurants in bangkok",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "restaurants in bangkok"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Place Photos",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places/photos?placeId={{place_id}}&maxPhotos=5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places", "photos"],
+              "query": [
+                {
+                  "key": "placeId",
+                  "value": "{{place_id}}"
+                },
+                {
+                  "key": "maxPhotos",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Place Reviews",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places/review?placeId={{place_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places", "review"],
+              "query": [
+                {
+                  "key": "placeId",
+                  "value": "{{place_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Place by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places/{{place_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places", "{{place_id}}"]
+            }
+          }
+        },
+        {
+          "name": "List Places",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places?limit=20&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Place (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('place_id', response.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"googlePlaceId\": \"ChIJrTLr-GyuEmsRBfy61i59si0\",\n  \"name\": \"Sydney Opera House\",\n  \"address\": \"Bennelong Point, Sydney NSW 2000, Australia\",\n  \"latitude\": -33.8567844,\n  \"longitude\": 151.2152967,\n  \"phone\": \"+61 2 9250 7111\",\n  \"website\": \"https://www.sydneyoperahouse.com\",\n  \"categories\": [\"tourist_attraction\", \"landmark\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places"]
+            }
+          }
+        },
+        {
+          "name": "Update Place (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sydney Opera House - Updated\",\n  \"phone\": \"+61 2 9250 7111\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places/{{place_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places", "{{place_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Place (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places/{{place_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places", "{{place_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Unsplash",
+      "item": [
+        {
+          "name": "Search Photos",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/unsplash/search?query=thailand&page=1&perPage=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "unsplash", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "thailand"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Random Photos",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/unsplash/random?query=beach&count=5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "unsplash", "random"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "beach"
+                },
+                {
+                  "key": "count",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Photo by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/unsplash/photos/Dwu85P9SOIk",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "unsplash", "photos", "Dwu85P9SOIk"]
+            }
+          }
+        },
+        {
+          "name": "Trigger Download",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"downloadLocation\": \"https://api.unsplash.com/photos/Dwu85P9SOIk/download?client_id=YOUR_ACCESS_KEY\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/unsplash/download",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "unsplash", "download"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "Upload File",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('file_id', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/files/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "files", "upload"]
+            }
+          }
+        },
+        {
+          "name": "List Files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/files?limit=20&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "files"],
+              "query": [
+                {
+                  "key": "ownerId",
+                  "value": "{{user_id}}",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "image",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get File",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/files/{{file_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "files", "{{file_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/files/{{file_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "files", "{{file_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "Get Trip Comments",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/comments?limit=20&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "comments"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Trip Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('comment_id', response.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is an amazing trip! Can't wait to visit.\",\n  \"photos\": [\n    \"https://example.com/photo1.jpg\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/comments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "comments"]
+            }
+          }
+        },
+        {
+          "name": "Create Comment Reply",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Thanks! Hope you enjoy it.\",\n  \"parentId\": \"{{comment_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/comments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "comments"]
+            }
+          }
+        },
+        {
+          "name": "Update Comment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is an amazing trip! Can't wait to visit. Updated!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/comments/{{comment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "comments", "{{comment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/trips/{{trip_id}}/comments/{{comment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "trips", "{{trip_id}}", "comments", "{{comment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Comment Replies",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/comments/{{comment_id}}/replies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "comments", "{{comment_id}}", "replies"]
+            }
+          }
+        },
+        {
+          "name": "Like Comment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/comments/{{comment_id}}/like",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "comments", "{{comment_id}}", "like"]
+            }
+          }
+        },
+        {
+          "name": "Unlike Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/comments/{{comment_id}}/like",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "comments", "{{comment_id}}", "like"]
+            }
+          }
+        },
+        {
+          "name": "Get Place Comments",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places/{{place_id}}/comments?limit=20&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places", "{{place_id}}", "comments"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Place Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Great place to visit!\",\n  \"photos\": [\n    \"https://example.com/place-photo.jpg\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/places/{{place_id}}/comments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "places", "{{place_id}}", "comments"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "id": "trip-planner-dev-env",
+  "name": "Trip Planner - Development",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "api_version",
+      "value": "v1",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "clerk_token",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "trip_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "expense_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "itinerary_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "entry_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "place_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "file_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "comment_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}

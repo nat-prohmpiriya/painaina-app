@@ -1,0 +1,288 @@
+{
+  "home": {
+    "hero": {
+      "title": "One app for all your travel planning needs",
+      "subtitle": "Create detailed itineraries, explore user-shared guides, and manage your booking seamlessly-all in one place",
+      "cta": "Start planning",
+      "secondaryTitle": "Your itinerary and your map in one view",
+      "secondarySubtitle": "No more switching between different apps, tabs, and tools to keep track of your travel plans."
+    },
+    "guideFeed": {
+      "title": "Explore Travel Guides",
+      "subtitle": "{count, plural, =0 {No guides available} =1 {1 guide available} other {# guides available}}",
+      "error": {
+        "title": "Error loading guides",
+        "description": "Please try again later"
+      },
+      "empty": {
+        "description": "No guides available yet. Check back later!"
+      },
+      "endOfList": "You've reached the end"
+    },
+    "features": {
+      "title": "Features to replace all your other tools",
+      "cta": "Start planning your trip",
+      "list": {
+        "addPlaces": {
+          "title": "Add places from guides with 1 click",
+          "description": "We crawled the web so you don't have to. Easily add mentioned places to your plan"
+        },
+        "collaborate": {
+          "title": "Collaborate with friends in real-time",
+          "description": "Plan together with your travel buddies. See changes instantly and chat within the app"
+        },
+        "autoGenerate": {
+          "title": "Auto-generate day plans",
+          "description": "Let our AI create a full day itinerary for you based on your interests and preferences"
+        },
+        "mapView": {
+          "title": "Interactive map view",
+          "description": "Visualize your entire trip on a map. Drag and drop to rearrange and optimize your route"
+        },
+        "bookingManagement": {
+          "title": "One-click booking management",
+          "description": "Sync all your bookings in one place. Get reminders and updates without switching apps"
+        },
+        "offlineAccess": {
+          "title": "Offline access",
+          "description": "Access your itinerary and maps even without internet. Perfect for traveling abroad"
+        }
+      },
+      "tools": {
+        "collaboration": {
+          "title": "Collaboration",
+          "description": "Work together with your team to plan the perfect trip"
+        },
+        "ai": {
+          "title": "AI Assistance",
+          "description": "Get smart suggestions and automate repetitive tasks with our AI tools"
+        },
+        "itinerary": {
+          "title": "Itinerary",
+          "description": "Create detailed day-by-day travel plans with drag-and-drop simplicity"
+        },
+        "offline": {
+          "title": "Offline access",
+          "description": "Access your travel plans and maps without internet connection"
+        },
+        "lodging": {
+          "title": "Lodging",
+          "description": "Find and book accommodations that fit your budget and preferences"
+        },
+        "reservations": {
+          "title": "Reservations",
+          "description": "Manage all your bookings and confirmations in one centralized place"
+        },
+        "packingChecklists": {
+          "title": "Packing Checklists",
+          "description": "Never forget essential items with smart packing lists tailored to your destination"
+        },
+        "travelGuides": {
+          "title": "Travel guides",
+          "description": "Discover local insights and hidden gems with curated travel guides"
+        },
+        "budgeting": {
+          "title": "Budgeting",
+          "description": "Track expenses and stay within budget with real-time spending insights"
+        },
+        "mapView": {
+          "title": "Map view",
+          "description": "Visualize your entire trip on interactive maps with route optimization"
+        }
+      }
+    }
+  },
+  "common": {
+    "trips": "Trips",
+    "travelGuides": "Travel Guides"
+  },
+  "guides": {
+    "hero": {
+      "title": "Explore Our Travel Guides",
+      "subtitle": "Discover curated itineraries and tips for your next adventure",
+      "searchPlaceholder": "Search by keyword, destination, activity..."
+    },
+    "popularDestinations": {
+      "title": "Popular Destinations",
+      "bangkok": "Bangkok",
+      "chiangMai": "Chiang Mai",
+      "phuket": "Phuket",
+      "krabi": "Krabi",
+      "ayutthaya": "Ayutthaya",
+      "huaHin": "Hua Hin",
+      "pattaya": "Pattaya"
+    },
+    "interests": {
+      "title": "Find your interest",
+      "food": "Food",
+      "temples": "Temples",
+      "nightlife": "Nightlife",
+      "historicalSites": "Historical Sites",
+      "markets": "Markets",
+      "beaches": "Beaches",
+      "nature": "Nature",
+      "thaiMassageSpa": "Thai Massage & Spa",
+      "festivals": "Festivals"
+    },
+    "sidebar": {
+      "sponsorBanner": "Sponser banner"
+    }
+  },
+  "trips": {
+    "header": {
+      "title": "Recently viewed and upcoming trips",
+      "recentlyViewed": "Recently Viewed",
+      "seeAll": "See All"
+    },
+    "accommodation": {
+      "title": "Need a place to stay?",
+      "searchPlaceholder": "Search Destination...",
+      "travelers": "Travelers",
+      "search": "Search"
+    },
+    "visitedPlaces": {
+      "title": "Visited Places"
+    },
+    "tabs": {
+      "trips": "Trips",
+      "guides": "Guides"
+    },
+    "emptyState": {
+      "noTrips": {
+        "title": "No trips yet",
+        "description": "Create your first trip to get started!"
+      },
+      "noGuides": {
+        "title": "No guides yet",
+        "description": "Create your first guide to get started!"
+      }
+    }
+  },
+  "profile": {
+    "errors": {
+      "needSignIn": {
+        "title": "403",
+        "subtitle": "You need to sign in to view this page",
+        "button": "Go Home"
+      },
+      "notFound": {
+        "title": "404",
+        "subtitle": "User not found",
+        "button": "Go Home"
+      },
+      "profileNotFound": {
+        "title": "404",
+        "subtitle": "Profile not found",
+        "button": "Go Home"
+      }
+    },
+    "tabs": {
+      "trips": "Trips",
+      "guides": "Guides"
+    },
+    "info": {
+      "loading": "Loading...",
+      "notProvided": "Not provided",
+      "message": "Message",
+      "share": "Share",
+      "followers": "Followers",
+      "following": "Following"
+    },
+    "checkIn": {
+      "loadingMap": "Loading map...",
+      "countries": "Countries",
+      "citiesRegions": "Cities & Regions",
+      "addPlaces": "Add visited places",
+      "addPlacesMobile": "Add places",
+      "badge": "Dreamy Wanderer"
+    },
+    "tripList": {
+      "sort": {
+        "upcoming": "Coming Soon",
+        "latest": "Recently Created"
+      },
+      "loading": {
+        "auth": "Loading authentication..."
+      },
+      "auth": {
+        "title": "Please sign in",
+        "description": "Sign in to view your trips"
+      },
+      "empty": {
+        "title": "No trips yet",
+        "description": "Create your first trip to get started!"
+      }
+    },
+    "guideList": {
+      "loading": {
+        "auth": "Loading authentication..."
+      },
+      "auth": {
+        "title": "Please sign in",
+        "description": "Sign in to view your guides"
+      },
+      "empty": {
+        "title": "No guides yet",
+        "description": "Create your first guide to get started!"
+      }
+    }
+  },
+  "tripDetail": {
+    "errors": {
+      "notFound": "Trip not found",
+      "notFoundDescription": "The trip you're looking for doesn't exist",
+      "loadingError": "Error loading trip",
+      "tryAgainLater": "Please try again later"
+    },
+    "map": {
+      "openMap": "Open Map",
+      "tripMap": "Trip Map"
+    },
+    "budget": {
+      "noExpenses": "No expenses yet"
+    },
+    "itinerary": {
+      "noPhotos": "No photos yet",
+      "addTodo": "Add Todo"
+    }
+  },
+  "guideDetail": {
+    "errors": {
+      "notFound": "Guide not found"
+    },
+    "map": {
+      "loading": "Loading map..."
+    },
+    "budget": {
+      "title": "Budget & Expenses",
+      "noExpenses": "No expense information available for this guide"
+    },
+    "comments": {
+      "title": "Comments",
+      "empty": "No comments yet. Be the first to share your thoughts!",
+      "loadMore": "Load More Comments",
+      "input": {
+        "placeholder": "Write a comment...",
+        "validation": "Please enter a comment",
+        "hint": "Press Ctrl+Enter to submit"
+      },
+      "auth": {
+        "signInToComment": "Please sign in to comment",
+        "signInToLeave": "Please sign in to leave a comment",
+        "signIn": "Sign In"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "reply": "Reply",
+        "comment": "Comment"
+      },
+      "success": {
+        "replyPosted": "Reply posted successfully",
+        "commentPosted": "Comment posted successfully"
+      },
+      "error": {
+        "failedToPost": "Failed to post comment"
+      }
+    }
+  }
+}

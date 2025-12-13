@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # Zipkin for distributed tracing
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem
+    networks:
+      - backend-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9411/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MongoDB (optional - if you want to run locally)
+  # mongodb:
+  #   image: mongo:7
+  #   container_name: mongodb
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: admin
+  #     MONGO_INITDB_ROOT_PASSWORD: password
+  #     MONGO_INITDB_DATABASE: travel_app
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #   networks:
+  #     - backend-network
+  #   healthcheck:
+  #     test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # Redis (optional - if you want to run locally)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: redis
+  #   ports:
+  #     - "6379:6379"
+  #   command: redis-server --requirepass yourpassword
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - backend-network
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # Backend API (development mode with hot reload)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: backend-api-dev
+    ports:
+      - "5001:5001"
+    volumes:
+      - .:/app
+      - /app/tmp  # Don't mount tmp directory
+    env_file:
+      - .env
+    depends_on:
+      zipkin:
+        condition: service_healthy
+      # mongodb:
+      #   condition: service_healthy
+      # redis:
+      #   condition: service_healthy
+    networks:
+      - backend-network
+    environment:
+      # Override OTEL endpoint to use docker network
+      - OTEL_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      # - MONGODB_URI=mongodb://admin:password@mongodb:27017/travel_app?authSource=admin
+      # - REDIS_ADDR=redis:6379
+      # - REDIS_PASSWORD=yourpassword
+    restart: unless-stopped
+
+networks:
+  backend-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  redis_data:
