@@ -93,10 +93,8 @@ const HeaderApp = () => {
                         <NotificationBell />
                     )}
 
-                    {/* Sign In - Desktop only */}
-                    <div className="hidden md:block">
-                        <SignInButton />
-                    </div>
+                    {/* Sign In / Avatar */}
+                    <SignInButton />
                 </div>
             </div>
         </div>
