@@ -1,8 +1,9 @@
 # ======================================
 # ISSUE 
 - [x] fix ga4
-- [] fix speed load imange
+- [x] fix speed load imange
 - [] fix cache image place google by dev and prod use together
+- [] fix monitoring & logging to otel
 # ======================================
 # FEATURE
 - [] create 100 guide content
@@ -12,3 +13,4 @@
 - [] pdpa(term & condition)
 - [] log & monitoring backend
 - [] content footerbar
+- [] logging frontend

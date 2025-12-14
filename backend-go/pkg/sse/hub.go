@@ -8,8 +8,9 @@ import (
 
 // Event represents an SSE event to be sent to clients
 type Event struct {
-	Type      string `json:"type"`
-	Timestamp int64  `json:"timestamp"`
+	Type        string `json:"type"`
+	Timestamp   int64  `json:"timestamp"`
+	UnreadCount int64  `json:"unreadCount,omitempty"`
 }
 
 // Client represents a connected SSE client
@@ -84,11 +85,12 @@ func (h *Hub) Broadcast(userID string, event Event) {
 	}
 }
 
-// BroadcastNotification sends a notification event to a user
-func (h *Hub) BroadcastNotification(userID string) {
+// BroadcastNotification sends a notification event to a user with unread count
+func (h *Hub) BroadcastNotification(userID string, unreadCount int64) {
 	event := Event{
-		Type:      "new_notification",
-		Timestamp: time.Now().UnixMilli(),
+		Type:        "new_notification",
+		Timestamp:   time.Now().UnixMilli(),
+		UnreadCount: unreadCount,
 	}
 	h.Broadcast(userID, event)
 }

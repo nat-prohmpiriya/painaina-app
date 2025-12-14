@@ -18,13 +18,13 @@ export function useNotifications(limit = 20, offset = 0) {
   const { timestamp } = useSSENotification()
   const previousTimestamp = useRef<number | null>(null)
 
-  // When SSE signal changes, refetch notifications
+  // When SSE signal changes, refetch notifications list only (not unread count)
   useEffect(() => {
     if (timestamp && timestamp !== previousTimestamp.current) {
       previousTimestamp.current = timestamp
-      queryClient.invalidateQueries({ queryKey: NOTIFICATION_KEYS.all })
+      queryClient.invalidateQueries({ queryKey: NOTIFICATION_KEYS.list(limit, offset) })
     }
-  }, [timestamp, queryClient])
+  }, [timestamp, queryClient, limit, offset])
 
   return useQuery({
     queryKey: NOTIFICATION_KEYS.list(limit, offset),
@@ -37,22 +37,23 @@ export function useNotifications(limit = 20, offset = 0) {
 export function useUnreadCount() {
   const { isSignedIn } = useAuth()
   const queryClient = useQueryClient()
-  const { timestamp } = useSSENotification()
-  const previousTimestamp = useRef<number | null>(null)
+  const { unreadCount: sseUnreadCount } = useSSENotification()
+  const previousCount = useRef<number | null>(null)
 
-  // When SSE signal changes, refetch unread count
+  // When SSE sends unread count, update cache directly (no refetch needed)
   useEffect(() => {
-    if (timestamp && timestamp !== previousTimestamp.current) {
-      previousTimestamp.current = timestamp
-      queryClient.invalidateQueries({ queryKey: NOTIFICATION_KEYS.unreadCount() })
+    if (sseUnreadCount !== null && sseUnreadCount !== previousCount.current) {
+      previousCount.current = sseUnreadCount
+      queryClient.setQueryData(NOTIFICATION_KEYS.unreadCount(), sseUnreadCount)
     }
-  }, [timestamp, queryClient])
+  }, [sseUnreadCount, queryClient])
 
   return useQuery({
     queryKey: NOTIFICATION_KEYS.unreadCount(),
     queryFn: () => notificationService.getUnreadCount(),
     enabled: isSignedIn,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // No need to refetch, SSE will update
+    staleTime: Infinity, // Don't auto refetch, rely on SSE
   })
 }
 

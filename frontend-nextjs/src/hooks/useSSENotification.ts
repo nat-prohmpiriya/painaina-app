@@ -6,10 +6,12 @@ import { useAuth } from '@clerk/nextjs'
 interface SSEEvent {
   type: string
   timestamp: number
+  unreadCount?: number
 }
 
 interface UseSSENotificationResult {
   timestamp: number | null
+  unreadCount: number | null
   isConnected: boolean
   error: Error | null
 }
@@ -17,6 +19,7 @@ interface UseSSENotificationResult {
 export function useSSENotification(): UseSSENotificationResult {
   const { getToken, isSignedIn } = useAuth()
   const [timestamp, setTimestamp] = useState<number | null>(null)
+  const [unreadCount, setUnreadCount] = useState<number | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
@@ -70,6 +73,9 @@ export function useSSENotification(): UseSSENotificationResult {
         try {
           const data: SSEEvent = JSON.parse(event.data)
           setTimestamp(data.timestamp)
+          if (data.unreadCount !== undefined) {
+            setUnreadCount(data.unreadCount)
+          }
         } catch (e) {
           console.error('Failed to parse notification event:', e)
         }
@@ -141,5 +147,5 @@ export function useSSENotification(): UseSSENotificationResult {
     }
   }, [isConnected, isSignedIn, connect])
 
-  return { timestamp, isConnected, error }
+  return { timestamp, unreadCount, isConnected, error }
 }

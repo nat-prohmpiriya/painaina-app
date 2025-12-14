@@ -338,7 +338,26 @@
       "citiesRegions": "Cities & Regions",
       "addPlaces": "Add visited places",
       "addPlacesMobile": "Add places",
-      "badge": "Dreamy Wanderer"
+      "badge": "Dreamy Wanderer",
+      "recentPlaces": "Places you've visited",
+      "more": "more",
+      "addSuccess": "Check-in added successfully!",
+      "addError": "Failed to add check-in",
+      "modal": {
+        "selectCountry": "Select Country",
+        "selectCity": "Select City",
+        "addDetails": "Add Details",
+        "searchCountry": "Search country...",
+        "searchCity": "Search city...",
+        "change": "Change",
+        "noResults": "No cities found",
+        "visitedDate": "When did you visit?",
+        "note": "Note (optional)",
+        "notePlaceholder": "Share your experience...",
+        "back": "Back",
+        "save": "Save Check-in",
+        "saving": "Saving..."
+      }
     },
     "tripList": {
       "sort": {

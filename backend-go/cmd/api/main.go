@@ -133,6 +133,11 @@ func main() {
 	placeHandler := handlers.NewPlaceHandler(&cfg.Google, cityService, redisService)
 	commentHandler := handlers.NewCommentHandler(notificationService)
 	tripHandler := handlers.NewTripHandler(notificationService)
+
+	// Initialize check-in service and handler
+	checkInRepo := repository.NewCheckInRepository()
+	checkInService := services.NewCheckInService(checkInRepo)
+	checkInHandler := handlers.NewCheckInHandler(checkInService)
 	unsplashHandler, err := handlers.NewUnsplashHandler(&cfg.Unsplash)
 	if err != nil {
 		log.Fatalf("Failed to create unsplash handler: %v", err)
@@ -174,6 +179,20 @@ func main() {
 	{
 		sseRoutes.GET("/notifications", sseHandler.StreamNotifications)
 	}
+
+	// Check-in routes
+	checkins := v1.Group("/checkins")
+	checkins.Use(middleware.Auth(cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain))
+	{
+		checkins.POST("", checkInHandler.CreateCheckIn)
+		checkins.GET("/:id", checkInHandler.GetCheckIn)
+		checkins.PUT("/:id", checkInHandler.UpdateCheckIn)
+		checkins.DELETE("/:id", checkInHandler.DeleteCheckIn)
+	}
+
+	// User check-ins routes (public - can view other users' check-ins)
+	v1.GET("/users/:userId/checkins", checkInHandler.GetUserCheckIns)
+	v1.GET("/users/:userId/checkins/stats", checkInHandler.GetUserCheckInStats)
 
 	// Trip routes - both /trips and /trips/:id
 	trips := v1.Group("/trips")

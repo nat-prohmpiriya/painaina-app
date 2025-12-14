@@ -136,7 +136,7 @@ const ProfileContent = ({ profileId, currentUser }: ProfileContentProps) => {
                 </div>
                 {/* Content - Full width mobile, 5 cols desktop */}
                 <div className='lg:col-span-5'>
-                    <CheckInSection />
+                    <CheckInSection userId={profileIdStr} isOwnProfile={isOwnProfile} />
                     <Tabs defaultValue="trips">
                         <TabsList>
                             <TabsTrigger value="trips">

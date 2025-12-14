@@ -38,9 +38,10 @@ func (s *NotificationService) CreateNotification(ctx context.Context, recipientI
 		return err
 	}
 
-	// Broadcast notification via SSE
+	// Broadcast notification via SSE with unread count
 	if s.sseHub != nil {
-		s.sseHub.BroadcastNotification(recipientID)
+		unreadCount, _ := s.repo.GetUnreadCount(ctx, recipientID)
+		s.sseHub.BroadcastNotification(recipientID, unreadCount)
 	}
 
 	return nil
