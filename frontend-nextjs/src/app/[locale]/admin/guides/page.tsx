@@ -48,7 +48,7 @@ export default function AdminGuidesPage() {
     const [data, setData] = useState<TripListResponse | null>(null)
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
-    const [statusFilter, setStatusFilter] = useState('')
+    const [statusFilter, setStatusFilter] = useState('all')
     const [page, setPage] = useState(1)
     const limit = 20
 
@@ -63,7 +63,7 @@ export default function AdminGuidesPage() {
             const result = await adminService.getTrips({
                 search: search || undefined,
                 type: 'guide',
-                status: statusFilter || undefined,
+                status: statusFilter === 'all' ? undefined : statusFilter,
                 page,
                 limit
             })
@@ -142,7 +142,7 @@ export default function AdminGuidesPage() {
                                 <SelectValue placeholder="All Status" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">All Status</SelectItem>
+                                <SelectItem value="all">All Status</SelectItem>
                                 <SelectItem value="published">Published</SelectItem>
                                 <SelectItem value="draft">Draft</SelectItem>
                                 <SelectItem value="archived">Archived</SelectItem>
