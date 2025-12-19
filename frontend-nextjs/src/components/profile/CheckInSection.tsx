@@ -9,8 +9,30 @@ import { Skeleton } from '@/components/ui/skeleton'
 import AddCheckInModal from './AddCheckInModal'
 
 // Dynamic import of Map with markers support
-const MapWithMarkers = dynamic(() => import('react-leaflet').then((mod) => {
+const MapWithMarkers = dynamic(() => import('react-leaflet').then(async (mod) => {
     const { MapContainer, TileLayer, Marker, Popup } = mod
+    const L = await import('leaflet')
+
+    // Create custom marker icon
+    const createPinIcon = (color: string = '#3b82f6') => {
+        return L.divIcon({
+            className: 'custom-marker',
+            html: `<div style="
+                width: 24px;
+                height: 24px;
+                background: ${color};
+                border: 2px solid white;
+                border-radius: 50% 50% 50% 0;
+                transform: rotate(-45deg);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            "></div>`,
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24],
+        })
+    }
+
+    const pinIcon = createPinIcon('#3b82f6')
 
     return function MapComponent({ checkins }: { checkins: Array<{ city: string; countryFlag: string; latitude: number; longitude: number }> }) {
         // Calculate center based on checkins or default to Asia
@@ -37,6 +59,7 @@ const MapWithMarkers = dynamic(() => import('react-leaflet').then((mod) => {
                     <Marker
                         key={index}
                         position={[checkin.latitude, checkin.longitude]}
+                        icon={pinIcon}
                     >
                         <Popup>
                             <div className="text-center">
@@ -107,12 +130,6 @@ const CheckInSection = ({ userId, isOwnProfile = true }: CheckInSectionProps) =>
                                     <div className="text-[10px] md:text-xs text-gray-300 uppercase tracking-wider whitespace-nowrap">{t('citiesRegions')}</div>
                                 </div>
                             </div>
-                            {(stats?.totalCountries || 0) >= 3 && (
-                                <div className="flex items-center space-x-2 md:ml-4">
-                                    <LuMapPin className="text-orange-400 w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
-                                    <span className="text-xs md:text-sm font-medium">{t('badge')}</span>
-                                </div>
-                            )}
                         </>
                     )}
                 </div>
@@ -124,29 +141,6 @@ const CheckInSection = ({ userId, isOwnProfile = true }: CheckInSectionProps) =>
                     </div>
                 )}
             </div>
-
-            {/* Recent Check-ins List */}
-            {checkins.length > 0 && (
-                <div className="p-4 border-t">
-                    <h3 className="text-sm font-medium text-muted-foreground mb-3">{t('recentPlaces')}</h3>
-                    <div className="flex flex-wrap gap-2">
-                        {checkins.slice(0, 8).map((checkin) => (
-                            <div
-                                key={checkin.id}
-                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted rounded-full text-sm"
-                            >
-                                <span>{checkin.countryFlag}</span>
-                                <span className="font-medium">{checkin.city}</span>
-                            </div>
-                        ))}
-                        {checkins.length > 8 && (
-                            <div className="flex items-center px-2.5 py-1.5 text-sm text-muted-foreground">
-                                +{checkins.length - 8} {t('more')}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

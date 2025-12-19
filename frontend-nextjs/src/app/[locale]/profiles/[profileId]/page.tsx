@@ -137,7 +137,7 @@ const ProfileContent = ({ profileId, currentUser }: ProfileContentProps) => {
                 {/* Content - Full width mobile, 5 cols desktop */}
                 <div className='lg:col-span-5'>
                     <CheckInSection userId={profileIdStr} isOwnProfile={isOwnProfile} />
-                    <Tabs defaultValue="trips">
+                    <Tabs defaultValue="trips" className='mt-4'>
                         <TabsList>
                             <TabsTrigger value="trips">
                                 <NotebookText className='inline mr-1' size={18} />

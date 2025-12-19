@@ -349,6 +349,7 @@
         "addDetails": "Add Details",
         "searchCountry": "Search country...",
         "searchCity": "Search city...",
+        "searchPlaceholder": "Add somewhere you've been",
         "change": "Change",
         "noResults": "No cities found",
         "visitedDate": "When did you visit?",

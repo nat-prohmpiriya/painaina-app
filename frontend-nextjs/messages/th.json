@@ -349,6 +349,7 @@
         "addDetails": "เพิ่มรายละเอียด",
         "searchCountry": "ค้นหาประเทศ...",
         "searchCity": "ค้นหาเมือง...",
+        "searchPlaceholder": "เพิ่มสถานที่ที่เคยไป",
         "change": "เปลี่ยน",
         "noResults": "ไม่พบเมือง",
         "visitedDate": "ไปเมื่อไหร่?",
