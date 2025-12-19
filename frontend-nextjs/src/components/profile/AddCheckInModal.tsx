@@ -122,7 +122,7 @@ const AddCheckInModal = ({ onSuccess }: AddCheckInModalProps) => {
                 onClick={() => setIsOpen(true)}
                 variant="secondary"
                 size="sm"
-                className="shadow-md"
+                className="shadow-md rounded-full"
             >
                 <LuPlus className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">{t('addPlaces')}</span>

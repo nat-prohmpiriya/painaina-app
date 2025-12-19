@@ -27,7 +27,7 @@ const ProfileInfo = ({ user, isOwnProfile }: ProfileInfoProps) => {
     }
 
     return (
-        <div className="w-full border border-gray-100 rounded-lg p-4 gap-4">
+        <div className="w-full border border-gray-100 rounded-lg p-4 gap-4 overflow-hidden">
             <div className="flex flex-col items-center mt-6 md:mt-10">
                 <img
                     className="rounded-full h-32 w-32 md:h-48 md:w-48 lg:h-64 lg:w-64 object-cover"
@@ -65,7 +65,7 @@ const ProfileInfo = ({ user, isOwnProfile }: ProfileInfoProps) => {
                     <span className="font-semibold text-gray-600 text-xs md:text-sm">0</span>
                 </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-2">
+            <div className={`grid gap-2 ${isOwnProfile ? 'grid-cols-2' : 'grid-cols-1'}`}>
                 {isOwnProfile && <EditProfileModal />}
                 <Button variant="outline" className="w-full rounded-full">
                     <Share className="mr-2 h-4 w-4" />
