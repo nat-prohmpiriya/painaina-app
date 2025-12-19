@@ -89,7 +89,7 @@ const CheckInSection = ({ userId, isOwnProfile = true }: CheckInSectionProps) =>
                 <MapWithMarkers checkins={markers} />
 
                 {/* Stats Bar - Responsive layout */}
-                <div className="absolute top-2 left-2 md:left-4 bg-black/75 text-white p-2 md:p-3 rounded-lg shadow-lg z-[1000] flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-6 max-w-[calc(100%-5rem)] md:max-w-none">
+                <div className="absolute top-2 left-2 md:left-4 bg-black/75 text-white p-2 md:p-3 rounded-lg shadow-lg z-[10] flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-6 max-w-[calc(100%-5rem)] md:max-w-none">
                     {isLoading ? (
                         <div className="flex items-center gap-3 md:gap-6">
                             <Skeleton className="h-8 w-12 bg-white/20" />
@@ -119,7 +119,7 @@ const CheckInSection = ({ userId, isOwnProfile = true }: CheckInSectionProps) =>
 
                 {/* Add Visited Places Button - Only show for own profile */}
                 {isOwnProfile && (
-                    <div className="absolute top-2 right-2 md:top-4 md:right-4 z-[1000]">
+                    <div className="absolute top-2 right-2 md:top-4 md:right-4 z-[10]">
                         <AddCheckInModal />
                     </div>
                 )}
