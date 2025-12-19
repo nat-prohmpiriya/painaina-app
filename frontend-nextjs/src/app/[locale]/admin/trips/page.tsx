@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePainainaApi } from '@/services/api-client'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { adminService, type Trip, type TripListResponse } from '@/services/admin.service'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -41,6 +42,7 @@ import { usePathname } from 'next/navigation'
 
 export default function AdminTripsPage() {
     usePainainaApi()
+    useDocumentTitle('Trips')
     const { showSuccess, showError } = useToastMessage()
     const pathname = usePathname()
     const locale = pathname.split('/')[1] || 'en'
@@ -182,7 +184,7 @@ export default function AdminTripsPage() {
                                             <td className="px-6 py-4"><Skeleton className="h-8 w-20 ml-auto" /></td>
                                         </tr>
                                     ))
-                                ) : data?.trips.length === 0 ? (
+                                ) : !data?.trips?.length ? (
                                     <tr>
                                         <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                                             No trips found

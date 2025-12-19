@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePainainaApi } from '@/services/api-client'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { adminService, type User, type UserListResponse } from '@/services/admin.service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -38,6 +39,7 @@ import { formatDistanceToNow } from 'date-fns'
 
 export default function AdminUsersPage() {
     usePainainaApi()
+    useDocumentTitle('Users')
     const { showSuccess, showError } = useToastMessage()
 
     const [data, setData] = useState<UserListResponse | null>(null)
@@ -189,7 +191,7 @@ export default function AdminUsersPage() {
                                             <td className="px-6 py-4"><Skeleton className="h-8 w-20 ml-auto" /></td>
                                         </tr>
                                     ))
-                                ) : data?.users.length === 0 ? (
+                                ) : !data?.users?.length ? (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
                                             No users found

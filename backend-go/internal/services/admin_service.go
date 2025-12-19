@@ -508,13 +508,33 @@ func (s *AdminService) GetTripList(ctx context.Context, filter TripListFilter) (
 	}
 	skip := (filter.Page - 1) * filter.Limit
 
-	// Find trips
-	findOptions := options.Find()
-	findOptions.SetSkip(int64(skip))
-	findOptions.SetLimit(int64(filter.Limit))
-	findOptions.SetSort(bson.M{"created_at": -1})
+	// Use aggregation pipeline with $lookup to get owner info
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: query}},
+		{{Key: "$lookup", Value: bson.M{
+			"from":         "users",
+			"localField":   "owner_id",
+			"foreignField": "_id",
+			"as":           "owner_data",
+		}}},
+		{{Key: "$addFields", Value: bson.M{
+			"owner": bson.M{
+				"$cond": bson.M{
+					"if":   bson.M{"$gt": bson.A{bson.M{"$size": "$owner_data"}, 0}},
+					"then": bson.M{"$arrayElemAt": bson.A{"$owner_data", 0}},
+					"else": nil,
+				},
+			},
+		}}},
+		{{Key: "$project", Value: bson.M{
+			"owner_data": 0,
+		}}},
+		{{Key: "$sort", Value: bson.M{"created_at": -1}}},
+		{{Key: "$skip", Value: int64(skip)}},
+		{{Key: "$limit", Value: int64(filter.Limit)}},
+	}
 
-	cursor, err := s.db.Collection("trips").Find(ctx, query, findOptions)
+	cursor, err := s.db.Collection("trips").Aggregate(ctx, pipeline)
 	if err != nil {
 		logger.Error(err)
 		return nil, err
