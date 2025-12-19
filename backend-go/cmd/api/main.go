@@ -148,6 +148,8 @@ func main() {
 	adminUserHandler := handlers.NewAdminUserHandler(db)
 	adminTripHandler := handlers.NewAdminTripHandler(db)
 	adminSystemHandler := handlers.NewAdminSystemHandler(db)
+	adminCommentHandler := handlers.NewAdminCommentHandler(db)
+	adminPlaceHandler := handlers.NewAdminPlaceHandler(db, &cfg.Google, cityService)
 
 	// Health check endpoint
 	router.GET("/", healthHandler.Check)
@@ -227,6 +229,17 @@ func main() {
 		// Trip management
 		admin.GET("/trips", adminTripHandler.ListTrips)
 		admin.DELETE("/trips/:id", adminTripHandler.DeleteTrip)
+
+		// Comment management
+		admin.GET("/comments", adminCommentHandler.ListComments)
+		admin.DELETE("/comments/:id", adminCommentHandler.DeleteComment)
+
+		// Place cache management
+		admin.GET("/places/cache", adminPlaceHandler.ListCachedPlaces)
+		admin.GET("/places/cache/stats", adminPlaceHandler.GetCacheStats)
+		admin.POST("/places/cache/clear-expired", adminPlaceHandler.ClearExpiredCache)
+		admin.POST("/places/cache/:id/refresh", adminPlaceHandler.RefreshPlace)
+		admin.DELETE("/places/cache/:id", adminPlaceHandler.DeleteCachedPlace)
 
 		// System health
 		admin.GET("/system/health", adminSystemHandler.GetSystemHealth)

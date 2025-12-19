@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"backend-go/internal/models"
@@ -576,6 +577,282 @@ func (s *AdminService) DeleteTrip(ctx context.Context, tripID, adminID string) e
 
 	logger.Output("Trip deleted successfully")
 	return nil
+}
+
+// ============================================================================
+// Place Cache Management
+// ============================================================================
+
+type PlaceCacheFilter struct {
+	Search string
+	Page   int
+	Limit  int
+}
+
+type PlaceCacheListResponse struct {
+	Places     []models.Place `json:"places"`
+	Total      int64          `json:"total"`
+	Page       int            `json:"page"`
+	Limit      int            `json:"limit"`
+	TotalPages int            `json:"totalPages"`
+}
+
+type PlaceCacheStats struct {
+	TotalCached    int64   `json:"totalCached"`
+	ExpiredCount   int64   `json:"expiredCount"`
+	ValidCount     int64   `json:"validCount"`
+	OldestCacheAge string  `json:"oldestCacheAge"` // e.g. "25 days ago"
+	CacheSizeMB    float64 `json:"cacheSizeMB"`
+}
+
+func (s *AdminService) GetPlaceCacheList(ctx context.Context, filter PlaceCacheFilter) (*PlaceCacheListResponse, error) {
+	ctx, span := s.tracer.Start(ctx, "AdminService.GetPlaceCacheList")
+	defer span.End()
+	logger := utils.NewTraceLogger(ctx, span)
+
+	logger.Input(filter)
+
+	// Build query
+	query := bson.M{}
+
+	// Search filter
+	if filter.Search != "" {
+		query["$or"] = []bson.M{
+			{"name": bson.M{"$regex": filter.Search, "$options": "i"}},
+			{"address": bson.M{"$regex": filter.Search, "$options": "i"}},
+			{"google_place_id": bson.M{"$regex": filter.Search, "$options": "i"}},
+		}
+	}
+
+	// Count total
+	total, err := s.db.Collection("places").CountDocuments(ctx, query)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	// Pagination
+	if filter.Page < 1 {
+		filter.Page = 1
+	}
+	if filter.Limit < 1 {
+		filter.Limit = 20
+	}
+	skip := (filter.Page - 1) * filter.Limit
+
+	// Find places
+	findOptions := options.Find()
+	findOptions.SetSkip(int64(skip))
+	findOptions.SetLimit(int64(filter.Limit))
+	findOptions.SetSort(bson.M{"updated_at": -1})
+
+	cursor, err := s.db.Collection("places").Find(ctx, query, findOptions)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var places []models.Place
+	if err := cursor.All(ctx, &places); err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	totalPages := int(total) / filter.Limit
+	if int(total)%filter.Limit > 0 {
+		totalPages++
+	}
+
+	response := &PlaceCacheListResponse{
+		Places:     places,
+		Total:      total,
+		Page:       filter.Page,
+		Limit:      filter.Limit,
+		TotalPages: totalPages,
+	}
+
+	logger.Output(response)
+	return response, nil
+}
+
+func (s *AdminService) GetPlaceCacheStats(ctx context.Context) (*PlaceCacheStats, error) {
+	ctx, span := s.tracer.Start(ctx, "AdminService.GetPlaceCacheStats")
+	defer span.End()
+	logger := utils.NewTraceLogger(ctx, span)
+
+	stats := &PlaceCacheStats{}
+
+	// Total cached
+	totalCached, err := s.db.Collection("places").CountDocuments(ctx, bson.M{})
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	stats.TotalCached = totalCached
+
+	// Expired count (older than 30 days)
+	thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
+	expiredCount, err := s.db.Collection("places").CountDocuments(ctx, bson.M{
+		"updated_at": bson.M{"$lt": thirtyDaysAgo},
+	})
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	stats.ExpiredCount = expiredCount
+	stats.ValidCount = totalCached - expiredCount
+
+	// Get oldest cache entry
+	var oldestPlace models.Place
+	findOneOptions := options.FindOne().SetSort(bson.M{"updated_at": 1})
+	err = s.db.Collection("places").FindOne(ctx, bson.M{}, findOneOptions).Decode(&oldestPlace)
+	if err == nil {
+		age := time.Since(oldestPlace.UpdatedAt)
+		days := int(age.Hours() / 24)
+		if days == 0 {
+			stats.OldestCacheAge = "today"
+		} else if days == 1 {
+			stats.OldestCacheAge = "1 day ago"
+		} else {
+			stats.OldestCacheAge = fmt.Sprintf("%d days ago", days)
+		}
+	} else {
+		stats.OldestCacheAge = "N/A"
+	}
+
+	// Estimate cache size (rough estimate)
+	// MongoDB doesn't easily provide collection size, so we estimate
+	stats.CacheSizeMB = float64(totalCached) * 0.005 // ~5KB per place
+
+	logger.Output(stats)
+	return stats, nil
+}
+
+// ============================================================================
+// Comment Management
+// ============================================================================
+
+type CommentListFilter struct {
+	Search     string // Search by content
+	TargetType string // trip, place, comment
+	UserID     string // Filter by user
+	Page       int
+	Limit      int
+}
+
+type CommentListResponse struct {
+	Comments   []CommentWithUserInfo `json:"comments"`
+	Total      int64                 `json:"total"`
+	Page       int                   `json:"page"`
+	Limit      int                   `json:"limit"`
+	TotalPages int                   `json:"totalPages"`
+}
+
+type CommentWithUserInfo struct {
+	models.Comment `bson:",inline"`
+	User           *CommentUserInfo `bson:"user,omitempty" json:"user,omitempty"`
+}
+
+type CommentUserInfo struct {
+	ID       primitive.ObjectID `bson:"_id" json:"id"`
+	Name     string             `bson:"name" json:"name"`
+	Email    string             `bson:"email" json:"email"`
+	PhotoURL *string            `bson:"photo_url,omitempty" json:"photoUrl,omitempty"`
+}
+
+func (s *AdminService) GetCommentList(ctx context.Context, filter CommentListFilter) (*CommentListResponse, error) {
+	ctx, span := s.tracer.Start(ctx, "AdminService.GetCommentList")
+	defer span.End()
+	logger := utils.NewTraceLogger(ctx, span)
+
+	logger.Input(filter)
+
+	// Build query
+	query := bson.M{
+		"deleted_at": nil, // Only non-deleted comments
+	}
+
+	// Search filter
+	if filter.Search != "" {
+		query["content"] = bson.M{"$regex": filter.Search, "$options": "i"}
+	}
+
+	// Target type filter
+	if filter.TargetType != "" {
+		query["target_type"] = filter.TargetType
+	}
+
+	// User filter
+	if filter.UserID != "" {
+		userOID, err := primitive.ObjectIDFromHex(filter.UserID)
+		if err == nil {
+			query["user_id"] = userOID
+		}
+	}
+
+	// Count total
+	total, err := s.db.Collection("comments").CountDocuments(ctx, query)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	// Pagination
+	if filter.Page < 1 {
+		filter.Page = 1
+	}
+	if filter.Limit < 1 {
+		filter.Limit = 20
+	}
+	skip := (filter.Page - 1) * filter.Limit
+
+	// Aggregation pipeline with user lookup
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: query}},
+		{{Key: "$sort", Value: bson.M{"created_at": -1}}},
+		{{Key: "$skip", Value: int64(skip)}},
+		{{Key: "$limit", Value: int64(filter.Limit)}},
+		{{Key: "$lookup", Value: bson.M{
+			"from":         "users",
+			"localField":   "user_id",
+			"foreignField": "_id",
+			"as":           "user",
+		}}},
+		{{Key: "$unwind", Value: bson.M{
+			"path":                       "$user",
+			"preserveNullAndEmptyArrays": true,
+		}}},
+	}
+
+	cursor, err := s.db.Collection("comments").Aggregate(ctx, pipeline)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var comments []CommentWithUserInfo
+	if err := cursor.All(ctx, &comments); err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	totalPages := int(total) / filter.Limit
+	if int(total)%filter.Limit > 0 {
+		totalPages++
+	}
+
+	response := &CommentListResponse{
+		Comments:   comments,
+		Total:      total,
+		Page:       filter.Page,
+		Limit:      filter.Limit,
+		TotalPages: totalPages,
+	}
+
+	logger.Output(response)
+	return response, nil
 }
 
 // ============================================================================
