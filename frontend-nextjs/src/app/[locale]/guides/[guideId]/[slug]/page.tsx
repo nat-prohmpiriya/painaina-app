@@ -11,7 +11,9 @@ interface Props {
 
 async function getGuideById(guideId: string): Promise<TripDetailResponse | null> {
 	try {
-		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/trips/${guideId}`, {
+		// Use API_URL for server-side (Docker network) or fallback to NEXT_PUBLIC_API_URL
+		const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL
+		const response = await fetch(`${apiUrl}/trips/${guideId}`, {
 			cache: 'no-store', // For SSR - always fetch fresh data
 		})
 
