@@ -2,7 +2,7 @@
 
 import BookingForm from '@/components/book/BookingForm'
 import { Input } from '@/components/ui/input'
-import Footer from '@/components/home/FooterSection'
+import { FooterSection } from '@/components/landing'
 import Image from 'next/image'
 import { r2Images } from '@/lib/r2Images'
 import { useRouter } from '@/i18n/navigation'
@@ -342,7 +342,7 @@ const GuidesPage = () => {
 			<div className='lg:hidden px-4 md:px-6 mt-6 mb-8'>
 				<BookingForm />
 			</div>
-			<Footer />
+			<FooterSection />
 		</div>
 	)
 }

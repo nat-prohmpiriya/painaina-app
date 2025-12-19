@@ -70,7 +70,7 @@ const HeroSection = () => {
             <Link href="/guides">
               <Button
                 size="lg"
-                className="bg-white hover:bg-white/90 text-primary px-8 py-6 text-lg font-semibold shadow-xl transition-all hover:-translate-y-0.5"
+                className="bg-primary hover:bg-primary/90 text-white px-8 py-6 text-lg font-semibold shadow-xl transition-all hover:-translate-y-0.5 rounded-full"
               >
                 {t('hero.cta')}
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -80,7 +80,7 @@ const HeroSection = () => {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-white/50 text-white hover:bg-white hover:text-primary px-8 py-6 text-lg font-semibold transition-all"
+                className="bg-white border-primary text-primary hover:bg-primary hover:text-white px-8 py-6 text-lg font-semibold transition-all rounded-full"
               >
                 {t('hero.ctaSecondary')}
               </Button>

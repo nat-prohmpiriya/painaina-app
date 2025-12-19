@@ -31,7 +31,7 @@ const FooterSection = () => {
   ]
 
   return (
-    <footer className="bg-foreground text-white py-16">
+    <footer className="bg-gradient-to-tr from-black via-neutral-900 to-neutral-800 text-white py-16">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand column */}
@@ -134,10 +134,10 @@ const FooterSection = () => {
 
           {/* Language switcher placeholder */}
           <div className="flex items-center gap-2">
-            <button className="px-3 py-1 text-sm bg-white/10 rounded-md hover:bg-white/20 transition-colors">
+            <button className="px-3 py-1 text-sm bg-white/10 rounded-full hover:bg-white/20 transition-colors">
               TH
             </button>
-            <button className="px-3 py-1 text-sm text-white/50 hover:text-white transition-colors">
+            <button className="px-3 py-1 text-sm text-white/50 hover:text-white transition-colors rounded-full">
               EN
             </button>
           </div>

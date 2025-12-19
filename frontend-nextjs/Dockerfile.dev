@@ -1,0 +1,22 @@
+# Development Dockerfile for Next.js with hot reload
+FROM node:20-alpine
+
+# Install dependencies for node-gyp (required for some packages)
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install all dependencies (including devDependencies)
+RUN npm ci
+
+# Copy the rest of the application
+COPY . .
+
+# Expose port
+EXPOSE 5002
+
+# Run Next.js in development mode with Turbopack (bind to 0.0.0.0 for Docker)
+CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0"]

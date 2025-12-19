@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Spinner } from "@/components/ui/spinner"
 import { LuMapPin, LuSearch } from "react-icons/lu"
-import FooterSection from "@/components/home/FooterSection"
+import { FooterSection } from '@/components/landing'
 import { useTrips } from "@/hooks/useTripQueries"
 import { useAuth } from "@/hooks/useAuth"
 import TripCard from "@/components/trip/TripCard"

@@ -45,85 +45,85 @@
 
 :root {
   --radius: 0.375rem;
-  /* White + Forest Green + Black Theme - Light Mode */
+  /* White + Black + Red Theme - Light Mode */
   --background: #FFFFFF;        /* Pure white */
-  --foreground: #1B3D2F;        /* Dark forest for text */
+  --foreground: #0A0A0A;        /* Near black for text */
   --card: #FFFFFF;
-  --card-foreground: #1B3D2F;
+  --card-foreground: #0A0A0A;
   --popover: #FFFFFF;
-  --popover-foreground: #1B3D2F;
-  --primary: #1B3D2F;           /* Dark Forest Green */
+  --popover-foreground: #0A0A0A;
+  --primary: #DC2626;           /* Red */
   --primary-foreground: #FFFFFF; /* White */
-  --secondary: #2D5A47;         /* Lighter forest */
+  --secondary: #0A0A0A;         /* Black */
   --secondary-foreground: #FFFFFF;
   --muted: #F5F5F5;             /* Light gray */
-  --muted-foreground: #5C7A6B;  /* Muted green */
-  --accent: #2D5A47;            /* Forest accent */
+  --muted-foreground: #737373;  /* Muted gray */
+  --accent: #DC2626;            /* Red accent */
   --accent-foreground: #FFFFFF;
-  --destructive: #DC2626;
+  --destructive: #B91C1C;       /* Darker red */
   --border: #E5E5E5;            /* Neutral border */
   --input: #E5E5E5;
-  --ring: #1B3D2F;
-  --chart-1: #1B3D2F;           /* Dark forest */
-  --chart-2: #2D5A47;           /* Forest */
-  --chart-3: #3D7A5F;           /* Light forest */
-  --chart-4: #5C9A7B;           /* Sage */
-  --chart-5: #7CBA9B;           /* Light sage */
+  --ring: #DC2626;              /* Red ring */
+  --chart-1: #DC2626;           /* Red */
+  --chart-2: #0A0A0A;           /* Black */
+  --chart-3: #EF4444;           /* Light red */
+  --chart-4: #F87171;           /* Lighter red */
+  --chart-5: #FCA5A5;           /* Pale red */
   --sidebar: #FAFAFA;           /* Near white */
-  --sidebar-foreground: #1B3D2F;
-  --sidebar-primary: #1B3D2F;
+  --sidebar-foreground: #0A0A0A;
+  --sidebar-primary: #DC2626;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #F5F5F5;
-  --sidebar-accent-foreground: #1B3D2F;
+  --sidebar-accent-foreground: #0A0A0A;
   --sidebar-border: #E5E5E5;
-  --sidebar-ring: #1B3D2F;
+  --sidebar-ring: #DC2626;
 
   /* Custom colors for landing page */
-  --cream: #F5F5F5;             /* Light gray (renamed for compatibility) */
-  --forest: #1B3D2F;            /* Dark forest */
-  --forest-light: #2D5A47;
-  --forest-dark: #0F1F18;       /* Near black */
+  --cream: #F5F5F5;             /* Light gray */
+  --accent-red: #DC2626;        /* Red */
+  --accent-red-light: #EF4444;
+  --accent-red-dark: #B91C1C;
 }
 
 .dark {
-  /* Dark Mode - Black + Forest Green + White */
-  --background: #0F1F18;        /* Near black */
+  /* Dark Mode - Black + Red + White */
+  --background: #0A0A0A;        /* Near black */
   --foreground: #FFFFFF;        /* White */
-  --card: #1B3D2F;              /* Forest */
+  --card: #171717;              /* Dark gray */
   --card-foreground: #FFFFFF;
-  --popover: #1B3D2F;
+  --popover: #171717;
   --popover-foreground: #FFFFFF;
-  --primary: #FFFFFF;           /* White for dark bg */
-  --primary-foreground: #1B3D2F;
-  --secondary: #7CBA9B;         /* Light sage */
-  --secondary-foreground: #0F1F18;
-  --muted: #2D5A47;             /* Forest */
-  --muted-foreground: #A8C4B5;  /* Light muted */
-  --accent: #7CBA9B;            /* Sage */
-  --accent-foreground: #0F1F18;
-  --destructive: #F87171;
-  --border: #2D5A47;            /* Forest border */
-  --input: #2D5A47;
-  --ring: #7CBA9B;
-  --chart-1: #FFFFFF;           /* White */
-  --chart-2: #7CBA9B;           /* Sage */
-  --chart-3: #5C9A7B;           /* Light forest */
-  --chart-4: #A8C4B5;           /* Pale sage */
-  --chart-5: #C8DED0;           /* Very light */
-  --sidebar: #1B3D2F;
+  --primary: #DC2626;           /* Red */
+  --primary-foreground: #FFFFFF;
+  --secondary: #262626;         /* Dark gray */
+  --secondary-foreground: #FFFFFF;
+  --muted: #262626;             /* Dark gray */
+  --muted-foreground: #A3A3A3;  /* Light muted */
+  --accent: #DC2626;            /* Red */
+  --accent-foreground: #FFFFFF;
+  --destructive: #F87171;       /* Light red */
+  --border: #262626;            /* Dark border */
+  --input: #262626;
+  --ring: #DC2626;              /* Red ring */
+  --chart-1: #DC2626;           /* Red */
+  --chart-2: #FFFFFF;           /* White */
+  --chart-3: #EF4444;           /* Light red */
+  --chart-4: #F87171;           /* Lighter red */
+  --chart-5: #FCA5A5;           /* Pale red */
+  --sidebar: #171717;
   --sidebar-foreground: #FFFFFF;
-  --sidebar-primary: #FFFFFF;
-  --sidebar-primary-foreground: #1B3D2F;
-  --sidebar-accent: #2D5A47;
+  --sidebar-primary: #DC2626;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #262626;
   --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #2D5A47;
-  --sidebar-ring: #7CBA9B;
+  --sidebar-border: #262626;
+  --sidebar-ring: #DC2626;
 
   /* Custom colors for landing page - dark mode */
-  --cream: #1A1A1A;             /* Dark gray */
-  --forest: #1B3D2F;
-  --forest-light: #2D5A47;
-  --forest-dark: #0F1F18;
+  --cream: #171717;             /* Dark gray */
+  --accent-red: #DC2626;        /* Red */
+  --accent-red-light: #EF4444;
+  --accent-red-dark: #B91C1C;
 }
 
 @layer base {
@@ -137,6 +137,26 @@
   h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.01em;
     font-weight: 600;
+  }
+
+  /* Interactive elements cursor pointer */
+  button,
+  [role="button"],
+  [role="menuitem"],
+  [role="option"],
+  [role="switch"],
+  [role="tab"],
+  [role="checkbox"],
+  [role="radio"],
+  select,
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="submit"],
+  input[type="button"],
+  label[for],
+  a[href],
+  .cursor-pointer {
+    cursor: pointer;
   }
 }
 

@@ -100,7 +100,7 @@ const PopularGuidesSection = () => {
             </p>
           </div>
           <Link href="/guides">
-            <Button variant="outline" className="hidden md:flex items-center gap-2 border-primary text-primary hover:bg-primary hover:text-white">
+            <Button variant="outline" className="hidden md:flex items-center gap-2 bg-white border-primary text-primary hover:bg-primary hover:text-white rounded-full">
               {t('popularGuides.viewAll')}
               <ArrowRight className="w-4 h-4" />
             </Button>
@@ -177,7 +177,7 @@ const PopularGuidesSection = () => {
         {/* Mobile CTA */}
         <div className="mt-8 text-center md:hidden">
           <Link href="/guides">
-            <Button className="w-full bg-primary text-white">
+            <Button className="w-full bg-primary text-white hover:bg-primary/90 rounded-full">
               {t('popularGuides.viewAll')}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>

@@ -1,0 +1,54 @@
+services:
+  # =============================================================================
+  # Backend API (Go) - Development with hot reload using Air
+  # =============================================================================
+  backend:
+    build:
+      context: ./backend-go
+      dockerfile: Dockerfile.dev
+    container_name: painaina-backend-dev
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend-go:/app
+      - /app/tmp  # Exclude tmp directory from volume mount
+    env_file:
+      - ./backend-go/.env
+    networks:
+      - painaina-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # =============================================================================
+  # Frontend (Next.js) - Development with Turbopack hot reload
+  # =============================================================================
+  frontend:
+    build:
+      context: ./frontend-nextjs
+      dockerfile: Dockerfile.dev
+    container_name: painaina-frontend-dev
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./frontend-nextjs:/app
+      - /app/node_modules  # Exclude node_modules from volume mount
+      - /app/.next         # Exclude .next from volume mount
+    env_file:
+      - ./frontend-nextjs/.env.local
+    environment:
+      - WATCHPACK_POLLING=true  # Enable polling for file changes in Docker
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+    networks:
+      - painaina-network
+    restart: unless-stopped
+
+networks:
+  painaina-network:
+    driver: bridge

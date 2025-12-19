@@ -1,6 +1,6 @@
 'use client'
 
-import FooterSection from '@/components/home/FooterSection'
+import { FooterSection } from '@/components/landing'
 
 const PrivacyPolicyPage = () => {
     return (

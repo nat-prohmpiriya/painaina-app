@@ -47,8 +47,9 @@ const CTASection = () => {
           {/* CTA Button */}
           <Link href="/sign-up">
             <Button
+              variant="outline"
               size="lg"
-              className="bg-white hover:bg-white/90 text-primary px-10 py-7 text-xl font-semibold shadow-2xl shadow-black/20 transition-all hover:shadow-black/30 hover:-translate-y-1"
+              className="bg-white border-primary text-primary hover:bg-primary hover:text-white px-10 py-7 text-xl font-semibold shadow-2xl shadow-black/20 transition-all hover:shadow-black/30 hover:-translate-y-1 rounded-full"
             >
               {t('cta.button')}
               <ArrowRight className="ml-3 h-6 w-6" />

@@ -1,6 +1,6 @@
 'use client'
 
-import FooterSection from '@/components/home/FooterSection'
+import { FooterSection } from '@/components/landing'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { LuMapPin, LuUsers, LuSparkles, LuCalendarDays, LuBookOpen, LuDownload } from 'react-icons/lu'
