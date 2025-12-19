@@ -165,20 +165,22 @@ export function ImageUpload({
     wide: "aspect-[2/1]",
   }
 
+  const files = value ?? []
+
   const handleRemove = (index: number) => {
     if (onRemove) {
       onRemove(index)
     } else {
-      const newFiles = value.filter((_, i) => i !== index)
+      const newFiles = files.filter((_, i) => i !== index)
       onChange?.(newFiles)
     }
   }
 
   return (
     <div className={cn("space-y-4", className)}>
-      {value.length > 0 ? (
+      {files.length > 0 ? (
         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
-          {value.map((file, index) => (
+          {files.map((file, index) => (
             <div
               key={`${file.name}-${index}`}
               className={cn(
@@ -203,10 +205,10 @@ export function ImageUpload({
               </Button>
             </div>
           ))}
-          {value.length < maxFiles && (
+          {files.length < maxFiles && (
             <FileUpload
               {...props}
-              value={value}
+              value={files}
               onChange={onChange}
               accept={{ "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"] }}
               showPreview={false}
@@ -224,7 +226,7 @@ export function ImageUpload({
       ) : (
         <FileUpload
           {...props}
-          value={value}
+          value={files}
           onChange={onChange}
           accept={{ "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"] }}
           showPreview={false}
