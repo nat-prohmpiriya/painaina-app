@@ -43,7 +43,7 @@ export default function AdminCommentsPage() {
     const [data, setData] = useState<CommentListResponse | null>(null)
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
-    const [targetTypeFilter, setTargetTypeFilter] = useState('')
+    const [targetTypeFilter, setTargetTypeFilter] = useState('all')
     const [page, setPage] = useState(1)
     const limit = 20
 
@@ -57,7 +57,7 @@ export default function AdminCommentsPage() {
             setLoading(true)
             const result = await adminService.getComments({
                 search: search || undefined,
-                targetType: targetTypeFilter || undefined,
+                targetType: targetTypeFilter === 'all' ? undefined : targetTypeFilter,
                 page,
                 limit
             })
@@ -136,7 +136,7 @@ export default function AdminCommentsPage() {
                                 <SelectValue placeholder="All Types" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">All Types</SelectItem>
+                                <SelectItem value="all">All Types</SelectItem>
                                 <SelectItem value="trip">Trip</SelectItem>
                                 <SelectItem value="place">Place</SelectItem>
                                 <SelectItem value="comment">Reply</SelectItem>
