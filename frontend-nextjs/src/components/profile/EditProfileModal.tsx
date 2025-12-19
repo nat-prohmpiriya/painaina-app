@@ -19,7 +19,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { ImageUpload } from "@/components/ui/file-upload"
+import { FileUpload } from "@/components/ui/file-upload"
 import { Camera, PenLine } from "lucide-react"
 import { useToastMessage } from '@/contexts/ToastMessageContext'
 import { useAuth } from '@/hooks/useAuth'
@@ -158,11 +158,14 @@ const EditProfileModal = () => {
                                         {getInitials(currentUser?.name)}
                                     </div>
                                 )}
-                                <div className="absolute bottom-0 right-30">
-                                    <ImageUpload
-                                        value={selectedImage}
-                                        onChange={handleImageChange}
-                                        accept="image/*"
+                                <div className="absolute bottom-0 right-1/4">
+                                    <FileUpload
+                                        value={selectedImage ? [selectedImage] : []}
+                                        onChange={(files) => handleImageChange(files[0] ?? null)}
+                                        accept={{ "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"] }}
+                                        showPreview={false}
+                                        maxFiles={1}
+                                        dropzoneClassName="border-0 p-0 bg-transparent hover:bg-transparent"
                                     >
                                         <Button
                                             type="button"
@@ -171,7 +174,7 @@ const EditProfileModal = () => {
                                         >
                                             <Camera className="h-5 w-5" />
                                         </Button>
-                                    </ImageUpload>
+                                    </FileUpload>
                                 </div>
                             </div>
 
@@ -221,11 +224,12 @@ const EditProfileModal = () => {
                                 <Button
                                     type="button"
                                     variant="outline"
+                                    className="rounded-full"
                                     onClick={closeModal}
                                 >
                                     Cancel
                                 </Button>
-                                <Button type="submit" disabled={isUploading}>
+                                <Button type="submit" className="rounded-full" disabled={isUploading}>
                                     {isUploading ? 'Saving...' : 'Save Changes'}
                                 </Button>
                             </DialogFooter>
