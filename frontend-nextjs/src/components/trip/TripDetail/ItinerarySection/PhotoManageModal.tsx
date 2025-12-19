@@ -124,7 +124,7 @@ const PhotoManageModal = ({
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-5xl w-[90vw] max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{`Manage Photos - ${entryTitle}`}</DialogTitle>
                 </DialogHeader>
@@ -157,86 +157,82 @@ const PhotoManageModal = ({
                 {allPhotos.length > 0 ? (
                     <div>
                         <h3 className="text-lg font-semibold mb-4">All Photos ({allPhotos.length})</h3>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             {allPhotos.map((photo, index) => (
-                                <div key={photo.id}>
-                                    <div className="relative group h-48 rounded-lg overflow-hidden">
-                                        <Image
-                                            src={photo.url || imgUrl}
-                                            alt={photo.name || `Photo ${index + 1}`}
-                                            fill
-                                            className="object-cover rounded-lg"
-                                            onError={(e) => {
-                                                console.error('Image load error:', photo.url, e);
-                                            }}
-                                        />
+                                <div key={photo.id} className="relative group aspect-[4/3] rounded-lg overflow-hidden">
+                                    <Image
+                                        src={photo.url || imgUrl}
+                                        alt={photo.name || `Photo ${index + 1}`}
+                                        fill
+                                        className="object-cover"
+                                        onError={(e) => {
+                                            console.error('Image load error:', photo.url, e);
+                                        }}
+                                    />
 
-                                        {/* Photo actions overlay */}
-                                        <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 rounded-lg">
-                                            <div className="flex gap-2">
-                                                {/* Set as cover button */}
-                                                {index !== 0 && (
-                                                    <Button
-                                                        size="sm"
-                                                        onClick={() => handleSetCoverPhoto(photo.id, photo.storage_id)}
-                                                    >
-                                                        <LuStar className="mr-1" />
-                                                        Cover
-                                                    </Button>
-                                                )}
+                                    {/* Photo actions overlay */}
+                                    <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                        <div className="flex gap-2">
+                                            {/* Set as cover button */}
+                                            {index !== 0 && (
+                                                <Button
+                                                    size="sm"
+                                                    className="rounded-full h-8"
+                                                    onClick={() => handleSetCoverPhoto(photo.id, photo.storage_id)}
+                                                >
+                                                    <LuStar className="size-3.5" />
+                                                    Cover
+                                                </Button>
+                                            )}
 
-                                                {/* Delete button - only for uploaded photos */}
-                                                {photo.type === 'uploaded' && (
-                                                    <AlertDialog>
-                                                        <AlertDialogTrigger asChild>
-                                                            <Button
-                                                                variant="destructive"
-                                                                size="sm"
-                                                            >
-                                                                <LuTrash2 className="mr-1" />
+                                            {/* Delete button - only for uploaded photos */}
+                                            {photo.type === 'uploaded' && (
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            variant="destructive"
+                                                            size="sm"
+                                                            className="rounded-full h-8"
+                                                        >
+                                                            <LuTrash2 className="size-3.5" />
+                                                            Delete
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Delete Photo</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Are you sure you want to delete this photo?
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleDeletePhoto(photo.id, photo.storage_id)}>
                                                                 Delete
-                                                            </Button>
-                                                        </AlertDialogTrigger>
-                                                        <AlertDialogContent>
-                                                            <AlertDialogHeader>
-                                                                <AlertDialogTitle>Delete Photo</AlertDialogTitle>
-                                                                <AlertDialogDescription>
-                                                                    Are you sure you want to delete this photo?
-                                                                </AlertDialogDescription>
-                                                            </AlertDialogHeader>
-                                                            <AlertDialogFooter>
-                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                <AlertDialogAction onClick={() => handleDeletePhoto(photo.id, photo.storage_id)}>
-                                                                    Delete
-                                                                </AlertDialogAction>
-                                                            </AlertDialogFooter>
-                                                        </AlertDialogContent>
-                                                    </AlertDialog>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Photo type indicator */}
-                                        <div className="absolute top-2 left-2">
-                                            {photo.type === 'google' ? (
-                                                <div className="bg-green-600 text-white px-2 py-1 rounded text-xs font-medium">
-                                                    Google
-                                                </div>
-                                            ) : (
-                                                <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">
-                                                    Uploaded
-                                                </div>
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             )}
                                         </div>
+                                    </div>
 
-                                        {/* Cover photo indicator */}
+                                    {/* Badges - top left combined */}
+                                    <div className="absolute top-2 left-2 flex gap-1.5">
                                         {index === 0 && (
-                                            <div className="absolute top-2 right-2">
-                                                <div className="bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
-                                                    <LuStar className="text-xs" />
-                                                    Cover
-                                                </div>
-                                            </div>
+                                            <span className="bg-yellow-500 text-white px-2 py-0.5 rounded-full text-xs font-medium inline-flex items-center gap-1">
+                                                <LuStar className="size-3" />
+                                                Cover
+                                            </span>
+                                        )}
+                                        {photo.type === 'google' ? (
+                                            <span className="bg-green-600 text-white px-2 py-0.5 rounded-full text-xs font-medium">
+                                                Google
+                                            </span>
+                                        ) : (
+                                            <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs font-medium">
+                                                Uploaded
+                                            </span>
                                         )}
                                     </div>
                                 </div>

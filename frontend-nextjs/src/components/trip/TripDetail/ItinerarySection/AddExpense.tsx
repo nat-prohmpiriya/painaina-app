@@ -34,10 +34,10 @@ const AddExpense = ({ entryId, hasExpenses, totalAmount, onExpenseUpdate }: AddE
             <Button
                 variant={hasExpenses ? "outline" : "default"}
                 size="sm"
-                className={hasExpenses ? "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-700" : ""}
+                className={`rounded-full h-7 px-2.5 ${hasExpenses ? "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-700" : ""}`}
                 onClick={handleOpenModal}
             >
-                <LuCircleDollarSign className="mr-1" />
+                <LuCircleDollarSign className="size-3.5" />
                 <span className="font-bold text-xs">{displayText}</span>
             </Button>
             <ExpenseModal

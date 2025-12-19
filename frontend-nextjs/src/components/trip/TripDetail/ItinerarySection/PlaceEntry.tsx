@@ -265,7 +265,7 @@ const PlaceEntry = ({ entry }: PlaceEntryProps) => {
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowManageModal(true)}
-                            className="text-gray-600 hover:text-blue-600"
+                            className="text-blue-600 hover:text-blue-700 rounded-full"
                         >
                             <LuSettings className="mr-2" />
                             Manage Photos
@@ -286,7 +286,7 @@ const PlaceEntry = ({ entry }: PlaceEntryProps) => {
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowManageModal(true)}
-                            className="text-gray-600 hover:text-blue-600"
+                            className="text-blue-600 hover:text-blue-700 rounded-full"
                         >
                             <LuSettings className="mr-2" />
                             Manage Photos

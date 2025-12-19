@@ -357,18 +357,20 @@ const ExpenseModal = forwardRef<ExpenseModalRef, ExpenseModalProps>((props, ref)
                         </div>
                     </div>
 
-                    <DialogFooter className="gap-2 sm:gap-0">
+                    <DialogFooter className="gap-3">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={handleClose}
                             disabled={isSubmitting}
+                            className="rounded-full px-6"
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
                             disabled={isSubmitting}
+                            className="rounded-full px-6"
                         >
                             {isSubmitting ? 'Saving...' : (currentExpense ? 'Update' : 'Save')}
                         </Button>

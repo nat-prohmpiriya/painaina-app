@@ -48,9 +48,9 @@ const AddTimePlace = ({ startTime, endTime, onTimeUpdate }: AddTimePlaceProps) =
                 <Button
                     variant={hasTime ? "outline" : "default"}
                     size="sm"
-                    className={hasTime ? "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-700" : ""}
+                    className={`rounded-full h-7 px-2.5 ${hasTime ? "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-700" : ""}`}
                 >
-                    <LuClock9 className="mr-1" />
+                    <LuClock9 className="size-3.5" />
                     <span className="font-bold text-xs">{displayText}</span>
                 </Button>
             </PopoverTrigger>
