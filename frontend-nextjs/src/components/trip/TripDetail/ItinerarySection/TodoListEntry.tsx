@@ -315,13 +315,9 @@ const TodoListEntry = ({ entry }: TodoListEntryProps) => {
                     >
                         <LuGripVertical className="text-lg cursor-grab active:cursor-grabbing" />
                     </Button>
-                    <Button
-                        size="lg"
-                        variant="ghost"
-                        className="h-10 w-10 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
+                    <div className="h-10 w-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <Checkbox className="scale-120" />
-                    </Button>
+                    </div>
                 </div>
                 <div className="col-span-14">
                     <ContentSection />

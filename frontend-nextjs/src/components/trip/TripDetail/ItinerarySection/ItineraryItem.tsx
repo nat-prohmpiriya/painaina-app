@@ -167,9 +167,9 @@ const ItineraryItem = ({ day, isGuidePage = false }: ItineraryItemProps) => {
             </div>
 
             <div
-                className={`transition-all duration-500 ease-in-out overflow-hidden space-y-4 ${isCollapsed
-                    ? 'max-h-0 opacity-0'
-                    : 'opacity-100'
+                className={`transition-all duration-500 ease-in-out space-y-4 ${isCollapsed
+                    ? 'max-h-0 opacity-0 overflow-hidden'
+                    : 'opacity-100 overflow-visible'
                     }`}
             >
                 <DndContext

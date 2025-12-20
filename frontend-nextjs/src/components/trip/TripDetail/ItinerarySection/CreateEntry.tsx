@@ -15,23 +15,11 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/ui/command'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
 import { LuListTodo, LuMapPin, LuStickyNote, LuChefHat, LuBed, LuCamera, LuShoppingBag, LuPartyPopper, LuCar, LuBuilding2, LuFuel } from "react-icons/lu";
 import SmallPlaceCard from "./SmallPlaceCard";
 import { useTripContext } from '@/contexts/TripContext'
-import { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
+import { usePainainaApi, placeService } from '@/services'
 
 interface CreateEntryProps {
     dayId: string
@@ -56,12 +44,11 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
     const [isLoading, setIsLoading] = useState(false)
     const [isCreating, setIsCreating] = useState(false)
     const [placeOptions, setPlaceOptions] = useState<PlaceOption[]>([])
-    const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
     const [selectedPlaceTypes, setSelectedPlaceTypes] = useState<string[]>([])
-    const [openAutocomplete, setOpenAutocomplete] = useState(false)
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    // Use placeService instead of Convex
-    const { placeService } = require('@/services')
+    // Initialize API client to set auth token
+    usePainainaApi()
     const placeTypes = [
         { value: 'restaurant', label: 'Restaurants', icon: <LuChefHat className="mr-1" /> },
         { value: 'lodging', label: 'Hotels & Lodging', icon: <LuBed className="mr-1" /> },
@@ -117,11 +104,11 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
     // Cleanup timeout on component unmount
     useEffect(() => {
         return () => {
-            if (searchTimeout) {
-                clearTimeout(searchTimeout)
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current)
             }
         }
-    }, [searchTimeout])
+    }, [])
 
     const searchPlaces = useCallback(async (value: string) => {
         if (!value.trim()) {
@@ -132,10 +119,6 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
 
         setIsLoading(true)
         try {
-            const searchTypes = selectedPlaceTypes.length > 0
-                ? selectedPlaceTypes.join('|')
-                : "establishment"
-
             const predictions = await placeService.autocomplete(value)
             console.log('Autocomplete predictions:', predictions)
 
@@ -178,33 +161,30 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
         } finally {
             setIsLoading(false)
         }
-    }, [placeService, selectedPlaceTypes])
+    }, [])
 
     const handlePlaceSearch = useCallback((value: string) => {
         setSearchText(value)
 
-        if (searchTimeout) {
-            clearTimeout(searchTimeout)
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current)
         }
 
-        const newTimeout = setTimeout(() => {
+        searchTimeoutRef.current = setTimeout(() => {
             searchPlaces(value)
         }, 300)
-
-        setSearchTimeout(newTimeout)
-    }, [searchPlaces, searchTimeout])
+    }, [searchPlaces])
 
     const handlePlaceTypeChange = (types: string[]) => {
         setSelectedPlaceTypes(types)
         // Re-search if there's already search text
         if (searchText.trim()) {
-            if (searchTimeout) {
-                clearTimeout(searchTimeout)
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current)
             }
-            const newTimeout = setTimeout(() => {
+            searchTimeoutRef.current = setTimeout(() => {
                 searchPlaces(searchText)
             }, 300)
-            setSearchTimeout(newTimeout)
         }
     }
 
@@ -278,48 +258,32 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
                         : 'All place types'}
                 </div>
                 <div className="flex gap-2">
-                    <Popover open={openAutocomplete} onOpenChange={setOpenAutocomplete}>
-                        <PopoverTrigger asChild>
-                            <div className="flex-1 relative">
-                                <Input
-                                    value={searchText}
-                                    onChange={(e) => {
-                                        setSearchText(e.target.value)
-                                        handlePlaceSearch(e.target.value)
-                                        setOpenAutocomplete(true)
-                                    }}
-                                    onKeyDown={handleKeyDown}
-                                    placeholder="Search for places (e.g., restaur..."
-                                    className="pl-10"
-                                    disabled={isCreating}
-                                />
-                                <LuMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-xl text-gray-400" />
+                    <div className="flex-1 relative">
+                        <Input
+                            value={searchText}
+                            onChange={(e) => {
+                                handlePlaceSearch(e.target.value)
+                            }}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Search for places (e.g., restaur..."
+                            className="pl-10"
+                            disabled={isCreating}
+                        />
+                        <LuMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-xl text-gray-400" />
+                        {placeOptions.length > 0 && (
+                            <div className="absolute top-full left-0 right-0 z-50 mt-1 border rounded-lg bg-white shadow-lg max-h-60 overflow-y-auto">
+                                {placeOptions.map((option) => (
+                                    <div
+                                        key={option.place.placeId}
+                                        className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                                        onClick={() => handlePlaceSelect(option.value, option)}
+                                    >
+                                        {option.label}
+                                    </div>
+                                ))}
                             </div>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                            <Command>
-                                <CommandList>
-                                    <CommandEmpty>
-                                        {isLoading ? "Searching..." : "No places found"}
-                                    </CommandEmpty>
-                                    <CommandGroup>
-                                        {placeOptions.map((option) => (
-                                            <CommandItem
-                                                key={option.place.placeId}
-                                                value={option.value}
-                                                onSelect={() => {
-                                                    handlePlaceSelect(option.value, option)
-                                                    setOpenAutocomplete(false)
-                                                }}
-                                            >
-                                                {option.label}
-                                            </CommandItem>
-                                        ))}
-                                    </CommandGroup>
-                                </CommandList>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
+                        )}
+                    </div>
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -356,9 +320,9 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
             </div>
 
             {/* Desktop Layout */}
-            <div className='hidden md:grid grid-cols-17 gap-4'>
+            <div className='hidden md:grid grid-cols-17 gap-4 overflow-visible'>
                 <div className="col-span-2"></div>
-                <div className="col-span-12">
+                <div className="col-span-12 overflow-visible">
                     <div className="mb-2">
                         <div className="text-sm text-gray-600">
                             {selectedPlaceTypes.length > 0
@@ -366,53 +330,37 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
                                 : 'All place types'}
                         </div>
                     </div>
-                    <Popover open={openAutocomplete} onOpenChange={setOpenAutocomplete}>
-                        <PopoverTrigger asChild>
-                            <div className="w-full relative">
-                                <Input
-                                    value={searchText}
-                                    onChange={(e) => {
-                                        setSearchText(e.target.value)
-                                        handlePlaceSearch(e.target.value)
-                                        setOpenAutocomplete(true)
-                                    }}
-                                    onKeyDown={handleKeyDown}
-                                    placeholder={selectedPlaceTypes.length > 0
-                                        ? `Search ${placeTypes.filter(t => selectedPlaceTypes.includes(t.value)).map(t => t.label).join(', ')}`
-                                        : "Search for places (e.g., restaurants, hotels, attractions)"
-                                    }
-                                    className="pl-10"
-                                    disabled={isCreating}
-                                />
-                                <LuMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-xl text-gray-400" />
+                    <div className="w-full relative">
+                        <Input
+                            value={searchText}
+                            onChange={(e) => {
+                                handlePlaceSearch(e.target.value)
+                            }}
+                            onKeyDown={handleKeyDown}
+                            placeholder={selectedPlaceTypes.length > 0
+                                ? `Search ${placeTypes.filter(t => selectedPlaceTypes.includes(t.value)).map(t => t.label).join(', ')}`
+                                : "Search for places (e.g., restaurants, hotels, attractions)"
+                            }
+                            className="pl-10"
+                            disabled={isCreating}
+                        />
+                        <LuMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-xl text-gray-400" />
+                        {placeOptions.length > 0 && (
+                            <div className="absolute top-full left-0 right-0 z-50 mt-1 border rounded-lg bg-white shadow-lg max-h-60 overflow-y-auto">
+                                {placeOptions.map((option) => (
+                                    <div
+                                        key={option.place.placeId}
+                                        className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                                        onClick={() => handlePlaceSelect(option.value, option)}
+                                    >
+                                        {option.label}
+                                    </div>
+                                ))}
                             </div>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                            <Command>
-                                <CommandList>
-                                    <CommandEmpty>
-                                        {isLoading ? "Searching..." : "No places found"}
-                                    </CommandEmpty>
-                                    <CommandGroup>
-                                        {placeOptions.map((option) => (
-                                            <CommandItem
-                                                key={option.place.placeId}
-                                                value={option.value}
-                                                onSelect={() => {
-                                                    handlePlaceSelect(option.value, option)
-                                                    setOpenAutocomplete(false)
-                                                }}
-                                            >
-                                                {option.label}
-                                            </CommandItem>
-                                        ))}
-                                    </CommandGroup>
-                                </CommandList>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
+                        )}
+                    </div>
                 </div>
-                <div className="col-span-3 flex gap-2 pt-12">
+                <div className="col-span-3 flex gap-2 pt-7 items-start">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -447,10 +395,11 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
                     </TooltipProvider>
                 </div>
             </div>
+            {/* TODO: SmallPlaceCard - temporarily disabled
             <div className="hidden md:grid grid-cols-17">
                 <div className="col-span-2"></div>
                 <div className="col-span-14 relative">
-                    <div className="py-4 px-2 flex gap-4 overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    <div className="pt-2 px-2 flex gap-4 overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {
                             listPlaceSuggestions.map((place) => (
                                 <SmallPlaceCard key={place.value} />
@@ -459,6 +408,7 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
                     </div>
                 </div>
             </div>
+            */}
         </div>
     )
 }
