@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { LuMapPin, LuSearch } from "react-icons/lu"
 import { FooterSection } from '@/components/landing'
 import { useTrips } from "@/hooks/useTripQueries"
+import CheckInSection from "@/components/profile/CheckInSection"
 import { useAuth } from "@/hooks/useAuth"
 import TripCard from "@/components/trip/TripCard"
 import GuideCard from "@/components/guide/GuideCard"
@@ -122,9 +123,10 @@ const TripsPage = () => {
                         </div>
                     </div>
                 </div>
-                {/* Add visited places - Responsive */}
-                <div className="w-full bg-gray-100 p-3 md:p-4 rounded-2xl mt-6 md:mt-8 min-h-[200px]">
-                    <h3 className="text-base md:text-lg font-semibold">{t('visitedPlaces.title')}</h3>
+                {/* Visited Places Section */}
+                <div className="mt-6 md:mt-8">
+                    <h3 className="text-base md:text-lg font-semibold mb-3">{t('visitedPlaces.title')}</h3>
+                    <CheckInSection userId={user?.id} isOwnProfile={true} />
                 </div>
 
                 {/* Tabs Section - Responsive */}
