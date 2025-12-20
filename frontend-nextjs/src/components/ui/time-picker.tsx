@@ -103,9 +103,9 @@ export function TimePicker({
           {displayValue}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0" align="start" collisionPadding={16}>
         <div className="flex">
-          <div className="border-r">
+          <div className="border-r w-20">
             <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
               Hour
             </div>
@@ -125,7 +125,7 @@ export function TimePicker({
               </div>
             </ScrollArea>
           </div>
-          <div className={format === "12h" ? "border-r" : ""}>
+          <div className={cn("w-20", format === "12h" ? "border-r" : "")}>
             <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
               Minute
             </div>
@@ -146,7 +146,7 @@ export function TimePicker({
             </ScrollArea>
           </div>
           {format === "12h" && (
-            <div>
+            <div className="w-16">
               <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
                 Period
               </div>

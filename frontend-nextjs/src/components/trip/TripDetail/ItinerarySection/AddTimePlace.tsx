@@ -54,29 +54,31 @@ const AddTimePlace = ({ startTime, endTime, onTimeUpdate }: AddTimePlaceProps) =
                     <span className="font-bold text-xs">{displayText}</span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-4">
-                <div>
-                    <div className="flex items-center gap-2 mb-2">
+            <PopoverContent className="w-[320px] p-4" align="start" sideOffset={4} collisionPadding={16}>
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2">
                         <TimePicker
                             value={localStartTime}
                             onChange={(value) => setLocalStartTime(value)}
                             placeholder="Start time"
+                            className="flex-1"
                         />
-                        <span>-</span>
+                        <span className="text-muted-foreground">-</span>
                         <TimePicker
                             value={localEndTime}
                             onChange={(value) => setLocalEndTime(value)}
                             placeholder="End time"
+                            className="flex-1"
                         />
                     </div>
 
-                    <div className="flex gap-2 p-2">
-                        <Button variant="outline" className="w-full" onClick={handleClear}>
+                    <div className="flex gap-2">
+                        <Button variant="outline" className="flex-1" onClick={handleClear}>
                             Clear
                         </Button>
                         <Button
                             variant="default"
-                            className="w-full"
+                            className="flex-1"
                             onClick={handleSave}
                             disabled={!localStartTime || !localEndTime}
                         >

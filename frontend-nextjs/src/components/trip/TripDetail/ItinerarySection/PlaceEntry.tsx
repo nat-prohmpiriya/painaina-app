@@ -191,7 +191,7 @@ const PlaceEntry = ({ entry }: PlaceEntryProps) => {
         <div className="bg-gray-100 p-4 rounded-lg flex flex-col gap-2 min-h-48 max-h-48">
             <div className="relative">
                 <input
-                    className="!border-0 !outline-none focus:!outline-none text-lg font-semibold w-full bg-transparent"
+                    className="border-0! outline-none! focus:outline-none! text-lg font-semibold w-full bg-transparent"
                     placeholder="Place name"
                     value={localEntry.title}
                     onChange={handleTitleChange}
@@ -204,7 +204,7 @@ const PlaceEntry = ({ entry }: PlaceEntryProps) => {
             </div>
             <div className="relative flex-1">
                 <textarea
-                    className="h-full !border-0 !outline-none focus:!outline-none w-full resize-none bg-transparent"
+                    className="h-full border-0! outline-none! focus:outline-none! w-full resize-none bg-transparent"
                     placeholder={entry?.place?.editorialSummary?.overview || "Add description..."}
                     value={localEntry.description}
                     onChange={handleDescriptionChange}
