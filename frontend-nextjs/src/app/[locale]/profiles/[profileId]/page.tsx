@@ -58,7 +58,7 @@ const ProfileContent = ({ profileId, currentUser }: ProfileContentProps) => {
     // Fetch profile user data (only if viewing someone else's profile)
     // This hook must be called unconditionally
     const { data: profileUser, isLoading: isLoadingProfile } = useUser(
-        profileIdStr,
+        profileIdStr || '',
         !isOwnProfile && !!currentUser // Only fetch if NOT viewing own profile AND user exists
     );
 

@@ -38,6 +38,12 @@ const nextConfig: NextConfig = {
         hostname: 'images.unsplash.com',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5001',
+        pathname: '/api/v1/places/photo/**',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
   },

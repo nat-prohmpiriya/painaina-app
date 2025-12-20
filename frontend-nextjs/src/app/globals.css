@@ -44,86 +44,88 @@
 }
 
 :root {
-  --radius: 0.375rem;
-  /* White + Black + Red Theme - Light Mode */
-  --background: #FFFFFF;        /* Pure white */
-  --foreground: #0A0A0A;        /* Near black for text */
-  --card: #FFFFFF;
-  --card-foreground: #0A0A0A;
-  --popover: #FFFFFF;
-  --popover-foreground: #0A0A0A;
-  --primary: #DC2626;           /* Red */
-  --primary-foreground: #FFFFFF; /* White */
-  --secondary: #0A0A0A;         /* Black */
-  --secondary-foreground: #FFFFFF;
-  --muted: #F5F5F5;             /* Light gray */
-  --muted-foreground: #737373;  /* Muted gray */
-  --accent: #DC2626;            /* Red accent */
-  --accent-foreground: #FFFFFF;
-  --destructive: #B91C1C;       /* Darker red */
-  --border: #E5E5E5;            /* Neutral border */
-  --input: #E5E5E5;
-  --ring: #DC2626;              /* Red ring */
-  --chart-1: #DC2626;           /* Red */
-  --chart-2: #0A0A0A;           /* Black */
-  --chart-3: #EF4444;           /* Light red */
-  --chart-4: #F87171;           /* Lighter red */
-  --chart-5: #FCA5A5;           /* Pale red */
-  --sidebar: #FAFAFA;           /* Near white */
-  --sidebar-foreground: #0A0A0A;
-  --sidebar-primary: #DC2626;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F5F5F5;
-  --sidebar-accent-foreground: #0A0A0A;
-  --sidebar-border: #E5E5E5;
-  --sidebar-ring: #DC2626;
+  --radius: 0.625rem;
+  /* Shadcn Default Theme - Light Mode */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);  /* red-500 */
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 
-  /* Custom colors for landing page */
-  --cream: #F5F5F5;             /* Light gray */
-  --accent-red: #DC2626;        /* Red */
-  --accent-red-light: #EF4444;
-  --accent-red-dark: #B91C1C;
+  /* Custom colors */
+  --cream: oklch(0.97 0 0);
+  --accent-red: oklch(0.577 0.245 27.325);        /* red-500 */
+  --accent-red-light: oklch(0.637 0.237 25.331);  /* red-400 */
+  --accent-red-dark: oklch(0.505 0.213 27.518);   /* red-600 */
 }
 
 .dark {
-  /* Dark Mode - Black + Red + White */
-  --background: #0A0A0A;        /* Near black */
-  --foreground: #FFFFFF;        /* White */
-  --card: #171717;              /* Dark gray */
-  --card-foreground: #FFFFFF;
-  --popover: #171717;
-  --popover-foreground: #FFFFFF;
-  --primary: #DC2626;           /* Red */
-  --primary-foreground: #FFFFFF;
-  --secondary: #262626;         /* Dark gray */
-  --secondary-foreground: #FFFFFF;
-  --muted: #262626;             /* Dark gray */
-  --muted-foreground: #A3A3A3;  /* Light muted */
-  --accent: #DC2626;            /* Red */
-  --accent-foreground: #FFFFFF;
-  --destructive: #F87171;       /* Light red */
-  --border: #262626;            /* Dark border */
-  --input: #262626;
-  --ring: #DC2626;              /* Red ring */
-  --chart-1: #DC2626;           /* Red */
-  --chart-2: #FFFFFF;           /* White */
-  --chart-3: #EF4444;           /* Light red */
-  --chart-4: #F87171;           /* Lighter red */
-  --chart-5: #FCA5A5;           /* Pale red */
-  --sidebar: #171717;
-  --sidebar-foreground: #FFFFFF;
-  --sidebar-primary: #DC2626;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #262626;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #262626;
-  --sidebar-ring: #DC2626;
+  /* Shadcn Default Theme - Dark Mode */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.577 0.245 27.325);  /* red-500 */
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
 
-  /* Custom colors for landing page - dark mode */
-  --cream: #171717;             /* Dark gray */
-  --accent-red: #DC2626;        /* Red */
-  --accent-red-light: #EF4444;
-  --accent-red-dark: #B91C1C;
+  /* Custom colors - dark mode */
+  --cream: oklch(0.205 0 0);
+  --accent-red: oklch(0.577 0.245 27.325);        /* red-500 */
+  --accent-red-light: oklch(0.637 0.237 25.331);  /* red-400 */
+  --accent-red-dark: oklch(0.505 0.213 27.518);   /* red-600 */
 }
 
 @layer base {
@@ -169,3 +171,4 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Chrome, Safari and Opera */
 }
+

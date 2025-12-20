@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import {
     Dialog,
     DialogContent,
+    DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -299,9 +300,10 @@ const AddCheckInModal = ({ onSuccess }: AddCheckInModalProps) => {
 
             <Dialog open={isOpen} onOpenChange={() => {}}>
                 <DialogContent
-                    className="!fixed !inset-0 !top-0 !left-0 !translate-x-0 !translate-y-0 !h-screen !w-screen !max-w-none !p-0 !gap-0 !rounded-none !border-0"
+                    className="fixed! inset-0! top-0! left-0! translate-x-0! translate-y-0! h-screen! w-screen! max-w-none! p-0! gap-0! rounded-none! border-0!"
                     showCloseButton={false}
                 >
+                    <DialogTitle className="sr-only">{t('addPlaces')}</DialogTitle>
                     {/* Map Container */}
                     <div className="relative h-full w-full">
                         <FullscreenMap
@@ -312,7 +314,7 @@ const AddCheckInModal = ({ onSuccess }: AddCheckInModalProps) => {
                         />
 
                         {/* Header Overlay */}
-                        <div className="absolute top-0 left-0 right-0 p-4 flex items-start justify-between z-[600]">
+                        <div className="absolute top-0 left-0 right-0 p-4 flex items-start justify-between z-600">
                             {/* Stats Bar (Left) */}
                             <div className="bg-black/75 text-white p-3 rounded-lg shadow-lg flex flex-col gap-2">
                                 <div className="flex items-center gap-4">
@@ -347,7 +349,7 @@ const AddCheckInModal = ({ onSuccess }: AddCheckInModalProps) => {
 
                                 {/* Search Results Dropdown */}
                                 {showResults && hasResults && (
-                                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl max-h-[400px] overflow-y-auto z-[700]">
+                                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl max-h-[400px] overflow-y-auto z-700">
                                         {/* Countries */}
                                         {searchResults.countries.length > 0 && (
                                             <div className="p-2">
@@ -408,7 +410,7 @@ const AddCheckInModal = ({ onSuccess }: AddCheckInModalProps) => {
 
                         {/* Details Form (Bottom Sheet) */}
                         {showDetailsForm && selectedLocation && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-[600] p-6">
+                            <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-600 p-6">
                                 <div className="max-w-lg mx-auto">
                                     {/* Close button */}
                                     <button
