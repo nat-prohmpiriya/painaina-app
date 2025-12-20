@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePainainaApi } from '@/services/api-client'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { adminService, type OverviewStats, type SystemHealth } from '@/services/admin.service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -89,6 +90,7 @@ function HealthIndicator({ status }: { status: 'healthy' | 'degraded' | 'down' }
 
 export default function AdminDashboard() {
     usePainainaApi() // Initialize API with auth
+    useDocumentTitle('Dashboard')
 
     const [stats, setStats] = useState<OverviewStats | null>(null)
     const [health, setHealth] = useState<SystemHealth | null>(null)

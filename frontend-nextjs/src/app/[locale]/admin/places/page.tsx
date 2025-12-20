@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePainainaApi } from '@/services/api-client'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { adminService, type Place, type PlaceCacheListResponse, type PlaceCacheStats } from '@/services/admin.service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -34,6 +35,7 @@ import { formatDistanceToNow } from 'date-fns'
 
 export default function AdminPlacesPage() {
     usePainainaApi()
+    useDocumentTitle('Places Cache')
     const { showSuccess, showError } = useToastMessage()
 
     const [data, setData] = useState<PlaceCacheListResponse | null>(null)
@@ -303,7 +305,7 @@ export default function AdminPlacesPage() {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-500">
-                                                {formatDistanceToNow(new Date(place.updatedAt), { addSuffix: true })}
+                                                {place.updatedAt ? formatDistanceToNow(new Date(place.updatedAt), { addSuffix: true }) : '-'}
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">

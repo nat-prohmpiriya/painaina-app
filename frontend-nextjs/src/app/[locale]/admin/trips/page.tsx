@@ -51,8 +51,9 @@ export default function AdminTripsPage() {
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
+    const [typeFilter, setTypeFilter] = useState('all')
     const [page, setPage] = useState(1)
-    const limit = 20
+    const [limit, setLimit] = useState(20)
 
     // Delete dialog
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -64,7 +65,7 @@ export default function AdminTripsPage() {
             setLoading(true)
             const result = await adminService.getTrips({
                 search: search || undefined,
-                type: 'trip',
+                type: typeFilter === 'all' ? undefined : typeFilter,
                 status: statusFilter === 'all' ? undefined : statusFilter,
                 page,
                 limit
@@ -79,7 +80,7 @@ export default function AdminTripsPage() {
 
     useEffect(() => {
         fetchTrips()
-    }, [page, statusFilter])
+    }, [page, statusFilter, typeFilter, limit])
 
     const handleSearch = () => {
         setPage(1)
@@ -116,6 +117,17 @@ export default function AdminTripsPage() {
         }
     }
 
+    const getTypeBadge = (type: string) => {
+        switch (type) {
+            case 'guide':
+                return <Badge className="bg-blue-100 text-blue-800">Guide</Badge>
+            case 'trip':
+                return <Badge className="bg-purple-100 text-purple-800">Trip</Badge>
+            default:
+                return <Badge variant="outline">{type}</Badge>
+        }
+    }
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -139,6 +151,16 @@ export default function AdminTripsPage() {
                                 <Search className="h-4 w-4" />
                             </Button>
                         </div>
+                        <Select value={typeFilter} onValueChange={setTypeFilter}>
+                            <SelectTrigger className="w-[130px]">
+                                <SelectValue placeholder="All Types" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Types</SelectItem>
+                                <SelectItem value="guide">Guide</SelectItem>
+                                <SelectItem value="trip">Trip</SelectItem>
+                            </SelectContent>
+                        </Select>
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
                             <SelectTrigger className="w-[150px]">
                                 <SelectValue placeholder="All Status" />
@@ -161,8 +183,9 @@ export default function AdminTripsPage() {
                         <table className="w-full">
                             <thead className="bg-gray-50 border-b">
                                 <tr>
-                                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Trip</th>
+                                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                                     <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
+                                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                                     <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                     <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Stats</th>
                                     <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
@@ -178,6 +201,7 @@ export default function AdminTripsPage() {
                                                 <Skeleton className="h-3 w-32" />
                                             </td>
                                             <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                                            <td className="px-6 py-4"><Skeleton className="h-6 w-16" /></td>
                                             <td className="px-6 py-4"><Skeleton className="h-6 w-20" /></td>
                                             <td className="px-6 py-4"><Skeleton className="h-4 w-16" /></td>
                                             <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
@@ -186,7 +210,7 @@ export default function AdminTripsPage() {
                                     ))
                                 ) : !data?.trips?.length ? (
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                                        <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                                             No trips found
                                         </td>
                                     </tr>
@@ -210,6 +234,9 @@ export default function AdminTripsPage() {
                                                     )}
                                                     <span className="text-sm text-gray-900">{trip.owner?.name || 'Unknown'}</span>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {getTypeBadge(trip.type)}
                                             </td>
                                             <td className="px-6 py-4">
                                                 {getStatusBadge(trip.status)}
@@ -257,12 +284,40 @@ export default function AdminTripsPage() {
                     </div>
 
                     {/* Pagination */}
-                    {data && data.totalPages > 1 && (
+                    {data && (
                         <div className="flex items-center justify-between px-6 py-4 border-t">
-                            <div className="text-sm text-gray-500">
-                                Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, data.total)} of {data.total} trips
+                            <div className="flex items-center gap-4">
+                                <div className="text-sm text-gray-500">
+                                    {data.total > 0
+                                        ? `Showing ${((page - 1) * limit) + 1} to ${Math.min(page * limit, data.total)} of ${data.total} items`
+                                        : 'No items found'
+                                    }
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-gray-500">Per page:</span>
+                                    <Select
+                                        value={limit.toString()}
+                                        onValueChange={(val) => {
+                                            setLimit(Number(val))
+                                            setPage(1)
+                                        }}
+                                    >
+                                        <SelectTrigger className="w-[70px] h-8">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="10">10</SelectItem>
+                                            <SelectItem value="20">20</SelectItem>
+                                            <SelectItem value="50">50</SelectItem>
+                                            <SelectItem value="100">100</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-500">
+                                    Page {page} of {data.totalPages || 1}
+                                </span>
                                 <Button
                                     size="sm"
                                     variant="outline"
@@ -274,8 +329,8 @@ export default function AdminTripsPage() {
                                 <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
-                                    disabled={page === data.totalPages}
+                                    onClick={() => setPage(p => Math.min(data.totalPages || 1, p + 1))}
+                                    disabled={page >= (data.totalPages || 1)}
                                 >
                                     <ChevronRight className="h-4 w-4" />
                                 </Button>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePainainaApi } from '@/services/api-client'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { adminService, type Trip, type TripListResponse } from '@/services/admin.service'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -41,6 +42,7 @@ import { usePathname } from 'next/navigation'
 
 export default function AdminGuidesPage() {
     usePainainaApi()
+    useDocumentTitle('Guides')
     const { showSuccess, showError } = useToastMessage()
     const pathname = usePathname()
     const locale = pathname.split('/')[1] || 'en'

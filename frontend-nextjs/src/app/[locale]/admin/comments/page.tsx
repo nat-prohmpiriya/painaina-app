@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePainainaApi } from '@/services/api-client'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { adminService, type Comment, type CommentListResponse } from '@/services/admin.service'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -38,6 +39,7 @@ import { formatDistanceToNow } from 'date-fns'
 
 export default function AdminCommentsPage() {
     usePainainaApi()
+    useDocumentTitle('Comments')
     const { showSuccess, showError } = useToastMessage()
 
     const [data, setData] = useState<CommentListResponse | null>(null)
@@ -222,7 +224,7 @@ export default function AdminCommentsPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-500">
-                                                {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                                                {comment.createdAt ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true }) : '-'}
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <Button
