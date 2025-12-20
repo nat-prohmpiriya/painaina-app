@@ -1,6 +1,7 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, X, Route, Info, Camera, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Info, Camera, Star } from "lucide-react";
+// import { Route } from "lucide-react"; // TODO: Uncomment when implementing route optimization
 import { useState, forwardRef, useImperativeHandle } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AboutTab from './tabs/AboutTab'
@@ -75,11 +76,13 @@ const MapBottomSheet = forwardRef<MapBottomSheetRef, MapBottomSheetProps>((props
                             onClick={goToNextPlace}
                         />
                     </div>
+{/* TODO: Implement route optimization (PRO feature)
                     <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl py-2 px-3 flex items-center space-x-2 cursor-pointer hover:bg-white transition-all duration-200">
                         <Route className="text-blue-600 h-4 w-4" />
                         <span className="font-semibold text-sm text-gray-700">Optimize route</span>
                         <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 py-1 rounded-lg text-xs font-bold">PRO</span>
                     </div>
+                    */}
                 </div>
                 <div className="h-10 w-10 bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105">
                     <X size={20} onClick={handleClose} className="text-gray-600" />
@@ -100,16 +103,16 @@ const MapBottomSheet = forwardRef<MapBottomSheetRef, MapBottomSheetProps>((props
                 {/* Tabs */}
                 <div className="px-3">
                     <Tabs defaultValue="about" className="h-full">
-                        <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="about" className="text-xs font-bold">
+                        <TabsList className="grid w-full grid-cols-3 rounded-full my-3">
+                            <TabsTrigger value="about" className="text-xs font-bold rounded-full">
                                 <Info size={16} className="inline-block mr-2" />
                                 About
                             </TabsTrigger>
-                            <TabsTrigger value="photos" className="text-xs font-bold">
+                            <TabsTrigger value="photos" className="text-xs font-bold rounded-full">
                                 <Camera size={16} className="inline-block mr-2" />
                                 Photos
                             </TabsTrigger>
-                            <TabsTrigger value="reviews" className="text-xs font-bold">
+                            <TabsTrigger value="reviews" className="text-xs font-bold rounded-full">
                                 <Star size={16} className="inline-block mr-2" />
                                 Reviews
                             </TabsTrigger>

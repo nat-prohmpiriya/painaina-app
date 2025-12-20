@@ -179,14 +179,14 @@ const AddToTripButton: React.FC<AddToTripButtonProps> = ({ placeDetails }) => {
             <PopoverTrigger asChild>
                 <Button
                     variant="default"
-                    className="rounded-full"
+                    className="rounded-full bg-red-500 hover:bg-red-600 text-white"
                     disabled={!placeDetails}
                 >
                     <BookmarkPlus className="h-4 w-4 mr-2" />
                     <span className='font-semibold'>Add To Trip</span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-72 max-h-96 overflow-y-auto p-0">
+            <PopoverContent className="w-72 max-h-96 overflow-y-auto p-0 z-[9999]" side="bottom" align="start">
                 <div className="p-4 border-b">
                     <h4 className="font-semibold">
                         {step === 'trips' ? 'Select Trip' : selectedTrip?.title}

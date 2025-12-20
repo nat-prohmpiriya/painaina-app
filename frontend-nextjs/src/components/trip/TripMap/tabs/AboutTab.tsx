@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Empty } from '@/components/ui/empty'
 import Image from 'next/image'
 import { useState } from 'react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import AddToTripButton from "../AddToTripButton";
 import { PlaceInfo } from "@/interfaces/itinerary.interface";
 
@@ -51,20 +51,20 @@ const AboutTab: React.FC<AboutTabProps> = ({ placeDetails }) => {
                             <span className="text-sm text-gray-500">({placeDetails?.userRatingsTotal} reviews)</span>
                         </div>
                         <div className="flex gap-4">
-                            <Info size={28} className="flex-shrink-0" />
+                            <Info size={28} className="shrink-0" />
                             <p className="text-gray-600 text-sm text-wrap">{placeDetails?.editorialSummary?.overview}</p>
                         </div>
                         <div className="flex gap-4">
-                            <MapPin size={22} className="flex-shrink-0" />
+                            <MapPin size={22} className="shrink-0" />
                             <p className="text-gray-600 text-sm">{placeDetails?.address}</p>
                         </div>
 
                         <div className="flex gap-4">
-                            <Phone size={18} className="flex-shrink-0" />
+                            <Phone size={18} className="shrink-0" />
                             <p className="text-sm text-gray-600">{placeDetails?.phone}</p>
                         </div>
                         <p className="flex gap-4">
-                            <Globe size={20} className="text-gray-600 flex-shrink-0" />
+                            <Globe size={20} className="text-gray-600 shrink-0" />
                             {
                                 placeDetails?.website
                                     ? (
@@ -77,7 +77,7 @@ const AboutTab: React.FC<AboutTabProps> = ({ placeDetails }) => {
 
                         </p>
                         <p className="flex gap-4">
-                            <Clock size={18} className="text-gray-500 mt-1 flex-shrink-0" />
+                            <Clock size={18} className="text-gray-500 mt-1 shrink-0" />
                             <span className={placeDetails?.openingHours?.openNow ? 'text-green-600' : 'text-red-600'}>
                                 {placeDetails?.openingHours?.openNow ? 'Open now' : 'Closed'}
                             </span>
@@ -87,9 +87,9 @@ const AboutTab: React.FC<AboutTabProps> = ({ placeDetails }) => {
 
                     <div className="col-span-2">
                         {placeDetails?.photos?.[0] && (
-                            <div className="ml-4 relative h-[250px] cursor-pointer" onClick={() => handlePreview(getPhotoUrl(placeDetails.photos[0].photoReference, 600))}>
+                            <div className="ml-4 relative h-[250px] cursor-pointer" onClick={() => handlePreview(getPhotoUrl(placeDetails.photos?.[0]?.photoReference ?? '', 600))}>
                                 <Image
-                                    src={getPhotoUrl(placeDetails.photos[0].photoReference, 300)}
+                                    src={getPhotoUrl(placeDetails.photos?.[0]?.photoReference ?? '', 300)}
                                     alt={`${placeDetails.name} - Photo`}
                                     fill
                                     className="rounded-lg object-cover shadow-sm hover:shadow-md transition-shadow"
@@ -132,6 +132,7 @@ const AboutTab: React.FC<AboutTabProps> = ({ placeDetails }) => {
             {/* Image Preview Dialog */}
             <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
                 <DialogContent className="max-w-4xl">
+                    <DialogTitle className="sr-only">Image Preview</DialogTitle>
                     {previewImage && (
                         <div className="relative w-full h-[80vh]">
                             <Image

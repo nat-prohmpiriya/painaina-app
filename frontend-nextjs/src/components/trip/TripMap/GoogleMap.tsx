@@ -6,7 +6,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import MapBottomSheet from './MapBottomSheet'
-import { Search, Layers, Bed, Map as MapIcon } from 'lucide-react'
+import { Map as MapIcon } from 'lucide-react'
+// import { Search, Layers, Bed } from 'lucide-react' // TODO: Uncomment when implementing these features
 import { PlaceInfo } from '@/interfaces/itinerary.interface'
 import { ItineraryWithEntries } from '@/interfaces/trip.interface'
 
@@ -185,9 +186,11 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ itineraries }) => {
             </GoogleMapReact>
             <div className='absolute top-0 right-0 w-[10%] z-400 h-36'>
                 <div className='flex flex-col items-end p-4 space-y-2'>
+                    {/* TODO: Implement search functionality
                     <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
                         <Search size={18} />
                     </div>
+                    */}
                     <Popover>
                         <PopoverTrigger asChild>
                             <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
@@ -213,12 +216,16 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ itineraries }) => {
                             </RadioGroup>
                         </PopoverContent>
                     </Popover>
+                    {/* TODO: Implement layers functionality
                     <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
                         <Layers size={18} />
                     </div>
+                    */}
+                    {/* TODO: Implement accommodation search
                     <div className=' rounded-full h-8 w-8 bg-white/75 flex items-center justify-center cursor-pointer hover:bg-white/100'>
                         <Bed size={18} />
                     </div>
+                    */}
                 </div>
 
             </div>
