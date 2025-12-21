@@ -52,8 +52,8 @@ const MapWithMarkers = dynamic(() => import('react-leaflet').then(async (mod) =>
                 attributionControl={true}
             >
                 <TileLayer
-                    url="https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png"
-                    attribution='&copy; Stadia Maps &copy; OpenMapTiles &copy; OpenStreetMap'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
                 {checkins.map((checkin, index) => (
                     <Marker
