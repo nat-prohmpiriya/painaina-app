@@ -3,6 +3,9 @@ name: Deploy Backend to Development
 on:
   push:
     branches: [ develop ]
+    paths:
+      - 'backend-go/**'
+      - '.github/workflows/deploy-backend-dev.yml'
 
 permissions:
   id-token: write
@@ -29,7 +32,7 @@ jobs:
     - name: Parse environment variables
       run: |
         # Create temporary env file and source it
-        echo "${{ secrets.ENV_FILE }}" > .temp_env
+        echo "${{ secrets.ENV_FILE_BACKEND_DEV }}" > .temp_env
         
         # Debug: Show first few lines
         echo "=== First 10 lines of ENV_FILE ==="
@@ -65,12 +68,13 @@ jobs:
         echo "=== Checking parsed environment variables ==="
         echo "MONGODB_URI exists: ${{ env.MONGODB_URI != '' }}"
         echo "FIREBASE_PROJECT_ID exists: ${{ env.FIREBASE_PROJECT_ID != '' }}"
-        echo "Number of lines in ENV_FILE: $(echo "${{ secrets.ENV_FILE }}" | wc -l)"
+        echo "Number of lines in ENV_FILE_BACKEND_DEV: $(echo "${{ secrets.ENV_FILE_BACKEND_DEV }}" | wc -l)"
 
     - name: Configure Docker for Artifact Registry
       run: gcloud auth configure-docker asia-southeast1-docker.pkg.dev
 
     - name: Build Docker image
+      working-directory: backend-go
       run: |
         docker build -t asia-southeast1-docker.pkg.dev/painaina-dev/painaina-images/painaina-api:dev-${{ github.sha }} .
 

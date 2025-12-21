@@ -1,8 +1,8 @@
-name: Deploy Frontend to Development
+name: Deploy Frontend to Production
 
 on:
   push:
-    branches: [ develop ]
+    tags: [ 'v*' ]
 
 permissions:
   id-token: write
@@ -11,8 +11,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: develop
-    
+    environment: production
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -26,32 +26,32 @@ jobs:
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
 
-    - name: Parse environment variables  
+    - name: Parse environment variables
       run: |
         # Create temporary env file and parse it
-        echo "${{ secrets.ENV_FILE }}" > .temp_env
-        
+        echo "${{ secrets.ENV_FILE_WEB_PROD }}" > .temp_env
+
         # Parse and set environment variables
         while IFS= read -r line || [[ -n "$line" ]]; do
           # Skip empty lines and comments
           if [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]]; then
             continue
           fi
-          
+
           # Check if line contains '='
           if [[ "$line" == *"="* ]]; then
             # Extract key and value
             key="${line%%=*}"
             value="${line#*=}"
-            
+
             # Clean key (remove spaces)
             key=$(echo "$key" | tr -d '[:space:]')
-            
+
             # Set environment variable
             echo "${key}=${value}" >> $GITHUB_ENV
           fi
         done < .temp_env
-        
+
         # Cleanup
         rm .temp_env
 
@@ -64,6 +64,7 @@ jobs:
         sudo systemctl restart docker || true
 
     - name: Build Docker image
+      working-directory: frontend-nextjs
       run: |
         docker build \
           --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="${{ env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}" \
@@ -74,13 +75,13 @@ jobs:
           --build-arg NEXT_PUBLIC_UNSPLASH_ACCESS_KEY="${{ env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY }}" \
           --build-arg NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN="${{ env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}" \
           --build-arg NEXT_PUBLIC_GA_ID="${{ env.NEXT_PUBLIC_GA_ID }}" \
-          -t asia-southeast1-docker.pkg.dev/painaina-dev/painaina-images/painaina-web:dev-${{ github.sha }} .
+          -t asia-southeast1-docker.pkg.dev/painaina-dev/painaina-images/painaina-web:prod-${{ github.sha }} .
 
     - name: Push Docker image with retry
       run: |
         for i in {1..3}; do
           echo "Push attempt $i/3"
-          if docker push asia-southeast1-docker.pkg.dev/painaina-dev/painaina-images/painaina-web:dev-${{ github.sha }}; then
+          if docker push asia-southeast1-docker.pkg.dev/painaina-dev/painaina-images/painaina-web:prod-${{ github.sha }}; then
             echo "Push successful on attempt $i"
             break
           else
@@ -118,14 +119,14 @@ jobs:
 
     - name: Deploy to Cloud Run
       run: |
-        gcloud run deploy painaina-web-development \
-          --image asia-southeast1-docker.pkg.dev/painaina-dev/painaina-images/painaina-web:dev-${{ github.sha }} \
+        gcloud run deploy painaina-web-production \
+          --image asia-southeast1-docker.pkg.dev/painaina-dev/painaina-images/painaina-web:prod-${{ github.sha }} \
           --platform managed \
           --region asia-southeast1 \
           --allow-unauthenticated \
           --port 3000 \
-          --memory 1Gi \
-          --cpu 1 \
-          --max-instances 10 \
+          --memory 2Gi \
+          --cpu 2 \
+          --max-instances 20 \
           --timeout=600 \
           --env-vars-file=env-vars.yaml
