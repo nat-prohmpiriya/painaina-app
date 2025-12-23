@@ -11,6 +11,7 @@ import { useTripContext } from "@/contexts/TripContext"
 import InviteMemberModal from "./InviteMemberModal"
 import ChangeCoverModal from "./ChangeCoverModal"
 import DeleteTripModal from "./DeleteTripModal"
+import ConvertToGuideModal from "./ConvertToGuideModal"
 import { LuEllipsisVertical, LuUser } from "react-icons/lu"
 import { canDeleteTrip } from '@/lib/permissions'
 import { useAuth } from '@/hooks/useAuth'
@@ -31,6 +32,7 @@ const TripBanner = () => {
     const descriptionTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
     const [isSaving, setIsSaving] = useState({ title: false, description: false })
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [isConvertModalOpen, setIsConvertModalOpen] = useState(false)
 
     // check path is guide page by nextjs usePathname
     const pathname = usePathname()
@@ -149,8 +151,8 @@ const TripBanner = () => {
                                         Delete Trip
                                     </DropdownMenuItem>
                                 )}
-                                <DropdownMenuItem onClick={() => console.log('Create Guides clicked')}>
-                                    Convert to Guides
+                                <DropdownMenuItem onClick={() => setIsConvertModalOpen(true)}>
+                                    Convert to Guide
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -230,6 +232,7 @@ const TripBanner = () => {
                 </div>
             </div>
             <DeleteTripModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} />
+            <ConvertToGuideModal isOpen={isConvertModalOpen} onClose={() => setIsConvertModalOpen(false)} />
         </div>
     )
 }
