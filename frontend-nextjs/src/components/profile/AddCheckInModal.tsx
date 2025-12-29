@@ -92,8 +92,8 @@ const FullscreenMap = dynamic(() => import('react-leaflet').then(async (mod) => 
                 worldCopyJump={true}
             >
                 <TileLayer
-                    url="https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png"
-                    attribution='&copy; Stadia Maps &copy; OpenMapTiles &copy; OpenStreetMap'
+                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                 />
                 <ZoomControl position="bottomright" />
                 <MapController
