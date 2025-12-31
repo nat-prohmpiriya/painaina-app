@@ -69,16 +69,16 @@ export default function AddPackingItemModal({ onAdd, isLoading }: AddPackingItem
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-1">
+        <Button size="sm" className="gap-1" data-testid="add-packing-item-trigger">
           <LuPlus size={16} />
           <span className="hidden sm:inline">{t('addItem')}</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" data-testid="add-packing-item-dialog">
         <DialogHeader>
           <DialogTitle>{t('addItemTitle')}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" data-testid="add-packing-item-form">
           {/* Item name */}
           <div className="space-y-2">
             <Label htmlFor="name">{t('itemName')}</Label>
@@ -89,13 +89,14 @@ export default function AddPackingItemModal({ onAdd, isLoading }: AddPackingItem
               placeholder={t('itemNamePlaceholder')}
               required
               autoFocus
+              data-testid="add-packing-item-name"
             />
           </div>
 
           {/* Category */}
           <div className="space-y-2">
             <Label>{t('category')}</Label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-2" data-testid="add-packing-item-categories">
               {CATEGORIES.map((cat) => {
                 const config = PACKING_CATEGORY_CONFIG[cat]
                 return (
@@ -108,6 +109,7 @@ export default function AddPackingItemModal({ onAdd, isLoading }: AddPackingItem
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
+                    data-testid={`add-packing-item-category-${cat}`}
                   >
                     <span className="text-xl">{config.icon}</span>
                     <span className="text-xs mt-1 text-center leading-tight">
@@ -130,6 +132,7 @@ export default function AddPackingItemModal({ onAdd, isLoading }: AddPackingItem
               value={quantity}
               onChange={(e) => setQuantity(Number(e.target.value))}
               className="w-24"
+              data-testid="add-packing-item-quantity"
             />
           </div>
 
@@ -142,15 +145,16 @@ export default function AddPackingItemModal({ onAdd, isLoading }: AddPackingItem
               onChange={(e) => setNotes(e.target.value)}
               placeholder={t('notesPlaceholder')}
               rows={2}
+              data-testid="add-packing-item-notes"
             />
           </div>
 
           {/* Submit button */}
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} data-testid="add-packing-item-cancel">
               {t('cancel')}
             </Button>
-            <Button type="submit" disabled={!name.trim() || isLoading}>
+            <Button type="submit" disabled={!name.trim() || isLoading} data-testid="add-packing-item-submit">
               {isLoading ? t('adding') : t('add')}
             </Button>
           </div>

@@ -186,7 +186,7 @@ export default function PackingSection({ tripId, isEditable = true }: PackingSec
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg p-4 space-y-4">
+      <div className="bg-white rounded-lg p-4 space-y-4" data-testid="packing-section-loading">
         <div className="flex items-center justify-between">
           <Skeleton className="h-6 w-32" />
           <Skeleton className="h-9 w-20" />
@@ -202,16 +202,16 @@ export default function PackingSection({ tripId, isEditable = true }: PackingSec
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm">
+    <div className="bg-white rounded-lg shadow-sm" data-testid="packing-section">
       {/* Header */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b" data-testid="packing-section-header">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <LuPackage className="text-gray-600" size={20} />
             <h3 className="font-semibold text-lg">{t('title')}</h3>
           </div>
           {isEditable && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" data-testid="packing-section-actions">
               <PackingTemplateModal
                 onApply={handleApplyTemplate}
                 isLoading={applyTemplate.isPending}
@@ -223,22 +223,22 @@ export default function PackingSection({ tripId, isEditable = true }: PackingSec
 
         {/* Progress bar */}
         {stats.total > 0 && (
-          <div className="space-y-1">
+          <div className="space-y-1" data-testid="packing-progress">
             <div className="flex justify-between text-sm text-gray-600">
-              <span>
+              <span data-testid="packing-progress-text">
                 {stats.packed}/{stats.total} {t('itemsPacked')}
               </span>
-              <span>{stats.percentage}%</span>
+              <span data-testid="packing-progress-percentage">{stats.percentage}%</span>
             </div>
-            <Progress value={stats.percentage} className="h-2" />
+            <Progress value={stats.percentage} className="h-2" data-testid="packing-progress-bar" />
           </div>
         )}
       </div>
 
       {/* Items list grouped by category */}
-      <div className="p-4">
+      <div className="p-4" data-testid="packing-content">
         {stats.total === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500" data-testid="packing-empty-state">
             <LuPackage className="mx-auto mb-2" size={40} />
             <p>{t('emptyList')}</p>
             <p className="text-sm mt-1">{t('emptyListHint')}</p>
@@ -258,16 +258,16 @@ export default function PackingSection({ tripId, isEditable = true }: PackingSec
                   const config = PACKING_CATEGORY_CONFIG[category]
 
                   return (
-                    <div key={category} className="space-y-1">
+                    <div key={category} className="space-y-1" data-testid={`packing-category-${category}`}>
                       {/* Category header */}
-                      <div className="flex items-center justify-between py-2 px-2 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between py-2 px-2 bg-gray-50 rounded-lg" data-testid={`packing-category-header-${category}`}>
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{config.icon}</span>
                           <span className="font-medium text-sm">
                             {getCategoryLabel(category)}
                           </span>
                         </div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500" data-testid={`packing-category-stats-${category}`}>
                           {getCategoryStats(category)}
                         </span>
                       </div>
@@ -277,7 +277,7 @@ export default function PackingSection({ tripId, isEditable = true }: PackingSec
                         items={items.map((item) => item.id)}
                         strategy={verticalListSortingStrategy}
                       >
-                        <div className="pl-2">
+                        <div className="pl-2" data-testid={`packing-items-${category}`}>
                           {items.map((item) => (
                             <PackingItem
                               key={item.id}
