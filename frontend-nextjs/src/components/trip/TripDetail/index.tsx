@@ -6,6 +6,7 @@ import TripBanner from './TripBanner'
 import ItinerarySection from './ItinerarySection'
 import BudgetSection from './BudgetSection'
 import ExploreGuide from './ExploreGuide'
+import { PackingSection } from '@/components/packing'
 import { TripBannerSkeleton, BudgetSkeleton } from '@/components/ui/SkeletonLoader'
 import { useTranslations } from 'next-intl'
 
@@ -41,6 +42,12 @@ const TripDetail = () => {
             {!isLoading && tripData && <ExploreGuide />}
             <ItinerarySection />
             {isLoading ? <BudgetSkeleton /> : <BudgetSection />}
+            {/* Packing List Section */}
+            {!isLoading && tripData && (
+                <div className="p-4">
+                    <PackingSection tripId={tripData.id} isEditable={true} />
+                </div>
+            )}
         </div>
     )
 }

@@ -20,6 +20,7 @@ import {
   useToggleTodo,
   useReorderEntries,
 } from '@/hooks/useItineraryQueries'
+import { useTripSync } from '@/hooks/useTripSync'
 import type {
   Trip,
   Itinerary,
@@ -47,6 +48,9 @@ interface TripContextType {
   isLoading: boolean
   error: any
   refetch: () => void
+
+  // Real-time sync status
+  isRealtimeSynced: boolean
 
   // Mutations
   updateTrip: (tripId: string, updates: Partial<Trip>) => Promise<void>
@@ -84,6 +88,12 @@ export function TripProvider({ children, tripId }: TripProviderProps) {
     error,
     refetch,
   } = useTrip(tripId)
+
+  // Real-time trip sync via SSE
+  const { isConnected: isRealtimeSynced } = useTripSync({
+    tripId,
+    enabled: !!tripId,
+  })
 
   // Separate data for easy component access
   const tripData = useMemo(() => {
@@ -309,6 +319,7 @@ export function TripProvider({ children, tripId }: TripProviderProps) {
         isLoading,
         error,
         refetch,
+        isRealtimeSynced,
         updateTrip,
         createItinerary,
         addDay,

@@ -18,12 +18,14 @@ import (
 
 type ItineraryHandler struct {
 	itineraryService *services.ItineraryService
+	tripSyncService  *services.TripSyncService
 	tracer           trace.Tracer
 }
 
-func NewItineraryHandler() *ItineraryHandler {
+func NewItineraryHandler(tripSyncService *services.TripSyncService) *ItineraryHandler {
 	return &ItineraryHandler{
 		itineraryService: services.NewItineraryService(),
+		tripSyncService:  tripSyncService,
 		tracer:           otel.Tracer("itinerary-handler"),
 	}
 }
@@ -129,6 +131,7 @@ func (h *ItineraryHandler) CreateItinerary(c *gin.Context) {
 	logger := utils.NewTraceLogger(ctx, span)
 
 	tripID := c.Param("id")
+	userID, _ := middleware.GetCurrentUserID(c)
 
 	var req schemas.CreateItineraryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -157,6 +160,14 @@ func (h *ItineraryHandler) CreateItinerary(c *gin.Context) {
 		return
 	}
 
+	// Broadcast real-time update
+	if h.tripSyncService != nil {
+		h.tripSyncService.BroadcastItineraryCreated(tripID, userID, itinerary.ID.Hex(), map[string]interface{}{
+			"dayNumber": itinerary.DayNumber,
+			"title":     itinerary.Title,
+		})
+	}
+
 	logger.Output(map[string]interface{}{"itineraryID": itinerary.ID.Hex()})
 	c.JSON(http.StatusCreated, itinerary)
 }
@@ -174,7 +185,9 @@ func (h *ItineraryHandler) UpdateItinerary(c *gin.Context) {
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
 
+	tripID := c.Param("id")
 	itineraryID := c.Param("itineraryId")
+	userID, _ := middleware.GetCurrentUserID(c)
 
 	var req schemas.UpdateItineraryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -198,6 +211,11 @@ func (h *ItineraryHandler) UpdateItinerary(c *gin.Context) {
 		return
 	}
 
+	// Broadcast real-time update
+	if h.tripSyncService != nil {
+		h.tripSyncService.BroadcastItineraryUpdated(tripID, userID, itineraryID, nil)
+	}
+
 	logger.Output(itinerary)
 	c.JSON(http.StatusOK, itinerary)
 }
@@ -214,13 +232,21 @@ func (h *ItineraryHandler) DeleteItinerary(c *gin.Context) {
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
 
+	tripID := c.Param("id")
 	itineraryID := c.Param("itineraryId")
+	userID, _ := middleware.GetCurrentUserID(c)
+
 	logger.Input(map[string]interface{}{"itineraryID": itineraryID})
 
 	if err := h.itineraryService.DeleteItinerary(ctx, itineraryID); err != nil {
 		logger.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Broadcast real-time update
+	if h.tripSyncService != nil {
+		h.tripSyncService.BroadcastItineraryDeleted(tripID, userID, itineraryID)
 	}
 
 	logger.Info("Itinerary deleted successfully")
@@ -292,7 +318,9 @@ func (h *ItineraryHandler) CreateEntry(c *gin.Context) {
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
 
+	tripID := c.Param("id")
 	itineraryID := c.Param("itineraryId")
+	userID, _ := middleware.GetCurrentUserID(c)
 
 	// Debug: log raw request body
 	bodyBytes, _ := c.GetRawData()
@@ -341,6 +369,14 @@ func (h *ItineraryHandler) CreateEntry(c *gin.Context) {
 		return
 	}
 
+	// Broadcast real-time update
+	if h.tripSyncService != nil {
+		h.tripSyncService.BroadcastEntryCreated(tripID, userID, itineraryID, entry.ID.Hex(), map[string]interface{}{
+			"title": entry.Title,
+			"type":  entry.Type,
+		})
+	}
+
 	logger.Output(map[string]interface{}{"entryID": entry.ID.Hex()})
 	c.JSON(http.StatusCreated, entry)
 }
@@ -358,7 +394,10 @@ func (h *ItineraryHandler) UpdateEntry(c *gin.Context) {
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
 
+	tripID := c.Param("id")
+	itineraryID := c.Param("itineraryId")
 	entryID := c.Param("entryId")
+	userID, _ := middleware.GetCurrentUserID(c)
 
 	var req schemas.UpdateEntryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -385,6 +424,11 @@ func (h *ItineraryHandler) UpdateEntry(c *gin.Context) {
 		return
 	}
 
+	// Broadcast real-time update
+	if h.tripSyncService != nil {
+		h.tripSyncService.BroadcastEntryUpdated(tripID, userID, itineraryID, entryID, nil)
+	}
+
 	logger.Output(entry)
 	c.JSON(http.StatusOK, entry)
 }
@@ -401,13 +445,22 @@ func (h *ItineraryHandler) DeleteEntry(c *gin.Context) {
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
 
+	tripID := c.Param("id")
+	itineraryID := c.Param("itineraryId")
 	entryID := c.Param("entryId")
+	userID, _ := middleware.GetCurrentUserID(c)
+
 	logger.Input(map[string]interface{}{"entryID": entryID})
 
 	if err := h.itineraryService.DeleteEntry(ctx, entryID); err != nil {
 		logger.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Broadcast real-time update
+	if h.tripSyncService != nil {
+		h.tripSyncService.BroadcastEntryDeleted(tripID, userID, itineraryID, entryID)
 	}
 
 	logger.Output("Entry deleted successfully")

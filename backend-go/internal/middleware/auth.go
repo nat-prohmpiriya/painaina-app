@@ -142,43 +142,38 @@ func (m *AuthMiddleware) authenticateAndSync(c *gin.Context) (*models.User, erro
 		return nil, err
 	}
 
-	// Try to find existing user by Clerk ID
-	user, err := m.userRepository.FindByClerkID(ctx, userInfo.ClerkID)
+	// If email is not in token claims, fetch from Clerk API
+	if userInfo.Email == "" {
+		log.Printf("Email not in JWT claims, fetching from Clerk API for user: %s", userInfo.ClerkID)
+		fullUserInfo, err := m.clerkClient.GetUser(ctx, userInfo.ClerkID)
+		if err != nil {
+			log.Printf("Failed to fetch user from Clerk API: %v", err)
+			return nil, err
+		}
+		userInfo = fullUserInfo
+	}
+
+	// Prepare user data for upsert
+	newUser := &models.User{
+		ClerkID: userInfo.ClerkID,
+		Email:   userInfo.Email,
+		Name:    userInfo.FullName,
+		Role:    models.UserRoleUser,
+	}
+
+	// Add photo URL if available
+	if userInfo.ImageURL != "" {
+		newUser.PhotoURL = &userInfo.ImageURL
+	}
+
+	// JIT Sync: Use atomic FindOrCreate to prevent race conditions
+	user, isNew, err := m.userRepository.FindOrCreate(ctx, newUser)
 	if err != nil {
+		log.Printf("Failed to find or create user during JIT sync: %v", err)
 		return nil, err
 	}
 
-	// JIT Sync: Create user if doesn't exist
-	if user == nil {
-		// If email is not in token claims, fetch from Clerk API
-		if userInfo.Email == "" {
-			log.Printf("Email not in JWT claims, fetching from Clerk API for user: %s", userInfo.ClerkID)
-			fullUserInfo, err := m.clerkClient.GetUser(ctx, userInfo.ClerkID)
-			if err != nil {
-				log.Printf("Failed to fetch user from Clerk API: %v", err)
-				return nil, err
-			}
-			userInfo = fullUserInfo
-		}
-
-		user = &models.User{
-			ClerkID:  userInfo.ClerkID,
-			Email:    userInfo.Email,
-			Name:     userInfo.FullName,
-			Role:     models.UserRoleUser,
-		}
-
-		// Add photo URL if available
-		if userInfo.ImageURL != "" {
-			user.PhotoURL = &userInfo.ImageURL
-		}
-
-		// Create user in database (MGM will handle ID, timestamps, and hooks)
-		if err := m.userRepository.Create(ctx, user); err != nil {
-			log.Printf("Failed to create user during JIT sync: %v", err)
-			return nil, err
-		}
-
+	if isNew {
 		log.Printf("✓ Created new user via JIT sync: %s (%s)", user.Email, user.ClerkID)
 	}
 

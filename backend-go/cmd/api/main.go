@@ -59,6 +59,11 @@ func main() {
 	}
 	log.Println("✓ Connected to MongoDB with MGM")
 
+	// Ensure indexes are created (idempotent operation)
+	if err := mongodb.EnsureIndexes(context.Background()); err != nil {
+		log.Printf("⚠️  Failed to ensure indexes: %v", err)
+	}
+
 	// Connect to Redis
 	var redisClient *redis.Client
 	if cfg.Redis.URL != "" {
@@ -81,9 +86,13 @@ func main() {
 	defer redisClient.Close()
 	log.Println("✓ Connected to Redis")
 
-	// Initialize SSE Hub for real-time notifications
+	// Initialize SSE Hub for real-time notifications and trip sync
 	sseHub := sse.NewHub()
 	log.Println("✓ Initialized SSE Hub for real-time notifications")
+
+	// Initialize TripSync service for real-time collaboration
+	tripSyncService := services.NewTripSyncService(sseHub)
+	log.Println("✓ Initialized Trip Sync service for real-time collaboration")
 
 	// Create Gin router
 	router := gin.Default()
@@ -101,7 +110,7 @@ func main() {
 	healthHandler := handlers.NewHealthHandler()
 	userHandler := handlers.NewUserHandler()
 	expenseHandler := handlers.NewExpenseHandler()
-	itineraryHandler := handlers.NewItineraryHandler()
+	itineraryHandler := handlers.NewItineraryHandler(tripSyncService)
 	fileHandler, err := handlers.NewFileHandler(&cfg.R2)
 	if err != nil {
 		log.Fatalf("Failed to create file handler: %v", err)
@@ -133,6 +142,7 @@ func main() {
 	placeHandler := handlers.NewPlaceHandler(&cfg.Google, cityService, redisService)
 	commentHandler := handlers.NewCommentHandler(notificationService)
 	tripHandler := handlers.NewTripHandler(notificationService)
+	packingHandler := handlers.NewPackingHandler()
 
 	// Initialize check-in service and handler
 	checkInRepo := repository.NewCheckInRepository()
@@ -211,6 +221,17 @@ func main() {
 	tripHandler.RegisterRoutes(tripDetail, cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain, commentHandler, expenseHandler, itineraryHandler)
 	expenseHandler.RegisterRoutes(tripDetail, cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain)
 	itineraryHandler.RegisterRoutes(tripDetail, cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain)
+	packingHandler.RegisterRoutes(tripDetail, cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain)
+
+	// Trip sync SSE route (real-time collaboration)
+	tripSyncRoutes := tripDetail.Group("/sync")
+	tripSyncRoutes.Use(middleware.SSEAuth(cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain))
+	{
+		tripSyncRoutes.GET("", sseHandler.StreamTripSync)
+	}
+
+	// Packing templates (no trip ID required)
+	packingHandler.RegisterTemplateRoutes(v1)
 
 	// Admin routes (requires authentication + admin role)
 	admin := v1.Group("/admin")
