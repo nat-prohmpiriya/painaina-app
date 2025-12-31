@@ -133,6 +133,7 @@ func main() {
 	placeHandler := handlers.NewPlaceHandler(&cfg.Google, cityService, redisService)
 	commentHandler := handlers.NewCommentHandler(notificationService)
 	tripHandler := handlers.NewTripHandler(notificationService)
+	packingHandler := handlers.NewPackingHandler()
 
 	// Initialize check-in service and handler
 	checkInRepo := repository.NewCheckInRepository()
@@ -211,6 +212,10 @@ func main() {
 	tripHandler.RegisterRoutes(tripDetail, cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain, commentHandler, expenseHandler, itineraryHandler)
 	expenseHandler.RegisterRoutes(tripDetail, cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain)
 	itineraryHandler.RegisterRoutes(tripDetail, cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain)
+	packingHandler.RegisterRoutes(tripDetail, cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain)
+
+	// Packing templates (no trip ID required)
+	packingHandler.RegisterTemplateRoutes(v1)
 
 	// Admin routes (requires authentication + admin role)
 	admin := v1.Group("/admin")
