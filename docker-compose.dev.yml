@@ -8,17 +8,17 @@ services:
       dockerfile: Dockerfile.dev
     container_name: painaina-backend-dev
     ports:
-      - "5001:5001"
+      - "5001:8080"
     volumes:
       - ./backend-go:/app
       - /app/tmp  # Exclude tmp directory from volume mount
     env_file:
-      - ./backend-go/.env
+      - ./backend-go/.env.prod
     networks:
       - painaina-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5001/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -112,6 +112,65 @@ func (r *UserRepository) FindByClerkID(ctx context.Context, clerkID string) (*mo
 	return user, nil
 }
 
+// FindOrCreate finds a user by Clerk ID, or creates one if not found (atomic upsert operation)
+// This prevents race conditions when multiple requests try to create the same user simultaneously
+func (r *UserRepository) FindOrCreate(ctx context.Context, user *models.User) (*models.User, bool, error) {
+	ctx, span := r.tracer.Start(ctx, "UserRepository.FindOrCreate")
+	defer span.End()
+	logger := utils.NewTraceLogger(ctx, span)
+
+	logger.Input(map[string]interface{}{
+		"clerkID": user.ClerkID,
+		"email":   user.Email,
+	})
+
+	now := time.Now()
+
+	// Use FindOneAndUpdate with upsert to atomically find or create
+	filter := bson.M{"clerk_id": user.ClerkID}
+	update := bson.M{
+		"$setOnInsert": bson.M{
+			"_id":        primitive.NewObjectID(),
+			"clerk_id":   user.ClerkID,
+			"email":      user.Email,
+			"name":       user.Name,
+			"photo_url":  user.PhotoURL,
+			"role":       user.Role,
+			"is_banned":  false,
+			"settings":   user.Settings,
+			"created_at": now,
+			"updated_at": now,
+		},
+	}
+
+	opts := options.FindOneAndUpdate().
+		SetUpsert(true).
+		SetReturnDocument(options.After)
+
+	result := &models.User{}
+	err := mgm.Coll(user).FindOneAndUpdate(ctx, filter, update, opts).Decode(result)
+	if err != nil {
+		logger.Error(err)
+		return nil, false, err
+	}
+
+	// Check if this was a new user (created_at matches now within a small tolerance)
+	isNewUser := result.CreatedAt.Sub(now).Abs() < time.Second
+
+	if isNewUser {
+		logger.Info("Created new user via upsert")
+	} else {
+		logger.Info("Found existing user")
+	}
+
+	logger.Output(map[string]interface{}{
+		"userID":    result.ID.Hex(),
+		"isNewUser": isNewUser,
+	})
+
+	return result, isNewUser, nil
+}
+
 // FindByEmail finds a user by email
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*models.User, error) {
 	ctx, span := r.tracer.Start(ctx, "UserRepository.FindByEmail")

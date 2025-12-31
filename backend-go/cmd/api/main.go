@@ -59,6 +59,11 @@ func main() {
 	}
 	log.Println("✓ Connected to MongoDB with MGM")
 
+	// Ensure indexes are created (idempotent operation)
+	if err := mongodb.EnsureIndexes(context.Background()); err != nil {
+		log.Printf("⚠️  Failed to ensure indexes: %v", err)
+	}
+
 	// Connect to Redis
 	var redisClient *redis.Client
 	if cfg.Redis.URL != "" {
