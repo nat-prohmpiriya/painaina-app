@@ -3,25 +3,35 @@ package otel
 import (
 	"context"
 	"io"
+	"log"
 	"log/slog"
 	"os"
 
 	"backend-go/internal/config"
 
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
+	otellog "go.opentelemetry.io/otel/log"
+	"go.opentelemetry.io/otel/log/global"
+	sdklog "go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.27.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Logger wraps slog.Logger with trace correlation
+// Logger wraps slog.Logger with trace correlation and OTLP export
 type Logger struct {
-	logger      *slog.Logger
-	serviceName string
-	environment string
+	logger         *slog.Logger
+	loggerProvider *sdklog.LoggerProvider
+	otelLogger     otellog.Logger
+	serviceName    string
+	environment    string
+	otlpEnabled    bool
 }
 
 // Global logger instance
 var globalLogger *Logger
 
-// NewLogger creates a new Logger with multiple outputs
+// NewLogger creates a new Logger with multiple outputs and optional OTLP export
 func NewLogger(cfg *config.Config) (*Logger, error) {
 	var level slog.Level
 	switch cfg.OTEL.LogLevel {
@@ -55,11 +65,54 @@ func NewLogger(cfg *config.Config) (*Logger, error) {
 		slog.String("environment", cfg.Server.Environment),
 	)
 
-	return &Logger{
+	l := &Logger{
 		logger:      logger,
 		serviceName: cfg.OTEL.ServiceName,
 		environment: cfg.Server.Environment,
-	}, nil
+		otlpEnabled: cfg.OTEL.LogOTLPEnabled,
+	}
+
+	// Initialize OTLP log exporter if enabled
+	if cfg.OTEL.LogOTLPEnabled && cfg.OTEL.OTLPEndpoint != "" {
+		ctx := context.Background()
+
+		// Create OTLP HTTP log exporter
+		exporter, err := otlploghttp.New(ctx,
+			otlploghttp.WithEndpoint(cfg.OTEL.OTLPEndpoint),
+			otlploghttp.WithInsecure(),
+		)
+		if err != nil {
+			log.Printf("⚠️  Failed to create OTLP log exporter: %v", err)
+		} else {
+			// Create resource
+			res, err := resource.New(ctx,
+				resource.WithAttributes(
+					semconv.ServiceName(cfg.OTEL.ServiceName),
+					semconv.ServiceVersion(cfg.Server.ServiceVersion),
+					semconv.DeploymentEnvironmentName(cfg.Server.Environment),
+				),
+			)
+			if err != nil {
+				log.Printf("⚠️  Failed to create log resource: %v", err)
+			} else {
+				// Create logger provider
+				l.loggerProvider = sdklog.NewLoggerProvider(
+					sdklog.WithResource(res),
+					sdklog.WithProcessor(sdklog.NewBatchProcessor(exporter)),
+				)
+
+				// Set global logger provider
+				global.SetLoggerProvider(l.loggerProvider)
+
+				// Get logger instance
+				l.otelLogger = l.loggerProvider.Logger(cfg.OTEL.ServiceName)
+
+				log.Printf("  - Logs: OTLP enabled (endpoint: %s)", cfg.OTEL.OTLPEndpoint)
+			}
+		}
+	}
+
+	return l, nil
 }
 
 // SetGlobalLogger sets the global logger instance
@@ -120,6 +173,7 @@ func (l *Logger) Debug(msg string, args ...any) {
 		return
 	}
 	l.logger.Debug(msg, args...)
+	l.emitOTLP(context.Background(), otellog.SeverityDebug, msg, args...)
 }
 
 // Info logs an info message
@@ -128,6 +182,7 @@ func (l *Logger) Info(msg string, args ...any) {
 		return
 	}
 	l.logger.Info(msg, args...)
+	l.emitOTLP(context.Background(), otellog.SeverityInfo, msg, args...)
 }
 
 // Warn logs a warning message
@@ -136,6 +191,7 @@ func (l *Logger) Warn(msg string, args ...any) {
 		return
 	}
 	l.logger.Warn(msg, args...)
+	l.emitOTLP(context.Background(), otellog.SeverityWarn, msg, args...)
 }
 
 // Error logs an error message
@@ -144,6 +200,91 @@ func (l *Logger) Error(msg string, args ...any) {
 		return
 	}
 	l.logger.Error(msg, args...)
+	l.emitOTLP(context.Background(), otellog.SeverityError, msg, args...)
+}
+
+// DebugContext logs a debug message with context (for trace correlation)
+func (l *Logger) DebugContext(ctx context.Context, msg string, args ...any) {
+	if l == nil || l.logger == nil {
+		return
+	}
+	l.WithContext(ctx).Debug(msg, args...)
+	l.emitOTLP(ctx, otellog.SeverityDebug, msg, args...)
+}
+
+// InfoContext logs an info message with context (for trace correlation)
+func (l *Logger) InfoContext(ctx context.Context, msg string, args ...any) {
+	if l == nil || l.logger == nil {
+		return
+	}
+	l.WithContext(ctx).Info(msg, args...)
+	l.emitOTLP(ctx, otellog.SeverityInfo, msg, args...)
+}
+
+// WarnContext logs a warning message with context (for trace correlation)
+func (l *Logger) WarnContext(ctx context.Context, msg string, args ...any) {
+	if l == nil || l.logger == nil {
+		return
+	}
+	l.WithContext(ctx).Warn(msg, args...)
+	l.emitOTLP(ctx, otellog.SeverityWarn, msg, args...)
+}
+
+// ErrorContext logs an error message with context (for trace correlation)
+func (l *Logger) ErrorContext(ctx context.Context, msg string, args ...any) {
+	if l == nil || l.logger == nil {
+		return
+	}
+	l.WithContext(ctx).Error(msg, args...)
+	l.emitOTLP(ctx, otellog.SeverityError, msg, args...)
+}
+
+// emitOTLP sends log to OTLP exporter
+func (l *Logger) emitOTLP(ctx context.Context, severity otellog.Severity, msg string, args ...any) {
+	if l == nil || !l.otlpEnabled || l.otelLogger == nil {
+		return
+	}
+
+	var record otellog.Record
+	record.SetBody(otellog.StringValue(msg))
+	record.SetSeverity(severity)
+
+	// Add trace context if available
+	spanCtx := trace.SpanContextFromContext(ctx)
+	if spanCtx.IsValid() {
+		record.AddAttributes(
+			otellog.String("trace_id", spanCtx.TraceID().String()),
+			otellog.String("span_id", spanCtx.SpanID().String()),
+		)
+	}
+
+	// Add additional attributes from args
+	for i := 0; i < len(args)-1; i += 2 {
+		if key, ok := args[i].(string); ok {
+			switch v := args[i+1].(type) {
+			case string:
+				record.AddAttributes(otellog.String(key, v))
+			case int:
+				record.AddAttributes(otellog.Int(key, v))
+			case int64:
+				record.AddAttributes(otellog.Int64(key, v))
+			case float64:
+				record.AddAttributes(otellog.Float64(key, v))
+			case bool:
+				record.AddAttributes(otellog.Bool(key, v))
+			}
+		}
+	}
+
+	l.otelLogger.Emit(ctx, record)
+}
+
+// Shutdown gracefully shuts down the logger provider
+func (l *Logger) Shutdown(ctx context.Context) error {
+	if l == nil || l.loggerProvider == nil {
+		return nil
+	}
+	return l.loggerProvider.Shutdown(ctx)
 }
 
 // GetSlogLogger returns the underlying slog.Logger

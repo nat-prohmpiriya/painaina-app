@@ -158,6 +158,12 @@ func (om *OtelManager) Shutdown(ctx context.Context) error {
 		}
 	}
 
+	if om.logger != nil {
+		if err := om.logger.Shutdown(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("logger shutdown: %w", err))
+		}
+	}
+
 	if len(errs) > 0 {
 		return fmt.Errorf("shutdown errors: %v", errs)
 	}
