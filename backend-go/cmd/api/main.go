@@ -81,9 +81,13 @@ func main() {
 	defer redisClient.Close()
 	log.Println("✓ Connected to Redis")
 
-	// Initialize SSE Hub for real-time notifications
+	// Initialize SSE Hub for real-time notifications and trip sync
 	sseHub := sse.NewHub()
 	log.Println("✓ Initialized SSE Hub for real-time notifications")
+
+	// Initialize TripSync service for real-time collaboration
+	tripSyncService := services.NewTripSyncService(sseHub)
+	log.Println("✓ Initialized Trip Sync service for real-time collaboration")
 
 	// Create Gin router
 	router := gin.Default()
@@ -101,7 +105,7 @@ func main() {
 	healthHandler := handlers.NewHealthHandler()
 	userHandler := handlers.NewUserHandler()
 	expenseHandler := handlers.NewExpenseHandler()
-	itineraryHandler := handlers.NewItineraryHandler()
+	itineraryHandler := handlers.NewItineraryHandler(tripSyncService)
 	fileHandler, err := handlers.NewFileHandler(&cfg.R2)
 	if err != nil {
 		log.Fatalf("Failed to create file handler: %v", err)
@@ -213,6 +217,13 @@ func main() {
 	expenseHandler.RegisterRoutes(tripDetail, cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain)
 	itineraryHandler.RegisterRoutes(tripDetail, cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain)
 	packingHandler.RegisterRoutes(tripDetail, cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain)
+
+	// Trip sync SSE route (real-time collaboration)
+	tripSyncRoutes := tripDetail.Group("/sync")
+	tripSyncRoutes.Use(middleware.SSEAuth(cfg.Clerk.SecretKey, cfg.Clerk.JWTIssuerDomain))
+	{
+		tripSyncRoutes.GET("", sseHandler.StreamTripSync)
+	}
 
 	// Packing templates (no trip ID required)
 	packingHandler.RegisterTemplateRoutes(v1)
