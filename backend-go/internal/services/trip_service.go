@@ -106,6 +106,11 @@ func (s *TripService) CreateTrip(ctx context.Context, userID string, req *schema
 		trip.Type = *req.Type
 	}
 
+	// Override status if provided
+	if req.Status != nil {
+		trip.Status = *req.Status
+	}
+
 	// Add owner as first member with owner role
 	trip.TripMembers = []models.TripMember{
 		{
@@ -213,7 +218,13 @@ func (s *TripService) GetTripWithFullData(ctx context.Context, tripID string) (*
 	return data, nil
 }
 
-func (s *TripService) ListTrips(ctx context.Context, query *schemas.ListTripsQuery) ([]*models.Trip, error) {
+// ListTripsResult contains trips and total count for pagination
+type ListTripsResult struct {
+	Trips []*models.Trip
+	Total int64
+}
+
+func (s *TripService) ListTrips(ctx context.Context, query *schemas.ListTripsQuery) (*ListTripsResult, error) {
 	ctx, span := s.tracer.Start(ctx, "TripService.ListTrips")
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
@@ -262,6 +273,13 @@ func (s *TripService) ListTrips(ctx context.Context, query *schemas.ListTripsQue
 		filter.Tags = tags
 	}
 
+	// Get total count (without limit/offset)
+	total, err := s.tripRepo.CountWithFilter(ctx, filter)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
 	// Use dynamic Find method
 	trips, err := s.tripRepo.Find(ctx, filter)
 	if err != nil {
@@ -271,8 +289,12 @@ func (s *TripService) ListTrips(ctx context.Context, query *schemas.ListTripsQue
 
 	logger.Output(map[string]interface{}{
 		"count": len(trips),
+		"total": total,
 	})
-	return trips, nil
+	return &ListTripsResult{
+		Trips: trips,
+		Total: total,
+	}, nil
 }
 
 func (s *TripService) UpdateTrip(ctx context.Context, tripID, userID string, req *schemas.UpdateTripRequest) (*models.Trip, error) {
