@@ -116,7 +116,7 @@ func (h *TripHandler) ListTrips(c *gin.Context) {
 		"offset": query.Offset,
 	})
 
-	trips, err := h.tripService.ListTrips(ctx, &query)
+	result, err := h.tripService.ListTrips(ctx, &query)
 	if err != nil {
 		logger.Error(err)
 		InternalServerError(c, err.Error())
@@ -124,14 +124,15 @@ func (h *TripHandler) ListTrips(c *gin.Context) {
 	}
 
 	logger.Output(map[string]interface{}{
-		"count": len(trips),
+		"count": len(result.Trips),
+		"total": result.Total,
 	})
 	Success(c, http.StatusOK, gin.H{
-		"trips": trips,
+		"trips": result.Trips,
 		"meta": gin.H{
 			"limit":  query.Limit,
 			"offset": query.Offset,
-			"total":  len(trips),
+			"total":  result.Total,
 		},
 	})
 }

@@ -464,6 +464,67 @@ func (r *TripRepository) Count(ctx context.Context) (int64, error) {
 	return count, nil
 }
 
+// CountWithFilter counts trips matching the filter (without limit/offset)
+func (r *TripRepository) CountWithFilter(ctx context.Context, filter *TripFilter) (int64, error) {
+	ctx, span := r.tracer.Start(ctx, "TripRepository.CountWithFilter")
+	defer span.End()
+	logger := utils.NewTraceLogger(ctx, span)
+
+	logger.Input(map[string]interface{}{
+		"type":     filter.Type,
+		"status":   filter.Status,
+		"ownerId":  filter.OwnerID,
+		"memberId": filter.MemberID,
+		"tags":     filter.Tags,
+	})
+
+	// Build MongoDB filter dynamically (same as Find but without limit/offset)
+	mongoFilter := bson.M{
+		"deleted_at": nil,
+	}
+
+	if filter.Type != nil {
+		mongoFilter["type"] = *filter.Type
+	}
+
+	if filter.Status != nil {
+		mongoFilter["status"] = *filter.Status
+	}
+
+	if filter.OwnerID != nil {
+		ownerObjID, err := primitive.ObjectIDFromHex(*filter.OwnerID)
+		if err != nil {
+			logger.Error(err)
+			return 0, fmt.Errorf("invalid owner ID: %w", err)
+		}
+		mongoFilter["owner_id"] = ownerObjID
+	}
+
+	if filter.MemberID != nil {
+		memberObjID, err := primitive.ObjectIDFromHex(*filter.MemberID)
+		if err != nil {
+			logger.Error(err)
+			return 0, fmt.Errorf("invalid member ID: %w", err)
+		}
+		mongoFilter["trip_members.user_id"] = memberObjID
+	}
+
+	if len(filter.Tags) > 0 {
+		mongoFilter["tags"] = bson.M{"$in": filter.Tags}
+	}
+
+	count, err := mgm.Coll(&models.Trip{}).CountDocuments(ctx, mongoFilter)
+	if err != nil {
+		logger.Error(err)
+		return 0, err
+	}
+
+	logger.Output(map[string]interface{}{
+		"count": count,
+	})
+	return count, nil
+}
+
 // FindByIDWithFullData gets trip with itineraries, entries, expenses, owner, and members in 1 query
 func (r *TripRepository) FindByIDWithFullData(ctx context.Context, id string) (*schemas.TripDetailResponse, error) {
 	ctx, span := r.tracer.Start(ctx, "TripRepository.FindByIDWithFullData")

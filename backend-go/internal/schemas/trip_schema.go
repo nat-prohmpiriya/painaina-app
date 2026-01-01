@@ -18,6 +18,7 @@ type CreateTripRequest struct {
 	Tags           []string            `json:"tags,omitempty" binding:"omitempty,dive,min=2,max=30"`
 	Type           *string             `json:"type,omitempty" binding:"omitempty,oneof=trip guide"`
 	Level          *string             `json:"level,omitempty" binding:"omitempty,oneof=Easy Moderate Hard Expert"`
+	Status         *string             `json:"status,omitempty" binding:"omitempty,oneof=draft published"`
 }
 
 type UpdateTripRequest struct {
