@@ -46,6 +46,8 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
     const [placeOptions, setPlaceOptions] = useState<PlaceOption[]>([])
     const [selectedPlaceTypes, setSelectedPlaceTypes] = useState<string[]>([])
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+    // Session token for Google Places API billing optimization
+    const [sessionToken, setSessionToken] = useState(() => placeService.generateSessionToken())
 
     // Initialize API client to set auth token
     usePainainaApi()
@@ -119,7 +121,8 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
 
         setIsLoading(true)
         try {
-            const predictions = await placeService.autocomplete(value)
+            // Use session token for billing optimization
+            const predictions = await placeService.autocomplete(value, sessionToken)
             console.log('Autocomplete predictions:', predictions)
 
             if (predictions && predictions.length > 0) {
@@ -192,7 +195,8 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
         setIsCreating(true)
         try {
             // Get full place details including coordinates, photos, and additional info
-            const placeDetails = await placeService.getPlace(option.place.placeId)
+            // Use same session token to complete billing session (makes autocomplete free)
+            const placeDetails = await placeService.getPlace(option.place.placeId, sessionToken)
 
             const lat = placeDetails?.geometry?.location?.lat || 0
             const lng = placeDetails?.geometry?.location?.lng || 0
@@ -220,8 +224,12 @@ const CreateEntry = ({ dayId }: CreateEntryProps) => {
 
             setSearchText('')
             setPlaceOptions([])
+            // Generate new session token for next search
+            setSessionToken(placeService.generateSessionToken())
         } catch (error) {
             console.error('Error creating place entry:', error)
+            // Generate new session token for next search even on error
+            setSessionToken(placeService.generateSessionToken())
         } finally {
             setIsCreating(false)
         }

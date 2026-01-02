@@ -34,7 +34,7 @@ func NewPlaceHandler(cfg *config.GoogleConfig, cityService *services.InMemoryCit
 }
 
 // Autocomplete handles place autocomplete
-// GET /api/v1/places/autocomplete?input=bangkok&types=
+// GET /api/v1/places/autocomplete?input=bangkok&types=&sessionToken=
 func (h *PlaceHandler) Autocomplete(c *gin.Context) {
 	ctx := c.Request.Context()
 	ctx, span := h.tracer.Start(ctx, "PlaceHandler.Autocomplete")
@@ -49,11 +49,12 @@ func (h *PlaceHandler) Autocomplete(c *gin.Context) {
 	}
 
 	logger.Input(map[string]interface{}{
-		"input": req.Input,
-		"types": req.Types,
+		"input":        req.Input,
+		"types":        req.Types,
+		"sessionToken": req.SessionToken != "",
 	})
 
-	result, err := h.placeService.Autocomplete(ctx, req.Input, req.Types)
+	result, err := h.placeService.Autocomplete(ctx, req.Input, req.Types, req.SessionToken)
 	if err != nil {
 		logger.Error(err)
 		InternalServerError(c, err.Error())
@@ -65,7 +66,7 @@ func (h *PlaceHandler) Autocomplete(c *gin.Context) {
 }
 
 // AutocompleteCity handles city autocomplete
-// GET /api/v1/places/autocomplete-city?input=bang
+// GET /api/v1/places/autocomplete-city?input=bang&sessionToken=
 func (h *PlaceHandler) AutocompleteCity(c *gin.Context) {
 	ctx := c.Request.Context()
 	ctx, span := h.tracer.Start(ctx, "PlaceHandler.AutocompleteCity")
@@ -80,10 +81,11 @@ func (h *PlaceHandler) AutocompleteCity(c *gin.Context) {
 	}
 
 	logger.Input(map[string]interface{}{
-		"input": req.Input,
+		"input":        req.Input,
+		"sessionToken": req.SessionToken != "",
 	})
 
-	result, err := h.placeService.AutocompleteCity(ctx, req.Input)
+	result, err := h.placeService.AutocompleteCity(ctx, req.Input, req.SessionToken)
 	if err != nil {
 		logger.Error(err)
 		InternalServerError(c, err.Error())
@@ -160,7 +162,7 @@ func (h *PlaceHandler) GetReview(c *gin.Context) {
 }
 
 // GetPlace handles getting place details by ID
-// GET /api/v1/places/:id
+// GET /api/v1/places/:id?sessionToken=
 func (h *PlaceHandler) GetPlace(c *gin.Context) {
 	ctx := c.Request.Context()
 	ctx, span := h.tracer.Start(ctx, "PlaceHandler.GetPlace")
@@ -174,9 +176,13 @@ func (h *PlaceHandler) GetPlace(c *gin.Context) {
 		return
 	}
 
+	// Get session token from query params
+	sessionToken := c.Query("sessionToken")
+
 	logger.Input(map[string]interface{}{
-		"id":     id,
-		"idType": map[bool]string{true: "MongoDB", false: "Google"}[len(id) == 24],
+		"id":           id,
+		"idType":       map[bool]string{true: "MongoDB", false: "Google"}[len(id) == 24],
+		"sessionToken": sessionToken != "",
 	})
 
 	// Check if ID is Google Place ID or MongoDB ID
@@ -187,8 +193,8 @@ func (h *PlaceHandler) GetPlace(c *gin.Context) {
 	if len(id) == 24 {
 		place, err = h.placeService.GetPlaceByID(ctx, id)
 	} else {
-		// Otherwise treat as Google Place ID
-		place, err = h.placeService.GetPlaceByGoogleID(ctx, id)
+		// Otherwise treat as Google Place ID (use session token to complete billing session)
+		place, err = h.placeService.GetPlaceByGoogleID(ctx, id, sessionToken)
 	}
 
 	if err != nil {
@@ -431,14 +437,17 @@ func (h *PlaceHandler) DeletePlace(c *gin.Context) {
 func (h *PlaceHandler) RegisterRoutes(v1 *gin.RouterGroup, clerkSecretKey, clerkJWTIssuerDomain string, commentHandler *CommentHandler) {
 	places := v1.Group("/places")
 	{
-		// Public routes
-		places.GET("/autocomplete", h.Autocomplete)
-		places.GET("/autocomplete-city", h.AutocompleteCity)
-		places.GET("/search", h.SearchPlaces)
-		places.GET("/photo", h.GetPhoto) // Single photo proxy with cache
-		places.GET("/review", h.GetReview)
-		places.GET("/:id", h.GetPlace)
-		places.GET("", h.ListPlaces)
+		// Rate limiter for Google Places API calls (30 requests/minute per user)
+		placesRateLimiter := middleware.PlacesAPIRateLimiter()
+
+		// Public routes with rate limiting for expensive API calls
+		places.GET("/autocomplete", placesRateLimiter.Middleware(), h.Autocomplete)
+		places.GET("/autocomplete-city", placesRateLimiter.Middleware(), h.AutocompleteCity)
+		places.GET("/search", placesRateLimiter.Middleware(), h.SearchPlaces)
+		places.GET("/photo", h.GetPhoto) // Photos are cached, no rate limit needed
+		places.GET("/review", placesRateLimiter.Middleware(), h.GetReview)
+		places.GET("/:id", h.GetPlace) // Place details are cached, no rate limit needed
+		places.GET("", h.ListPlaces)   // List from DB only
 
 		// Authenticated routes (admin only)
 		authenticated := places.Group("")

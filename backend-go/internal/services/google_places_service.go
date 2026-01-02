@@ -153,14 +153,15 @@ type PlaceSearchResult struct {
 }
 
 // Autocomplete performs place autocomplete search
-func (s *GooglePlacesService) Autocomplete(ctx context.Context, input string, types string) (*AutocompleteResponse, error) {
+func (s *GooglePlacesService) Autocomplete(ctx context.Context, input string, types string, sessionToken string) (*AutocompleteResponse, error) {
 	ctx, span := s.tracer.Start(ctx, "GooglePlacesService.Autocomplete")
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
 
 	logger.Input(map[string]interface{}{
-		"input": input,
-		"types": types,
+		"input":        input,
+		"types":        types,
+		"sessionToken": sessionToken != "",
 	})
 
 	params := url.Values{}
@@ -169,6 +170,10 @@ func (s *GooglePlacesService) Autocomplete(ctx context.Context, input string, ty
 	params.Add("language", "en") // Force English language response
 	if types != "" {
 		params.Add("types", types)
+	}
+	// Session token groups autocomplete + place details into single billing session
+	if sessionToken != "" {
+		params.Add("sessiontoken", sessionToken)
 	}
 
 	endpoint := fmt.Sprintf("%s/autocomplete/json?%s", s.baseURL, params.Encode())
@@ -223,16 +228,17 @@ func (s *GooglePlacesService) Autocomplete(ctx context.Context, input string, ty
 }
 
 // AutocompleteCity performs city autocomplete (regions only)
-func (s *GooglePlacesService) AutocompleteCity(ctx context.Context, input string) (*AutocompleteResponse, error) {
+func (s *GooglePlacesService) AutocompleteCity(ctx context.Context, input string, sessionToken string) (*AutocompleteResponse, error) {
 	ctx, span := s.tracer.Start(ctx, "GooglePlacesService.AutocompleteCity")
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
 
 	logger.Input(map[string]interface{}{
-		"input": input,
+		"input":        input,
+		"sessionToken": sessionToken != "",
 	})
 
-	result, err := s.Autocomplete(ctx, input, "(regions)")
+	result, err := s.Autocomplete(ctx, input, "(regions)", sessionToken)
 	if err != nil {
 		logger.Error(err)
 		return nil, err
@@ -245,21 +251,29 @@ func (s *GooglePlacesService) AutocompleteCity(ctx context.Context, input string
 }
 
 // GetPlaceDetails fetches detailed information about a place
-func (s *GooglePlacesService) GetPlaceDetails(ctx context.Context, placeID string) (*PlaceDetailsResponse, error) {
+func (s *GooglePlacesService) GetPlaceDetails(ctx context.Context, placeID string, sessionToken string) (*PlaceDetailsResponse, error) {
 	ctx, span := s.tracer.Start(ctx, "GooglePlacesService.GetPlaceDetails")
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
 
 	logger.Input(map[string]interface{}{
-		"placeID": placeID,
+		"placeID":      placeID,
+		"sessionToken": sessionToken != "",
 	})
 
 	params := url.Values{}
 	params.Add("place_id", placeID)
 	params.Add("key", s.apiKey)
-	// Request Basic tier + Atmosphere tier fields (rating, reviews, etc.)
-	// Cost: $22/1000 requests after 10K free tier
-	params.Add("fields", "place_id,name,formatted_address,geometry,types,photos,rating,user_ratings_total,editorial_summary,reviews")
+	// Request Basic tier fields only (cheaper)
+	// Basic: place_id, name, formatted_address, geometry, types, photos
+	// Contact: formatted_phone_number, website ($3/1000)
+	// Atmosphere: rating, user_ratings_total, reviews, editorial_summary ($5/1000)
+	// Using Basic + rating only to reduce cost
+	params.Add("fields", "place_id,name,formatted_address,geometry,types,photos,rating,user_ratings_total")
+	// Session token completes the autocomplete->details billing session
+	if sessionToken != "" {
+		params.Add("sessiontoken", sessionToken)
+	}
 
 	endpoint := fmt.Sprintf("%s/details/json?%s", s.baseURL, params.Encode())
 
