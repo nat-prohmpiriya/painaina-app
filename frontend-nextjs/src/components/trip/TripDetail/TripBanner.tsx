@@ -24,7 +24,7 @@ import { DateRangePicker } from "@/components/ui/date-range-picker"
 import { DateRange } from "react-day-picker"
 
 const TripBanner = () => {
-    const { tripData, members, updateTrip } = useTripContext()
+    const { tripData, members, updateTrip, canEdit } = useTripContext()
     const { user } = useAuth()
     const [title, setTitle] = useState(tripData?.title || "")
     const [description, setDescription] = useState(tripData?.description || "")
@@ -127,36 +127,40 @@ const TripBanner = () => {
             >
                 <div className="flex justify-end p-2 gap-4">
                     {isGuidePage && <GuideViewButton />}
-                    <ChangeCoverModal
-                        tripId={tripData.id}
-                        currentPhotoUrl={tripData.coverPhoto}
-                        onPhotoUpdated={(newPhotoUrl) => {
-                            // Optional: Update local state or refetch data
-                            console.log('Cover photo updated:', newPhotoUrl)
-                        }}
-                    />
-                    <div className="bg-black/40 h-10 w-10 flex justify-center items-center rounded-full p-2 cursor-pointer hover:bg-black/70 transition">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <button className="outline-none">
-                                    <LuEllipsisVertical className="text-white text-lg" />
-                                </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                {canDelete && (
-                                    <DropdownMenuItem
-                                        className="text-red-600 focus:text-red-600"
-                                        onClick={() => setIsDeleteModalOpen(true)}
-                                    >
-                                        Delete Trip
-                                    </DropdownMenuItem>
-                                )}
-                                <DropdownMenuItem onClick={() => setIsConvertModalOpen(true)}>
-                                    Convert to Guide
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
+                    {canEdit && (
+                        <>
+                            <ChangeCoverModal
+                                tripId={tripData.id}
+                                currentPhotoUrl={tripData.coverPhoto}
+                                onPhotoUpdated={(newPhotoUrl) => {
+                                    // Optional: Update local state or refetch data
+                                    console.log('Cover photo updated:', newPhotoUrl)
+                                }}
+                            />
+                            <div className="bg-black/40 h-10 w-10 flex justify-center items-center rounded-full p-2 cursor-pointer hover:bg-black/70 transition">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button className="outline-none">
+                                            <LuEllipsisVertical className="text-white text-lg" />
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        {canDelete && (
+                                            <DropdownMenuItem
+                                                className="text-red-600 focus:text-red-600"
+                                                onClick={() => setIsDeleteModalOpen(true)}
+                                            >
+                                                Delete Trip
+                                            </DropdownMenuItem>
+                                        )}
+                                        <DropdownMenuItem onClick={() => setIsConvertModalOpen(true)}>
+                                            Convert to Guide
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 

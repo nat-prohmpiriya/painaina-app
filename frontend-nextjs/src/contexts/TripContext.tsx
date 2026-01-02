@@ -21,6 +21,7 @@ import {
   useReorderEntries,
 } from '@/hooks/useItineraryQueries'
 import { useTripSync } from '@/hooks/useTripSync'
+import { useAuth } from '@/hooks/useAuth'
 import type {
   Trip,
   Itinerary,
@@ -43,6 +44,10 @@ interface TripContextType {
   expenses: Expense[]
   owner: TripUserInfo | undefined
   members: TripMemberWithUser[]
+
+  // Permission flags
+  isOwner: boolean
+  canEdit: boolean
 
   // Loading states
   isLoading: boolean
@@ -81,6 +86,8 @@ interface TripProviderProps {
 }
 
 export function TripProvider({ children, tripId }: TripProviderProps) {
+  const { user } = useAuth()
+
   // Single API call to get all aggregated data
   const {
     data: fullData,
@@ -94,6 +101,22 @@ export function TripProvider({ children, tripId }: TripProviderProps) {
     tripId,
     enabled: !!tripId,
   })
+
+  // Permission calculations
+  const isOwner = useMemo(() => {
+    if (!user || !fullData) return false
+    return fullData.ownerId === user.id
+  }, [user, fullData])
+
+  const canEdit = useMemo(() => {
+    if (!user || !fullData) return false
+    // Owner can always edit
+    if (fullData.ownerId === user.id) return true
+    // Check if user is a member with edit permissions (admin or editor role)
+    const member = fullData.tripMembers?.find(m => m.userId === user.id)
+    if (member && (member.role === 'admin' || member.role === 'editor')) return true
+    return false
+  }, [user, fullData])
 
   // Separate data for easy component access
   const tripData = useMemo(() => {
@@ -316,6 +339,8 @@ export function TripProvider({ children, tripId }: TripProviderProps) {
         expenses,
         owner,
         members,
+        isOwner,
+        canEdit,
         isLoading,
         error,
         refetch,
