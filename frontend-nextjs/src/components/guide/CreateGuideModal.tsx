@@ -47,6 +47,8 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
     const [searchText, setSearchText] = useState("")
     const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
     const [showPlacePopover, setShowPlacePopover] = useState(false)
+    // Session token for Google Places API billing optimization
+    const [sessionToken, setSessionToken] = useState(() => placeService.generateSessionToken())
     const { showSuccess, showError } = useToastMessage()
     const { register, handleSubmit: handleFormSubmit, formState: { errors }, reset } = useForm<{
         title: string
@@ -69,7 +71,8 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
         }
 
         try {
-            const response = await placeService.autocompleteCity(value)
+            // Use session token for billing optimization
+            const response = await placeService.autocompleteCity(value, sessionToken)
             const predictions = response.predictions || []
 
             if (predictions && predictions.length > 0) {
@@ -146,7 +149,8 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
             // If source is Google (no coordinates), fetch place details
             if (option.place.source === 'google') {
                 try {
-                    const placeDetails = await placeService.getPlace(option.place.placeId)
+                    // Use same session token to complete billing session (makes autocomplete free)
+                    const placeDetails = await placeService.getPlace(option.place.placeId, sessionToken)
                     // Update coordinates from place details
                     placeData = {
                         ...placeData,
@@ -180,6 +184,8 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
             setSelectedPlace(place)
             setSearchText(place.name)
             setShowPlacePopover(false)
+            // Generate new session token for next search
+            setSessionToken(placeService.generateSessionToken())
         } catch (error) {
             console.error('Error getting place photo:', error)
             // Fallback to original place data without cover photo
@@ -189,6 +195,8 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
             })
             setSearchText(option.place.name)
             setShowPlacePopover(false)
+            // Generate new session token for next search
+            setSessionToken(placeService.generateSessionToken())
         }
     }
 
@@ -249,6 +257,8 @@ const CreateGuideModal = ({ onSuccess }: CreateGuideModalProps) => {
         setSelectedPlace(null)
         setSearchText("")
         setPlaceOptions([])
+        // Generate fresh session token for next time modal opens
+        setSessionToken(placeService.generateSessionToken())
     }
 
     return (

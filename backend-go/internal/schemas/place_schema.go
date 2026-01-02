@@ -1,8 +1,9 @@
 package schemas
 
 type AutocompleteRequest struct {
-	Input string `form:"input" binding:"required,min=1"`
-	Types string `form:"types"` // Optional: (cities), establishment, etc.
+	Input        string `form:"input" binding:"required,min=1"`
+	Types        string `form:"types"`        // Optional: (cities), establishment, etc.
+	SessionToken string `form:"sessionToken"` // Optional: Session token for billing optimization
 }
 
 type SearchPlacesRequest struct {

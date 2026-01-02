@@ -13,21 +13,35 @@ import type {
 export class PlaceService {
   private basePath = "/places";
 
-  async autocomplete(input: string): Promise<AutocompleteResult[]> {
-    const response = await apiClient.get<AutocompleteResponse>(`${this.basePath}/autocomplete`, { input });
+  /**
+   * Generate a unique session token for Google Places API billing optimization
+   * Use the same token for autocomplete + getPlace calls to group them as one billing session
+   */
+  generateSessionToken(): string {
+    return crypto.randomUUID();
+  }
+
+  async autocomplete(input: string, sessionToken?: string): Promise<AutocompleteResult[]> {
+    const params: Record<string, string> = { input };
+    if (sessionToken) params.sessionToken = sessionToken;
+    const response = await apiClient.get<AutocompleteResponse>(`${this.basePath}/autocomplete`, params);
     return response.predictions || [];
   }
 
-  async autocompleteCity(input: string): Promise<AutocompleteResponse> {
-    return apiClient.get<AutocompleteResponse>(`${this.basePath}/autocomplete-city`, { input });
+  async autocompleteCity(input: string, sessionToken?: string): Promise<AutocompleteResponse> {
+    const params: Record<string, string> = { input };
+    if (sessionToken) params.sessionToken = sessionToken;
+    return apiClient.get<AutocompleteResponse>(`${this.basePath}/autocomplete-city`, params);
   }
 
   async searchPlaces(query: SearchPlacesQuery): Promise<Place[]> {
     return apiClient.get<Place[]>(`${this.basePath}/search`, query as any);
   }
 
-  async getPlace(placeId: string): Promise<Place> {
-    return apiClient.get<Place>(`${this.basePath}/${placeId}`);
+  async getPlace(placeId: string, sessionToken?: string): Promise<Place> {
+    const params: Record<string, string> = {};
+    if (sessionToken) params.sessionToken = sessionToken;
+    return apiClient.get<Place>(`${this.basePath}/${placeId}`, params);
   }
 
   async listPlaces(limit: number = 20, offset: number = 0): Promise<Place[]> {

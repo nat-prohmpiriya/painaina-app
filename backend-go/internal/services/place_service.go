@@ -31,18 +31,19 @@ func NewPlaceService(cfg *config.GoogleConfig, cityService *InMemoryCityService)
 }
 
 // Autocomplete performs place autocomplete with caching
-func (s *PlaceService) Autocomplete(ctx context.Context, input string, types string) (*AutocompleteResponse, error) {
+func (s *PlaceService) Autocomplete(ctx context.Context, input string, types string, sessionToken string) (*AutocompleteResponse, error) {
 	ctx, span := s.tracer.Start(ctx, "PlaceService.Autocomplete")
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
 
 	logger.Input(map[string]interface{}{
-		"input": input,
-		"types": types,
+		"input":        input,
+		"types":        types,
+		"sessionToken": sessionToken != "",
 	})
 
 	// Autocomplete is fast and changes frequently, so we don't cache it
-	response, err := s.googlePlaces.Autocomplete(ctx, input, types)
+	response, err := s.googlePlaces.Autocomplete(ctx, input, types, sessionToken)
 	if err != nil {
 		logger.Error(err)
 		return nil, err
@@ -53,12 +54,15 @@ func (s *PlaceService) Autocomplete(ctx context.Context, input string, types str
 }
 
 // AutocompleteCity performs city autocomplete using in-memory cache
-func (s *PlaceService) AutocompleteCity(ctx context.Context, input string) (*AutocompleteResponse, error) {
+func (s *PlaceService) AutocompleteCity(ctx context.Context, input string, sessionToken string) (*AutocompleteResponse, error) {
 	ctx, span := s.tracer.Start(ctx, "PlaceService.AutocompleteCity")
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
 
-	logger.Input(map[string]interface{}{"input": input})
+	logger.Input(map[string]interface{}{
+		"input":        input,
+		"sessionToken": sessionToken != "",
+	})
 
 	// Search in-memory cities (fast, free)
 	cities := s.cityService.Search(ctx, input)
@@ -106,7 +110,7 @@ func (s *PlaceService) AutocompleteCity(ctx context.Context, input string) (*Aut
 
 	// Fallback to Google Places (if no results from in-memory)
 	logger.Info("Fallback to Google Places API")
-	response, err := s.googlePlaces.AutocompleteCity(ctx, input)
+	response, err := s.googlePlaces.AutocompleteCity(ctx, input, sessionToken)
 	if err != nil {
 		logger.Error(err)
 		return nil, err
@@ -126,12 +130,15 @@ func (s *PlaceService) AutocompleteCity(ctx context.Context, input string) (*Aut
 }
 
 // GetPlaceByGoogleID gets place details with cache-first strategy
-func (s *PlaceService) GetPlaceByGoogleID(ctx context.Context, googlePlaceID string) (*models.Place, error) {
+func (s *PlaceService) GetPlaceByGoogleID(ctx context.Context, googlePlaceID string, sessionToken string) (*models.Place, error) {
 	ctx, span := s.tracer.Start(ctx, "PlaceService.GetPlaceByGoogleID")
 	defer span.End()
 	logger := utils.NewTraceLogger(ctx, span)
 
-	logger.Input(map[string]interface{}{"googlePlaceID": googlePlaceID})
+	logger.Input(map[string]interface{}{
+		"googlePlaceID": googlePlaceID,
+		"sessionToken":  sessionToken != "",
+	})
 
 	// 1. Check cache first
 	cachedPlace, err := s.placeRepo.FindByGooglePlaceID(ctx, googlePlaceID)
@@ -149,7 +156,7 @@ func (s *PlaceService) GetPlaceByGoogleID(ctx context.Context, googlePlaceID str
 	}
 
 	// 3. Cache miss or expired - fetch from Google
-	details, err := s.googlePlaces.GetPlaceDetails(ctx, googlePlaceID)
+	details, err := s.googlePlaces.GetPlaceDetails(ctx, googlePlaceID, sessionToken)
 	if err != nil {
 		err := fmt.Errorf("failed to fetch from Google: %w", err)
 		logger.Error(err)
@@ -224,7 +231,8 @@ func (s *PlaceService) SearchPlaces(ctx context.Context, query string) ([]*model
 	places := make([]*models.Place, 0)
 	for _, result := range searchResult.Results {
 		// Get full details for each result (which will cache them)
-		place, err := s.GetPlaceByGoogleID(ctx, result.PlaceID)
+		// No session token for search results
+		place, err := s.GetPlaceByGoogleID(ctx, result.PlaceID, "")
 		if err != nil {
 			// Skip failed places
 			continue
@@ -426,8 +434,8 @@ func (s *PlaceService) RefreshCache(ctx context.Context, googlePlaceID string) (
 
 	logger.Input(map[string]interface{}{"googlePlaceID": googlePlaceID})
 
-	// Fetch fresh data from Google
-	details, err := s.googlePlaces.GetPlaceDetails(ctx, googlePlaceID)
+	// Fetch fresh data from Google (no session token for admin refresh)
+	details, err := s.googlePlaces.GetPlaceDetails(ctx, googlePlaceID, "")
 	if err != nil {
 		logger.Error(err)
 		return nil, err

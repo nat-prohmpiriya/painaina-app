@@ -63,6 +63,8 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
     const [placeOptions, setPlaceOptions] = useState<PlaceOption[]>([])
     const [searchText, setSearchText] = useState("")
     const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
+    // Session token for Google Places API billing optimization
+    const [sessionToken, setSessionToken] = useState(() => placeService.generateSessionToken())
     const { showSuccess, showError } = useToastMessage()
 
     // Cleanup timeout on component unmount
@@ -81,7 +83,8 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
         }
 
         try {
-            const response = await placeService.autocompleteCity(value)
+            // Use session token for billing optimization
+            const response = await placeService.autocompleteCity(value, sessionToken)
             const results = response.predictions || []
 
             console.log('🔍 API response:', response)
@@ -165,12 +168,11 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
 
         try {
             let placeData = option.place
-            debugger
             // If source is Google (no coordinates), fetch place details
             if (option.place.source === 'google') {
-                debugger
                 try {
-                    const placeDetails = await placeService.getPlace(option.place.placeId)
+                    // Use same session token to complete billing session (makes autocomplete free)
+                    const placeDetails = await placeService.getPlace(option.place.placeId, sessionToken)
                     // Update coordinates from place details
                     placeData = {
                         ...placeData,
@@ -203,6 +205,8 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
 
             setSelectedPlace(place)
             setSearchText(place.name)
+            // Generate new session token for next search
+            setSessionToken(placeService.generateSessionToken())
         } catch (error) {
             console.error('Error getting place photo:', error)
             // Fallback to original place data without cover photo
@@ -211,6 +215,8 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
                 coverPhoto: '/default-trip-cover.jpg'
             })
             setSearchText(option.place.name)
+            // Generate new session token for next search
+            setSessionToken(placeService.generateSessionToken())
         }
     }
 
@@ -309,6 +315,8 @@ const CreateTripModal = ({ onSuccess }: CreateTripModalProps) => {
             from: new Date(),
             to: addDays(new Date(), 7)
         })
+        // Generate fresh session token for new search session
+        setSessionToken(placeService.generateSessionToken())
     }
 
     return (
